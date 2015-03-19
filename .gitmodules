@@ -1,0 +1,6 @@
+[submodule "src/Wrapper/glsl-optimizer"]
+	path = src/Wrapper/glsl-optimizer
+	url = https://github.com/jbarczak/glsl-optimizer
+[submodule "src/Wrapper/GLSlang"]
+	path = src/Wrapper/GLSlang
+	url = https://github.com/jbarczak/GLSlang
