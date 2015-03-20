@@ -2,9 +2,12 @@ echo off
 mkdir Pyramid
 mkdir Pyramid\bin
 mkdir Pyramid\src
+mkdir Pyramid\src\Backends
+mkdir Pyramid\src\Languages
+mkdir Pyramid\src\MainUI
 mkdir Pyramid\src\Properties
 mkdir Pyramid\src\Wrapper
-mkdir Pyramid\src\Wrapper\glsl-optimizer-master
+mkdir Pyramid\src\Wrapper\glsl-optimizer
 mkdir Pyramid\src\Wrapper\GLSlang
 cp -r bin/* Pyramid/bin
 cp -r LICENSE.txt Pyramid/LICENSE.txt
@@ -25,7 +28,7 @@ cp src/Wrapper/*.cpp Pyramid/src/Wrapper
 cp src/Wrapper/*.h  Pyramid/src/Wrapper
 cp src/Wrapper/Wrapper.vcxproj Pyramid/src/Wrapper
 cp src/Wrapper/Wrapper.vcxproj.filters Pyramid/src/Wrapper
-cp -r src/Wrapper/glsl-optimizer-master Pyramid/src/Wrapper
+cp -r src/Wrapper/glsl-optimizer Pyramid/src/Wrapper
 cp src/Wrapper/GLSlang/glslang_vs2013.vcxproj Pyramid/src/Wrapper/GLSlang/glslang_vs2013.vcxproj
 cp -r src/Wrapper/GLSlang/glslang          Pyramid/src/Wrapper/GLSlang
 cp -r src/Wrapper/GLSlang/OGLCompilersDLL  Pyramid/src/Wrapper/GLSlang
