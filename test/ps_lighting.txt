@@ -1,0 +1,17 @@
+
+uint nLights;
+Buffer<float3> g_LightPositions;
+Buffer<float3> g_LightColors;
+
+float4 main( float3 P : P, float3 N : N ) : SV_Target
+{
+    float3 C=0;
+    for( uint i=0; i<nLights; i++ )
+    {
+        float3 Pl = g_LightPositions.Load(i);
+        float3 Cl = g_LightColors.Load(i);
+        float3 L = normalize( Pl - P );
+        C += Cl*saturate(dot(N,L));
+    }
+    return float4(C,1);
+}

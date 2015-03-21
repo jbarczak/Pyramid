@@ -1,0 +1,93 @@
+float4 mainPS() : SV_Target { return 0; }
+float4 mainVS() : SV_Position { return 0; }
+
+struct GSIn
+{
+    float4 v : SV_Position;
+};
+struct GSOut
+{
+    float4 vPos : SV_Position;
+};
+[maxvertexcount(4)]
+void mainGS( point GSIn p[1], inout TriangleStream<GSOut> triStream )
+{
+    GSOut v;
+    v.vPos = p[0].v;
+    triStream.Append(v);
+    triStream.Append(v);
+    triStream.Append(v);
+}
+
+
+struct VertexDS
+{
+   float3 p : SV_Position;
+};
+
+struct PatchInfoDS
+{
+   float v[2] : SV_InsideTessFactor;
+   float edges[4] : SV_TessFactor;
+};
+
+[domain("quad")]
+float4 mainDS( in PatchInfoDS info, float2 UV : SV_DomainLocation, const OutputPatch<VertexDS, 4> bezpatch ) : SV_Position
+{
+    float4 v = 0;
+    v.xyz = lerp( lerp( bezpatch[0].p, bezpatch[1].p, UV.x ),
+                  lerp( bezpatch[2].p, bezpatch[3].p, UV.x ), UV.y );
+    
+    v.w = 1;
+    return v;  
+}
+
+
+
+struct VertexHS
+{
+   float3 p : Pos;
+};
+
+struct PatchInfoHS
+{
+   float v[2] : SV_InsideTessFactor;
+   float edges[4] : SV_TessFactor;
+};
+
+PatchInfoHS HSConstants()
+{
+   PatchInfoHS info;
+   info.v[0] = 0;
+   info.v[1] = 0;
+   info.edges[0] = 0;
+   info.edges[1] = 0;
+   info.edges[2] = 0;
+   info.edges[3] = 0;
+   return info;
+}
+
+[domain("quad")]
+[partitioning("integer")]
+[outputtopology("triangle_cw")]
+[outputcontrolpoints(16)]
+[patchconstantfunc("HSConstants")]
+VertexHS mainHS( 
+    InputPatch<VertexHS, 4> ip, 
+    uint i : SV_OutputControlPointID,
+    uint PatchID : SV_PrimitiveID )
+{
+    VertexHS Output;
+    Output.p.xyz = 0;
+    return Output;
+}
+
+
+RWBuffer<float2> Out;
+
+[numthreads(64,1,1)]
+void mainCS( uint id : SV_DispatchThreadID )
+{
+   Out[id] = 0;
+}
+

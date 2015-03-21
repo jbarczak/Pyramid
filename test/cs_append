@@ -1,0 +1,32 @@
+
+struct DrawCall
+{
+   uint nShaderID;
+   uint nStartIndex;
+   uint nIndexCount;
+};
+
+AppendStructuredBuffer<DrawCall> StuffToDraw;
+
+float4 g_Frustum[6];
+
+Buffer<float4>   Spheres;
+Buffer<DrawCall> Draws;
+
+[numthreads(64,1,1)]
+void main( uint3 tid : SV_DispatchThreadID )
+{
+
+   float4 sph = Spheres[tid.x];
+   
+   [unroll]
+   for( uint i=0; i<6; i++ ) 
+   {
+        float d = dot(g_Frustum[i].xyzw,float4(sph.xyz,1));
+        if( d < 0 )
+            return;
+   }
+
+   StuffToDraw.Append(Draws[tid.x]);
+
+}

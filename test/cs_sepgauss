@@ -1,0 +1,47 @@
+#define N 8
+
+Texture2D<float4> Texels;
+RWTexture2D<float4> Output;
+
+groupshared float4 SCRATCH[N+6][N+6];
+groupshared float4 H[N][N+6];
+
+static const float KERNEL[7] = {
+ 0.1,0.3,0.5,1.0,0.5,0.3,0.1 // note: wrong weights
+};
+
+[numthreads(N,N,1)]
+void main( uint3 TID : SV_DispatchThreadID,
+           uint3 gid : SV_GroupThreadID,
+           uint3 group : SV_GroupID )
+{
+    // fetch the full NxN neighborhood, along with
+    //  a 3 texel border aroudn it
+    uint3 addr = uint3(TID.xy,0);
+    SCRATCH[gid.x][gid.y]     = Texels.Load(addr,int2(-3,-3));
+    SCRATCH[gid.x][gid.y+5]   = Texels.Load(addr,int2(-3,3));
+    SCRATCH[gid.x+5][gid.y]   = Texels.Load(addr,int2(3,-3));
+    SCRATCH[gid.x+5][gid.y+5] = Texels.Load(addr,int2(3,3));
+    GroupMemoryBarrierWithGroupSync();
+
+    {
+        float4 htop=0;
+        float4 hbottom=0;
+        [unroll]
+        for( int i=0; i<7; i++ )
+        {
+            htop += KERNEL[i]*SCRATCH[gid.x+i][gid.y];
+            hbottom += KERNEL[i]*SCRATCH[gid.x+i][gid.y+5];
+        }
+        H[gid.x][gid.y] = htop;
+        H[gid.x][gid.y+5] = hbottom;
+    }
+    GroupMemoryBarrierWithGroupSync();
+
+    // vertical pass
+    float4 v=0;
+    [unroll]
+    for( int i=0; i<7; i++ )
+        v += KERNEL[i]*H[3+gid.x][gid.y+(i-3)];
+    Output[TID.xy] = v;
+}

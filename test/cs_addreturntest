@@ -1,0 +1,19 @@
+
+groupshared uint LDS;
+
+Buffer<uint> counts;
+Buffer<uint> data;
+RWBuffer<uint> vout;
+
+[numthreads(64,1,1)]
+void main( uint3 idx : SV_DispatchThreadID )
+{
+   LDS=0;
+   GroupMemoryBarrierWithGroupSync();
+
+   uint N = counts[idx.x];
+   uint loc;
+   InterlockedAdd(LDS,N,loc);
+   for( uint i=0; i<N; i++ )
+     vout[loc+i] = data[idx.x+i];
+}
