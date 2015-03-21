@@ -8,6 +8,7 @@
 
 namespace GCN{
     class Instruction;
+    class IDecoder;
 namespace Disassembler{
 
     /// Interface that receives a series of text strings
@@ -23,11 +24,11 @@ namespace Disassembler{
 
     /// Disassemble a full program, returns false if an instruction is encountered whose encoding
     ///  wasn't recognized
-    bool DisassembleProgram( IPrinter& printer, const void* pISA, size_t nISASize );
+    bool DisassembleProgram( IDecoder& decoder, IPrinter& printer, const void* pISA, size_t nISASize );
 
     /// List encodings and hex bytes for each instruction.  Returns false if an instruction is encountered
     ///  whose encoding wasn't recognized. In this case, returns early
-    bool ListEncodings( IPrinter& printer, const void* pISA, size_t nISASize );
+    bool ListEncodings( IDecoder& decoder, IPrinter& printer, const void* pISA, size_t nISASize );
 }}
 
 #endif

@@ -15,7 +15,7 @@ namespace GCN
         #define ENUM(en) { en , #en },
         #define END_ENUM_TABLE {0,0} };
 
-        START_ENUM_TABLE(SOP2_Opcodes)
+        START_ENUM_TABLE(ScalarInstructions)
             ENUM(S_ADD_U32)   
             ENUM(S_SUB_U32         )   
             ENUM(S_ADD_I32         )   
@@ -59,9 +59,6 @@ namespace GCN
             ENUM(S_BFE_I64         )   
             ENUM(S_CBRANCH_G_FORK  )   
             ENUM(S_ABSDIFF_I32     )   
-        END_ENUM_TABLE
-
-        START_ENUM_TABLE(SOPK_Opcodes)
              ENUM(S_MOVK_I32         )    
              ENUM(S_CMOVK_I32        )    
              ENUM(S_CMPK_EQ_I32      )    
@@ -82,9 +79,6 @@ namespace GCN
              ENUM(S_GETREG_B32       )    
              ENUM(S_SETREG_B32       )    
              ENUM(S_SETREG_IMM32_B32 )    
-        END_ENUM_TABLE
-         
-        START_ENUM_TABLE(SOP1_Opcodes)
            ENUM( S_MOV_B32            ) 
            ENUM( S_MOV_B64            ) 
            ENUM( S_CMOV_B32           ) 
@@ -134,9 +128,6 @@ namespace GCN
            ENUM( S_CBRANCH_JOIN       ) 
            ENUM( S_ABS_I32            ) 
            ENUM( S_MOV_FED_B32        ) 
-        END_ENUM_TABLE
-  
-        START_ENUM_TABLE(SOPC_Opcodes)
             ENUM(S_CMP_EQ_I32    )      
             ENUM(S_CMP_LG_I32    )      
             ENUM(S_CMP_GT_I32    )      
@@ -154,9 +145,6 @@ namespace GCN
             ENUM(S_BITCMP0_B64   )      
             ENUM(S_BITCMP1_B64   )      
             ENUM(S_SETVSKIP      )      
-        END_ENUM_TABLE
-
-        START_ENUM_TABLE(SOPP_Opcodes)
             ENUM(S_NOP                      )
             ENUM(S_ENDPGM                   )
             ENUM(S_BRANCH                   )
@@ -182,10 +170,10 @@ namespace GCN
             ENUM(S_CBRANCH_CDBGUSER         )
             ENUM(S_CBRANCH_CDBGSYS_OR_USER  )
             ENUM(S_CBRANCH_CDBGSYS_AND_USER )
+           
         END_ENUM_TABLE
 
-
-        START_ENUM_TABLE(SMEM_Opcodes)
+        START_ENUM_TABLE(ScalarMemoryInstructions)
             ENUM(S_LOAD_DWORD            )
             ENUM(S_LOAD_DWORDX2          )
             ENUM(S_LOAD_DWORDX4          )
@@ -201,7 +189,7 @@ namespace GCN
             ENUM(S_DCACHE_INV            )
         END_ENUM_TABLE
 
-        START_ENUM_TABLE(VOP2_Opcodes)
+        START_ENUM_TABLE(VectorInstructions)
             ENUM( V_CNDMASK_B32          )    
             ENUM( V_READLANE_B32         )    
             ENUM( V_WRITELANE_B32        )    
@@ -252,10 +240,6 @@ namespace GCN
             ENUM( V_CVT_PKRTZ_F16_F32    )    
             ENUM( V_CVT_PK_U16_U32       )    
             ENUM( V_CVT_PK_I16_I32       )    
-        END_ENUM_TABLE
-
-
-        START_ENUM_TABLE(VOP1_Opcodes)
            ENUM(V_NOP                  ) 
            ENUM(V_MOV_B32              ) 
            ENUM(V_READFIRSTLANE_B32    )        
@@ -322,10 +306,6 @@ namespace GCN
            ENUM(V_MOVRELSD_B32         ) 
            ENUM(V_LOG_LEGACY_F32       )
            ENUM(V_EXP_LEGACY_F32       ) 
-        END_ENUM_TABLE
-
-
-        START_ENUM_TABLE(VOPC_Opcodes)
             ENUM(V_CMP_F_F32        )
             ENUM(V_CMP_LT_F32       )
             ENUM(V_CMP_EQ_F32       )
@@ -522,383 +502,70 @@ namespace GCN
             ENUM(V_CMPX_CLASS_F32   )
             ENUM(V_CMP_CLASS_F64    )
             ENUM(V_CMPX_CLASS_F64   )
-        END_ENUM_TABLE
-
-        #define ENUM_V3(en) { V3_##en, "v_"#en },
-        START_ENUM_TABLE(VOP3_Opcodes)
-            ENUM_V3(CMP_F_F32       )
-            ENUM_V3(CMP_LT_F32      )
-            ENUM_V3(CMP_EQ_F32      )
-            ENUM_V3(CMP_LE_F32      )
-            ENUM_V3(CMP_GT_F32      )
-            ENUM_V3(CMP_LG_F32      )
-            ENUM_V3(CMP_GE_F32      )
-            ENUM_V3(CMP_O_F32       )
-            ENUM_V3(CMP_U_F32       )
-            ENUM_V3(CMP_NGE_F32     )
-            ENUM_V3(CMP_NLG_F32     )
-            ENUM_V3(CMP_NGT_F32     )
-            ENUM_V3(CMP_NLE_F32     )
-            ENUM_V3(CMP_NEQ_F32     )
-            ENUM_V3(CMP_NLT_F32     )
-            ENUM_V3(CMP_TRU_F32     )
-            ENUM_V3(CMPX_F_F32      )
-            ENUM_V3(CMPX_LT_F32     )
-            ENUM_V3(CMPX_EQ_F32     )
-            ENUM_V3(CMPX_LE_F32     )
-            ENUM_V3(CMPX_GT_F32     )
-            ENUM_V3(CMPX_LG_F32     )
-            ENUM_V3(CMPX_GE_F32     )
-            ENUM_V3(CMPX_O_F32      )
-            ENUM_V3(CMPX_U_F32      )
-            ENUM_V3(CMPX_NGE_F32    )
-            ENUM_V3(CMPX_NLG_F32    )
-            ENUM_V3(CMPX_NGT_F32    )
-            ENUM_V3(CMPX_NLE_F32    )
-            ENUM_V3(CMPX_NEQ_F32    )
-            ENUM_V3(CMPX_NLT_F32    )
-            ENUM_V3(CMPX_TRU_F32    )
-            ENUM_V3(CMP_F_F64       )
-            ENUM_V3(CMP_LT_F64      )
-            ENUM_V3(CMP_EQ_F64      )
-            ENUM_V3(CMP_LE_F64      )
-            ENUM_V3(CMP_GT_F64      )
-            ENUM_V3(CMP_LG_F64      )
-            ENUM_V3(CMP_GE_F64      )
-            ENUM_V3(CMP_O_F64       )
-            ENUM_V3(CMP_U_F64       )
-            ENUM_V3(CMP_NGE_F64     )
-            ENUM_V3(CMP_NLG_F64     )
-            ENUM_V3(CMP_NGT_F64     )
-            ENUM_V3(CMP_NLE_F64     )
-            ENUM_V3(CMP_NEQ_F64     )
-            ENUM_V3(CMP_NLT_F64     )
-            ENUM_V3(CMP_TRU_F64     )
-            ENUM_V3(CMPX_F_F64      )
-            ENUM_V3(CMPX_LT_F64     )
-            ENUM_V3(CMPX_EQ_F64     )
-            ENUM_V3(CMPX_LE_F64     )
-            ENUM_V3(CMPX_GT_F64     )
-            ENUM_V3(CMPX_LG_F64     )
-            ENUM_V3(CMPX_GE_F64     )
-            ENUM_V3(CMPX_O_F64      )
-            ENUM_V3(CMPX_U_F64      )
-            ENUM_V3(CMPX_NGE_F64    )
-            ENUM_V3(CMPX_NLG_F64    )
-            ENUM_V3(CMPX_NGT_F64    )
-            ENUM_V3(CMPX_NLE_F64    )
-            ENUM_V3(CMPX_NEQ_F64    )
-            ENUM_V3(CMPX_NLT_F64    )
-            ENUM_V3(CMPX_TRU_F64    )
-            ENUM_V3(CMPS_F_F32      )
-            ENUM_V3(CMPS_LT_F32     )
-            ENUM_V3(CMPS_EQ_F32     )
-            ENUM_V3(CMPS_LE_F32     )
-            ENUM_V3(CMPS_GT_F32     )
-            ENUM_V3(CMPS_LG_F32     )
-            ENUM_V3(CMPS_GE_F32     )
-            ENUM_V3(CMPS_O_F32      )
-            ENUM_V3(CMPS_U_F32      )
-            ENUM_V3(CMPS_NGE_F32    )
-            ENUM_V3(CMPS_NLG_F32    )
-            ENUM_V3(CMPS_NGT_F32    )
-            ENUM_V3(CMPS_NLE_F32    )
-            ENUM_V3(CMPS_NEQ_F32    )
-            ENUM_V3(CMPS_NLT_F32    )
-            ENUM_V3(CMPS_TRU_F32    )
-            ENUM_V3(CMPSX_F_F32     )
-            ENUM_V3(CMPSX_LT_F32    )
-            ENUM_V3(CMPSX_EQ_F32    )
-            ENUM_V3(CMPSX_LE_F32    )
-            ENUM_V3(CMPSX_GT_F32    )
-            ENUM_V3(CMPSX_LG_F32    )
-            ENUM_V3(CMPSX_GE_F32    )
-            ENUM_V3(CMPSX_O_F32     )
-            ENUM_V3(CMPSX_U_F32     )
-            ENUM_V3(CMPSX_NGE_F32   )
-            ENUM_V3(CMPSX_NLG_F32   )
-            ENUM_V3(CMPSX_NGT_F32   )
-            ENUM_V3(CMPSX_NLE_F32   )
-            ENUM_V3(CMPSX_NEQ_F32   )
-            ENUM_V3(CMPSX_NLT_F32   )
-            ENUM_V3(CMPSX_TRU_F32   )
-            ENUM_V3(CMPS_F_F64      )
-            ENUM_V3(CMPS_LT_F64     )
-            ENUM_V3(CMPS_EQ_F64     )
-            ENUM_V3(CMPS_LE_F64     )
-            ENUM_V3(CMPS_GT_F64     )
-            ENUM_V3(CMPS_LG_F64     )
-            ENUM_V3(CMPS_GE_F64     )
-            ENUM_V3(CMPS_O_F64      )
-            ENUM_V3(CMPS_U_F64      )
-            ENUM_V3(CMPS_NGE_F64    )
-            ENUM_V3(CMPS_NLG_F64    )
-            ENUM_V3(CMPS_NGT_F64    )
-            ENUM_V3(CMPS_NLE_F64    )
-            ENUM_V3(CMPS_NEQ_F64    )
-            ENUM_V3(CMPS_NLT_F64    )
-            ENUM_V3(CMPS_TRU_F64    )
-            ENUM_V3(CMPSX_F_F64     )
-            ENUM_V3(CMPSX_LT_F64    )
-            ENUM_V3(CMPSX_EQ_F64    )
-            ENUM_V3(CMPSX_LE_F64    )
-            ENUM_V3(CMPSX_GT_F64    )
-            ENUM_V3(CMPSX_LG_F64    )
-            ENUM_V3(CMPSX_GE_F64    )
-            ENUM_V3(CMPSX_O_F64     )
-            ENUM_V3(CMPSX_U_F64     )
-            ENUM_V3(CMPSX_NGE_F64   )
-            ENUM_V3(CMPSX_NLG_F64   )
-            ENUM_V3(CMPSX_NGT_F64   )
-            ENUM_V3(CMPSX_NLE_F64   )
-            ENUM_V3(CMPSX_NEQ_F64   )
-            ENUM_V3(CMPSX_NLT_F64   )
-            ENUM_V3(CMPSX_TRU_F64   )
-            ENUM_V3(CMP_F_I32       )
-            ENUM_V3(CMP_LT_I32      )
-            ENUM_V3(CMP_EQ_I32      )
-            ENUM_V3(CMP_LE_I32      )
-            ENUM_V3(CMP_GT_I32      )
-            ENUM_V3(CMP_LG_I32      )
-            ENUM_V3(CMP_GE_I32      )
-            ENUM_V3(CMP_TRU_I32     )
-            ENUM_V3(CMPX_F_I32      )
-            ENUM_V3(CMPX_LT_I32     )
-            ENUM_V3(CMPX_EQ_I32     )
-            ENUM_V3(CMPX_LE_I32     )
-            ENUM_V3(CMPX_GT_I32     )
-            ENUM_V3(CMPX_LG_I32     )
-            ENUM_V3(CMPX_GE_I32     )
-            ENUM_V3(CMPX_TRU_I32    )
-            ENUM_V3(CMP_F_I64       )
-            ENUM_V3(CMP_LT_I64      )
-            ENUM_V3(CMP_EQ_I64      )
-            ENUM_V3(CMP_LE_I64      )
-            ENUM_V3(CMP_GT_I64      )
-            ENUM_V3(CMP_LG_I64      )
-            ENUM_V3(CMP_GE_I64      )
-            ENUM_V3(CMP_TRU_I64     )
-            ENUM_V3(CMPX_F_I64      )
-            ENUM_V3(CMPX_LT_I64     )
-            ENUM_V3(CMPX_EQ_I64     )
-            ENUM_V3(CMPX_LE_I64     )
-            ENUM_V3(CMPX_GT_I64     )
-            ENUM_V3(CMPX_LG_I64     )
-            ENUM_V3(CMPX_GE_I64     )
-            ENUM_V3(CMPX_TRU_I64    )
-            ENUM_V3(CMP_F_U32       )
-            ENUM_V3(CMP_LT_U32      )
-            ENUM_V3(CMP_EQ_U32      )
-            ENUM_V3(CMP_LE_U32      )
-            ENUM_V3(CMP_GT_U32      )
-            ENUM_V3(CMP_LG_U32      )
-            ENUM_V3(CMP_GE_U32      )
-            ENUM_V3(CMP_TRU_U32     )
-            ENUM_V3(CMPX_F_U32      )
-            ENUM_V3(CMPX_LT_U32     )
-            ENUM_V3(CMPX_EQ_U32     )
-            ENUM_V3(CMPX_LE_U32     )
-            ENUM_V3(CMPX_GT_U32     )
-            ENUM_V3(CMPX_LG_U32     )
-            ENUM_V3(CMPX_GE_U32     )
-            ENUM_V3(CMPX_TRU_U32    )
-            ENUM_V3(CMP_F_U64       )
-            ENUM_V3(CMP_LT_U64      )
-            ENUM_V3(CMP_EQ_U64      )
-            ENUM_V3(CMP_LE_U64      )
-            ENUM_V3(CMP_GT_U64      )
-            ENUM_V3(CMP_LG_U64      )
-            ENUM_V3(CMP_GE_U64      )
-            ENUM_V3(CMP_TRU_U64     )
-            ENUM_V3(CMPx_F_U64      )
-            ENUM_V3(CMPx_LT_U64     )
-            ENUM_V3(CMPx_EQ_U64     )
-            ENUM_V3(CMPx_LE_U64     )
-            ENUM_V3(CMPx_GT_U64     )
-            ENUM_V3(CMPx_LG_U64     )
-            ENUM_V3(CMPx_GE_U64     )
-            ENUM_V3(CMPx_TRU_U64    )
-            ENUM_V3(CMP_CLASS_F32   )
-            ENUM_V3(CMPX_CLASS_F32  )
-            ENUM_V3(CMP_CLASS_F64   )
-            ENUM_V3(CMPX_CLASS_F64  )
-            ENUM_V3(CNDMASK_B32         )
-            ENUM_V3(READLANE_B32        )
-            ENUM_V3(WRITELANE_B32       )
-            ENUM_V3(ADD_F32             )
-            ENUM_V3(SUB_F32             )
-            ENUM_V3(SUBREV_F32          )
-            ENUM_V3(MAC_LEGACY_F32      )
-            ENUM_V3(MUL_LEGACY_F32      )
-            ENUM_V3(MUL_F32             )
-            ENUM_V3(MUL_I32_I24         )
-            ENUM_V3(MUL_HI_I32_I24      )
-            ENUM_V3(MUL_U32_U24         )
-            ENUM_V3(MUL_HI_U32_U24      )
-            ENUM_V3(MIN_LEGACY_F32      )
-            ENUM_V3(MAX_LEGACY_F32      )
-            ENUM_V3(MIN_F32             )
-            ENUM_V3(MAX_F32             )
-            ENUM_V3(MIN_I32             )
-            ENUM_V3(MAX_I32             )
-            ENUM_V3(MIN_U32             )
-            ENUM_V3(MAX_U32             )
-            ENUM_V3(LSHR_B32            )
-            ENUM_V3(LSHRREV_B32         )
-            ENUM_V3(ASHR_I32            )
-            ENUM_V3(ASHRREV_I32         )
-            ENUM_V3(LSHL_B32            )
-            ENUM_V3(LSHLREV_B32         )
-            ENUM_V3(AND_B32             )
-            ENUM_V3(OR_B32              )
-            ENUM_V3(XOR_B32             )
-            ENUM_V3(BFM_B32             )
-            ENUM_V3(MAC_F32             )
-            ENUM_V3(MADMK_F32           )
-            ENUM_V3(MADAK_F32           )
-            ENUM_V3(BCNT_U32_B32        )
-            ENUM_V3(MBCNT_LO_U32_B32    )
-            ENUM_V3(MBCNT_HI_U32_B32    )
-            ENUM_V3(LDEXP_F32           )
-            ENUM_V3(CVT_PKACCUM_U8_F32  )
-            ENUM_V3(CVT_PKNORM_I16_F32  )
-            ENUM_V3(CVT_PKNORM_U16_F32  )
-            ENUM_V3(CVT_PKRTZ_F16_F32   )
-            ENUM_V3(CVT_PK_U16_U32      )
-            ENUM_V3(CVT_PK_I16_I32      )
-            ENUM_V3(MAD_LEGACY_F32      )
-            ENUM_V3(MAD_F32             )
-            ENUM_V3(MAD_I32_I24         )
-            ENUM_V3(MAD_U32_U24         )
-            ENUM_V3(CUBEID_F32          )
-            ENUM_V3(CUBESC_F32          )
-            ENUM_V3(CUBETC_F32          )
-            ENUM_V3(CUBEMA_F32          )
-            ENUM_V3(BFE_U32             )
-            ENUM_V3(BFE_I32             )
-            ENUM_V3(BFI_B32             )
-            ENUM_V3(FMA_F32             )
-            ENUM_V3(FMA_F64             )
-            ENUM_V3(LERP_U8             )
-            ENUM_V3(ALIGNBIT_B32        )
-            ENUM_V3(ALIGNBYTE_B32       )
-            ENUM_V3(MULLIT_F32          )
-            ENUM_V3(MIN3_F32            )
-            ENUM_V3(MIN3_I32            )
-            ENUM_V3(MIN3_U32            )
-            ENUM_V3(MAX3_F32            )
-            ENUM_V3(MAX3_I32            )
-            ENUM_V3(MAX3_U32            )
-            ENUM_V3(MED3_F32            )
-            ENUM_V3(MED3_I32            )
-            ENUM_V3(MED3_U32            )
-            ENUM_V3(SAD_U8              )
-            ENUM_V3(SAD_HI_U8           )
-            ENUM_V3(SAD_U16             )
-            ENUM_V3(SAD_U32             )
-            ENUM_V3(CVT_PK_U8_F32       )
-            ENUM_V3(DIV_FIXUP_F32       )
-            ENUM_V3(DIV_FIXUP_F64       )
-            ENUM_V3(LSHL_B64            )
-            ENUM_V3(LSHR_B64            )
-            ENUM_V3(ASHR_I64            )
-            ENUM_V3(ADD_F64             )
-            ENUM_V3(MUL_F64             )
-            ENUM_V3(MIN_F64             )
-            ENUM_V3(MAX_F64             )
-            ENUM_V3(LDEXP_F64           )
-            ENUM_V3(MUL_LO_U32          )
-            ENUM_V3(MUL_HI_U32          )
-            ENUM_V3(MUL_LO_I32          )
-            ENUM_V3(MUL_HI_I32          )
-            ENUM_V3(DIV_FMAS_F32        )
-            ENUM_V3(DIV_FMAS_F64        )
-            ENUM_V3(MSAD_U8             )
-            ENUM_V3(QSAD_U8             )
-            ENUM_V3(MQSAD_U8            )
-            ENUM_V3(QSAD_PK_U16_U8      )
-            ENUM_V3(MQSAD_PK_U16_U8     )
-            ENUM_V3(TRIG_PREOP_F64      )
-            ENUM_V3(MQSAD_U32_U8        )
-            ENUM_V3(MAD_U64_U32         )
-            ENUM_V3(MAD_I64_I32         )
-            ENUM_V3(NOP                 )
-            ENUM_V3(MOV_B32             )
-            ENUM_V3(READFIRSTLANE_B32   )
-            ENUM_V3(CVT_I32_F64         )
-            ENUM_V3(CVT_F64_I32         )
-            ENUM_V3(CVT_F32_I32         )
-            ENUM_V3(CVT_F32_U32         )
-            ENUM_V3(CVT_U32_F32         )
-            ENUM_V3(CVT_I32_F32         )
-            ENUM_V3(MOV_FED_B32         )
-            ENUM_V3(CVT_F16_F32         )
-            ENUM_V3(CVT_F32_F16         )
-            ENUM_V3(CVT_RPI_I32_F32     )
-            ENUM_V3(CVT_FLR_I32_F32     )
-            ENUM_V3(CVT_OFF_F32_I4      )
-            ENUM_V3(CVT_F32_F64         )
-            ENUM_V3(CVT_F64_F32         )
-            ENUM_V3(CVT_F32_UBYTE0      )
-            ENUM_V3(CVT_F32_UBYTE1      )
-            ENUM_V3(CVT_F32_UBYTE2      )
-            ENUM_V3(CVT_F32_UBYTE3      )
-            ENUM_V3(CVT_U32_F64         )
-            ENUM_V3(CVT_F64_U32         )
-            ENUM_V3(FRACT_F32           )
-            ENUM_V3(TRUNC_F32           )
-            ENUM_V3(CEIL_F32            )
-            ENUM_V3(RNDNE_F32           )
-            ENUM_V3(FLOOR_F32           )
-            ENUM_V3(EXP_F32             )
-            ENUM_V3(LOG_CLAMP_F32       )
-            ENUM_V3(LOG_F32             )
-            ENUM_V3(RCP_CLAMP_F32       )
-            ENUM_V3(RCP_LEGACY_F32      )
-            ENUM_V3(RCP_F32             )
-            ENUM_V3(RCP_IFLAG_F32       )
-            ENUM_V3(RSQ_CLAMP_F32       )
-            ENUM_V3(RSQ_LEGACY_F32      )
-            ENUM_V3(RSQ_F32             )
-            ENUM_V3(RCP_F64             )
-            ENUM_V3(RCP_CLAMP_F64       )
-            ENUM_V3(RSQ_F64             )
-            ENUM_V3(RSQ_CLAMP_F64       )
-            ENUM_V3(SQRT_F32            )
-            ENUM_V3(SQRT_F64            )
-            ENUM_V3(SIN_F32             )
-            ENUM_V3(COS_F32             )
-            ENUM_V3(NOT_B32             )
-            ENUM_V3(BFREV_B32           )
-            ENUM_V3(FFBH_U32            )
-            ENUM_V3(FFBL_B32            )
-            ENUM_V3(FFBH_I32            )
-            ENUM_V3(FREXP_EXP_I32_F64   )
-            ENUM_V3(FREXP_MANT_F64      )
-            ENUM_V3(FRACT_F64           )
-            ENUM_V3(FREXP_EXP_I32_F32   )
-            ENUM_V3(FREXP_MANT_F32      )
-            ENUM_V3(CLREXCP             )
-            ENUM_V3(MOVRELD_B32         )
-            ENUM_V3(MOVRELS_B32         )
-            ENUM_V3(MOVRELSD_B32        )
-            ENUM_V3(ADD_I32             )
-            ENUM_V3(SUB_I32             )
-            ENUM_V3(SUBREV_I32          )
-            ENUM_V3(ADDC_U32            )
-            ENUM_V3(SUBB_U32            )
-            ENUM_V3(SUBBREV_U32         )
-            ENUM_V3(DIV_SCALE_F32       )
-            ENUM_V3(DIV_SCALE_F64       )
-        END_ENUM_TABLE
-    
-        START_ENUM_TABLE(VINTERP_Opcodes)
+           ENUM(V_DIV_SCALE_F32    )  //  = D.f = Special case divide preop and flags(s0.f = Quotient,s1.f = Denominator, s2.f = Numerator) s0 must equal s1 or s2.
+           ENUM(V_DIV_SCALE_F64    )  //  = D.d = Special case divide preop and flags(s0.d = Quotient,s1.d = Denominator, s2.d = Numerator) s0 must equal s1 or s2.
+           ENUM(V_MAD_LEGACY_F32   )//   = D.f = S0.f * S1.f + S2.f (DX9 rules, 0.0*x = 0.0).
+           ENUM(V_MAD_F32          )//   = D.f = S0.f * S1.f + S2.f.
+           ENUM(V_MAD_I32_I24      )//   = D.i = S0.i * S1.i + S2.iD.i = S0.i * S1.i + S2.i.
+           ENUM(V_MAD_U32_U24      )//   = D.u = S0.u * S1.u + S2.u.
+           ENUM(V_CUBEID_F32       )//   = Rm.w <- Rn,x, Rn,y, Rn.z.
+           ENUM(V_CUBESC_F32       )//   = Rm.y <- Rn,x, Rn,y, Rn.z.
+           ENUM(V_CUBETC_F32       )//   = Rm.x <- Rn,x, Rn,y, Rn.z.
+           ENUM(V_CUBEMA_F32       )//   = Rm.z <- Rn,x, Rn,y, Rn.z
+           ENUM(V_BFE_U32          )//   = D.u = (S0.u>>S1.u[4:0]) & ((1<<S2.u[4:0])-1); bitfield extract,S0=data, S1=field_offset, S2=field_width.
+           ENUM(V_BFE_I32          )//   = D.i = (S0.i>>S1.u[4:0]) & ((1<<S2.u[4:0])-1); bitfield extract, S0=data, S1=field_offset, S2=field_width.
+           ENUM(V_BFI_B32          )//   = D.u = (S0.u & S1.u) | (~S0.u & S2.u); bitfield insert.
+           ENUM(V_FMA_F32          )//   = D.f = S0.f * S1.f + S2.f
+           ENUM(V_FMA_F64          )//   = D.d = S0.d * S1.d + S2.d.
+           ENUM(V_LERP_U8          )//  = D.u = ((S0.u[31:24] + S1.u[31:24] + S2.u[24]) >> 1) << 24 +
+           ENUM(V_ALIGNBIT_B32     )//  = D.u = ({S0,S1} >> S2.u[4:0]) & 0xFFFFFFFF.
+           ENUM(V_ALIGNBYTE_B32    )//  = D.u = ({S0,S1} >> (8*S2.u[4:0])) & 0xFFFFFFFF.
+           ENUM(V_MULLIT_F32       )//  = D.f = S0.f * S1.f, replicate result into 4 components (0.0 * x = 0.0; special INF, NaN, overflow rules).
+           ENUM(V_MIN3_F32         )//  = D.f = min(S0.f, S1.f, S2.f).
+           ENUM(V_MIN3_I32         )//  = D.i = min(S0.i, S1.i, S2.i).
+           ENUM(V_MIN3_U32         )//  = 0x153 D.u = min(S0.u, S1.u, S2.u).
+           ENUM(V_MAX3_F32         )//  = D.f = max(S0.f, S1.f, S2.f).
+           ENUM(V_MAX3_I32         )//  = D.i = max(S0.i, S1.i, S2.i).
+           ENUM(V_MAX3_U32         )//  = D.u = max(S0.u, S1.u, S2.u).
+           ENUM(V_MED3_F32         )//  = D.f = median(S0.f, S1.f, S2.f).
+           ENUM(V_MED3_I32         )//  = D.i = median(S0.i, S1.i, S2.i).
+           ENUM(V_MED3_U32         )//  = D.u = median(S0.u, S1.u, S2.u).
+           ENUM(V_SAD_U8           )//  = D.u = Byte SAD with accum_lo(S0.u, S1.u, S2.u).
+           ENUM(V_SAD_HI_U8        )//  = D.u = Byte SAD with accum_hi(S0.u, S1.u, S2.u).
+           ENUM(V_SAD_U16          )//  = D.u = Word SAD with accum(S0.u, S1.u, S2.u).
+           ENUM(V_SAD_U32          )//  = D.u = Dword SAD with accum(S0.u, S1.u, S2.u).
+           ENUM(V_CVT_PK_U8_F32    )//  = f32->u8(s0.f), pack into byte(s1.u), of dword(s2).
+           ENUM(V_DIV_FIXUP_F32    )//  = D.f = Special case divide fixup and flags(s0.f = Quotient,   s1.f = Denominator, s2.f = Numerator).
+           ENUM(V_DIV_FIXUP_F64    )//  = D.d = Special case divide fixup and flags(s0.d = Quotient,  s1.d = Denominator, s2.d = Numerator).
+           ENUM(V_LSHL_B64         )//  = D = S0.u << S1.u[4:0].
+           ENUM(V_LSHR_B64         )//  = D = S0.u >> S1.u[4:0].
+           ENUM(V_ASHR_I64         )//  = D = S0.u >> S1.u[4:0].
+           ENUM(V_ADD_F64          )//  = D.d = S0.d + S1.d.
+           ENUM(V_MUL_F64          )//  = D.d = S0.d * S1.d.
+           ENUM(V_MIN_F64          )//  = D.d = min(S0.d, S1.d).
+           ENUM(V_MAX_F64          )//  = D.d = max(S0.d, S1.d).
+           ENUM(V_LDEXP_F64        )//  = D.d = pow(S0.d, S1.i[31:0]).
+           ENUM(V_MUL_LO_U32       )//  = D.u = S0.u * S1.u.
+           ENUM(V_MUL_HI_U32       )//  = D.u = (S0.u * S1.u)>>32.
+           ENUM(V_MUL_LO_I32       )//  = D.i = S0.i * S1.i.
+           ENUM(V_MUL_HI_I32       )//  = D.i = (S0.i * S1.i)>>32.
+           ENUM(V_DIV_FMAS_F32     ) 
+           ENUM(V_DIV_FMAS_F64     ) 
+           ENUM(V_MSAD_U8          ) 
+           ENUM(V_QSAD_U8          ) 
+           ENUM(V_MQSAD_U8         ) 
+           ENUM(V_QSAD_PK_U16_U8   ) 
+           ENUM(V_MQSAD_PK_U16_U8  ) 
+           ENUM(V_TRIG_PREOP_F64   )
+           ENUM(V_MQSAD_U32_U8     )
+           ENUM(V_MAD_U64_U32      )
+           ENUM(V_MAD_I64_I32      )
             ENUM(V_INTERP_P1_F32 )
             ENUM(V_INTERP_P2_F32 )
             ENUM(V_INTERP_MOV_F32)
         END_ENUM_TABLE
 
-        START_ENUM_TABLE(DS_Opcodes)
+        START_ENUM_TABLE(DSInstructions)
              ENUM( DS_ADD_U32             )
              ENUM( DS_SUB_U32             )
              ENUM( DS_RSUB_U32            )
@@ -1041,7 +708,7 @@ namespace GCN
              ENUM( DS_READ_B128           )
         END_ENUM_TABLE          
                   
-        START_ENUM_TABLE(MUBUFF_Opcodes)
+        START_ENUM_TABLE(BufferInstructions)
             ENUM(BUFFER_LOAD_FORMAT_X        )
             ENUM(BUFFER_LOAD_FORMAT_XY       )
             ENUM(BUFFER_LOAD_FORMAT_XYZ      )
@@ -1100,9 +767,6 @@ namespace GCN
             ENUM(BUFFER_ATOMIC_FMAX_X2       )
             ENUM(BUFFER_WBINVL1_SC           )
             ENUM(BUFFER_WBINVL1              )
-        END_ENUM_TABLE
-        
-        START_ENUM_TABLE(MTBUFF_Opcodes)
             ENUM(TBUFFER_LOAD_FORMAT_X      )
             ENUM(TBUFFER_LOAD_FORMAT_XY     )
             ENUM(TBUFFER_LOAD_FORMAT_XYZ    )
@@ -1113,7 +777,8 @@ namespace GCN
             ENUM(TBUFFER_STORE_FORMAT_XYZW  )
         END_ENUM_TABLE
 
-        START_ENUM_TABLE(MIMG_Opcodes)
+
+        START_ENUM_TABLE(ImageInstructions)
             ENUM(IMAGE_LOAD                )
             ENUM(IMAGE_LOAD_MIP            )
             ENUM(IMAGE_LOAD_PCK            )
@@ -1210,7 +875,7 @@ namespace GCN
         END_ENUM_TABLE
 
 
-        START_ENUM_TABLE(FLAT_Opcodes)
+        START_ENUM_TABLE(FlatInstructions)
             ENUM(FLAT_LOAD_UBYTE          )
             ENUM(FLAT_LOAD_SBYTE          )
             ENUM(FLAT_LOAD_USHORT         )
@@ -1310,7 +975,7 @@ namespace GCN
         END_ENUM_TABLE
 
         #define ENUM_NF(x) { NF_##x, #x },
-        START_ENUM_TABLE(MTBUFF_NumberFormat)
+        START_ENUM_TABLE(TBufferNumberFormats)
             ENUM_NF(UNORM     )
             ENUM_NF(SNORM     )
             ENUM_NF(USCALED   )
@@ -1327,7 +992,7 @@ namespace GCN
         END_ENUM_TABLE
         
     #define ENUM_DF(x) { DF_##x, #x },
-        START_ENUM_TABLE(MTBUFF_DataFormat)
+        START_ENUM_TABLE(TBufferDataFormats)
             ENUM_DF(INVALID    )
             ENUM_DF(8          )
             ENUM_DF(16         )
@@ -1362,31 +1027,16 @@ namespace GCN
         const char* p = _INTERNAL::Search( _INTERNAL::en##LUT, op ); \
         return p ? p : "?????????"#en; }
 
-    #define IMPLEMENT_OPCODE_LOOKUP(en)\
-    const char* EnumToString( en##_Opcodes op ) {\
-        const char* p = _INTERNAL::Search( _INTERNAL::en##_Opcodes##LUT, op ); \
-        return p ? p : "?????????"#en; }
+    IMPLEMENT_ENUM_LOOKUP(ScalarInstructions);
     
-    IMPLEMENT_OPCODE_LOOKUP(SOP2);
-    IMPLEMENT_OPCODE_LOOKUP(SOP1);
-    IMPLEMENT_OPCODE_LOOKUP(SOPK);
-    IMPLEMENT_OPCODE_LOOKUP(SOPC);
-    IMPLEMENT_OPCODE_LOOKUP(SOPP);
-    IMPLEMENT_OPCODE_LOOKUP(SMEM);
-    IMPLEMENT_OPCODE_LOOKUP(VOP2);
-    IMPLEMENT_OPCODE_LOOKUP(VOP1);
-    IMPLEMENT_OPCODE_LOOKUP(VOPC);
-    IMPLEMENT_OPCODE_LOOKUP(VOP3);
-    IMPLEMENT_OPCODE_LOOKUP(VINTERP);
-    IMPLEMENT_OPCODE_LOOKUP(DS);
-    IMPLEMENT_OPCODE_LOOKUP(MUBUFF);
-    IMPLEMENT_OPCODE_LOOKUP(MTBUFF);
-    IMPLEMENT_OPCODE_LOOKUP(MIMG);
-    IMPLEMENT_OPCODE_LOOKUP(FLAT);
-
+    IMPLEMENT_ENUM_LOOKUP(ScalarMemoryInstructions);
+    IMPLEMENT_ENUM_LOOKUP(VectorInstructions);
+    IMPLEMENT_ENUM_LOOKUP(BufferInstructions)
+    IMPLEMENT_ENUM_LOOKUP(ImageInstructions)
+    IMPLEMENT_ENUM_LOOKUP(DSInstructions);
     IMPLEMENT_ENUM_LOOKUP(ExportTargets);
-    
-    IMPLEMENT_ENUM_LOOKUP(MTBUFF_DataFormat);
-    IMPLEMENT_ENUM_LOOKUP(MTBUFF_NumberFormat);
+    IMPLEMENT_ENUM_LOOKUP(FlatInstructions);
+    IMPLEMENT_ENUM_LOOKUP(TBufferDataFormats);
+    IMPLEMENT_ENUM_LOOKUP(TBufferNumberFormats);
 
 }

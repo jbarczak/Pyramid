@@ -82,6 +82,8 @@
   <ItemGroup>
     <ClCompile Include="AMDDriver_Impl.cpp" />
     <ClCompile Include="D3DCompiler_Impl.cpp" />
+    <ClCompile Include="GCN1Decoder.cpp" />
+    <ClCompile Include="GCNDecoder.cpp" />
     <ClCompile Include="GCNDisassembler.cpp">
       <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</PreprocessToFile>
     </ClCompile>
@@ -90,11 +92,15 @@
     <ClCompile Include="GLSlang_Impl.cpp" />
     <ClCompile Include="GLSlang_Stubs.cpp" />
     <ClCompile Include="GLSLOpt_Impl.cpp" />
+    <ClCompile Include="GCN3Decoder.cpp" />
     <ClCompile Include="Wrapper.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AMDDriver_Impl.h" />
     <ClInclude Include="D3DCompiler_Impl.h" />
+    <ClInclude Include="GCN1Decoder.h" />
+    <ClInclude Include="GCN3Decoder.h" />
+    <ClInclude Include="GCNDecoder.h" />
     <ClInclude Include="GCNDisassembler.h" />
     <ClInclude Include="GCNEnums.h" />
     <ClInclude Include="GCNIsa.h" />

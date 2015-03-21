@@ -3,6 +3,7 @@
 #include <windows.h>
 #include "elf.h"
 #include "GCNDisassembler.h"
+#include "GCNDecoder.h"
 #pragma managed
 
 #include "AMDDriver_Impl.h"
@@ -21,11 +22,41 @@ public:
     std::vector<char> m_Bytes;
 };
 
+private ref class AMDAsic_Impl : Pyramid::IAMDAsic
+{
+public:
+    AMDAsic_Impl( const char* pName, DWORD arg0, DWORD arg1, GCN::IDecoder::GCNVersions eGCNVersion )
+        : m_pmName( MakeString(pName) ),
+          m_nArg0(arg0),
+          m_nArg1(arg1),
+          m_pDecoder( GCN::IDecoder::Create( eGCNVersion ) )
+    {
+    }
+
+    ~AMDAsic_Impl()
+    {
+        GCN::IDecoder::Destroy(m_pDecoder);
+        m_pDecoder=0;
+    }
+
+    property System::String^ Name {
+        virtual System::String^ get() { return m_pmName; }
+    }
+  
+
+internal:
+    System::String^ m_pmName;
+    GCN::IDecoder* m_pDecoder;
+    DWORD m_nArg0;
+    DWORD m_nArg1;
+};
+
+
 private ref class AMDShader_Impl : public Pyramid::IAMDShader
 {
 public:
 
-    AMDShader_Impl( AMDDriver_Impl^ pOwner, Pyramid::IAMDAsic^ asic, Elf32_Ehdr* pElf, DWORD nElfSize )
+    AMDShader_Impl( AMDDriver_Impl^ pOwner, AMDAsic_Impl^ asic, Elf32_Ehdr* pElf, DWORD nElfSize )
         : m_pmDriver(pOwner), 
           m_pmAsic(asic), 
           m_pElf(pElf),
@@ -65,6 +96,7 @@ public:
 
     ~AMDShader_Impl()
     {
+        GCN::IDecoder::Destroy( m_pDecoder );
         m_pmDriver->m_pFreeFunc(m_pElf);
         m_pElf=0;
         m_nElfSize=0;
@@ -82,7 +114,7 @@ public:
     {
         Printer printer;
 
-        if( !GCN::Disassembler::DisassembleProgram( printer, m_pISA, m_nISASize ) )
+        if( !GCN::Disassembler::DisassembleProgram( *m_pmAsic->m_pDecoder, printer, m_pISA, m_nISASize ) )
             printer.Push("Disassembly terminated due to encoding error\n");
 
         printer.m_Bytes.push_back(0);
@@ -96,7 +128,7 @@ public:
     {
         Printer printer;
 
-        if( !GCN::Disassembler::ListEncodings( printer, m_pISA, m_nISASize ) )
+        if( !GCN::Disassembler::ListEncodings( *m_pmAsic->m_pDecoder, printer, m_pISA, m_nISASize ) )
             printer.Push("Disassembly terminated due to encoding error\n");
 
         printer.m_Bytes.push_back(0);
@@ -112,35 +144,16 @@ public:
 
 internal:
     AMDDriver_Impl^ m_pmDriver;
-    Pyramid::IAMDAsic^ m_pmAsic; 
+    AMDAsic_Impl^ m_pmAsic; 
     Elf32_Ehdr* m_pElf;
     DWORD m_nElfSize;
 
     byte* m_pISA;
     DWORD m_nISASize;
+    GCN::IDecoder* m_pDecoder;
 };
 
 
-private ref class AMDAsic_Impl : Pyramid::IAMDAsic
-{
-public:
-    AMDAsic_Impl( const char* pName, DWORD family, DWORD arg1 )
-        : m_pmName( MakeString(pName) ),
-          m_nFamily(family),
-          m_nArg1(arg1)
-    {
-    }
-
-    property System::String^ Name {
-        virtual System::String^ get() { return m_pmName; }
-    }
-
-
-internal:
-    System::String^ m_pmName;
-    DWORD m_nFamily;
-    DWORD m_nArg1;
-};
 
 
 AMDDriver_Impl::AMDDriver_Impl( System::String^ path )
@@ -164,21 +177,21 @@ AMDDriver_Impl::AMDDriver_Impl( System::String^ path )
     m_pmAsics = gcnew System::Collections::Generic::List<Pyramid::IAMDAsic^>();
 
     // SI chips seen during CodeXL snooping
-    m_pmAsics->Add( gcnew AMDAsic_Impl( "Capeverde", 110, 41 ) );
-    m_pmAsics->Add( gcnew AMDAsic_Impl( "Hainan",    110, 70 ) );
-    m_pmAsics->Add( gcnew AMDAsic_Impl( "Oland",     110, 60 ) );
-    m_pmAsics->Add( gcnew AMDAsic_Impl( "Pitcairn",  110, 21 ) );
-    m_pmAsics->Add( gcnew AMDAsic_Impl( "Tahiti",    110, 6  ) );
+    m_pmAsics->Add( gcnew AMDAsic_Impl( "Capeverde", 110, 41, GCN::IDecoder::GCN1 ) );
+    m_pmAsics->Add( gcnew AMDAsic_Impl( "Hainan",    110, 70, GCN::IDecoder::GCN1 ) );
+    m_pmAsics->Add( gcnew AMDAsic_Impl( "Oland",     110, 60, GCN::IDecoder::GCN1 ) );
+    m_pmAsics->Add( gcnew AMDAsic_Impl( "Pitcairn",  110, 21, GCN::IDecoder::GCN1 ) );
+    m_pmAsics->Add( gcnew AMDAsic_Impl( "Tahiti",    110, 6 , GCN::IDecoder::GCN1 ) );
 
     // CI chips seen during CodeXL snopping
-    m_pmAsics->Add( gcnew AMDAsic_Impl( "Kalindi",   120, 20 ) );
-    m_pmAsics->Add( gcnew AMDAsic_Impl( "Spectre",   120, 1  ) );
-    m_pmAsics->Add( gcnew AMDAsic_Impl( "Spooky",    120, 65 ) );
+    m_pmAsics->Add( gcnew AMDAsic_Impl( "Kalindi",   120, 20, GCN::IDecoder::GCN1  ) );
+    m_pmAsics->Add( gcnew AMDAsic_Impl( "Spectre",   120, 1 , GCN::IDecoder::GCN1  ) );
+    m_pmAsics->Add( gcnew AMDAsic_Impl( "Spooky",    120, 65, GCN::IDecoder::GCN1  ) );
 
     // Other stuff the driver accepted but I haven't identified
-    m_pmAsics->Add( gcnew AMDAsic_Impl( "asic-125",  125, 1 )) ;
-    m_pmAsics->Add( gcnew AMDAsic_Impl( "asic-130",  130, 1 )) ;
-    m_pmAsics->Add( gcnew AMDAsic_Impl( "asic-135",  135, 1 )) ;
+    m_pmAsics->Add( gcnew AMDAsic_Impl( "asic-125",  125, 1, GCN::IDecoder::GCN1 )) ;
+    m_pmAsics->Add( gcnew AMDAsic_Impl( "asic-130",  130, 1, GCN::IDecoder::GCN3 )) ;
+    m_pmAsics->Add( gcnew AMDAsic_Impl( "asic-135",  135, 1, GCN::IDecoder::GCN3 )) ;
 }
 
 
@@ -207,8 +220,9 @@ Pyramid::IAMDShader^  AMDDriver_Impl::CompileDXBlob(Pyramid::IAMDAsic^ asic, arr
     
     MarshalledBlob^ bl = gcnew MarshalledBlob(blob);
     
+    
     CompileArgs args;
-    args.asic                   = a->m_nFamily;
+    args.asic                   = a->m_nArg0;
     args.arg1                   = a->m_nArg1;
     args.pByteCode              = bl->GetBlob();
     args.nBytecodeSize          = bl->GetLength();
@@ -224,5 +238,5 @@ Pyramid::IAMDShader^  AMDDriver_Impl::CompileDXBlob(Pyramid::IAMDAsic^ asic, arr
     if( hResult != 0 )
         throw gcnew System::Exception( "Error returned from AMD driver compile" );
 
-    return gcnew AMDShader_Impl( this, asic, result.pElf, result.nElfSize );
+    return gcnew AMDShader_Impl( this, a, result.pElf, result.nElfSize );
 }
