@@ -8,7 +8,57 @@ namespace GCN
         switch( eOp )
         {
         default: return 0;
-        case V_CNDMASK_B32              :
+        
+        case V_MAD_F16              :
+        case V_MAD_U16              :
+        case V_MAD_I16              :
+        case V_PERM_B32             :
+        case V_FMA_F16              :
+        case V_DIV_FIXUP_F16        :
+            return 3;
+
+        case V_CVT_F16_U16        :      
+        case V_CVT_F16_I16        :   
+        case V_CVT_U16_F16        :   
+        case V_CVT_I16_F16        :   
+        case V_RCP_F16            :   
+        case V_SQRT_F16           :   
+        case V_RSQ_F16            :   
+        case V_LOG_F16            :   
+        case V_EXP_F16            :   
+        case V_FREXP_MANT_F16     :   
+        case V_FREXP_EXP_I16_F16  :   
+        case V_FLOOR_F16          :   
+        case V_CEIL_F16           :   
+        case V_TRUNC_F16          :   
+        case V_RNDNE_F16          :   
+        case V_FRACT_F16          :   
+        case V_SIN_F16            :   
+        case V_COS_F16            :   
+            return 1;
+
+        case V_ADD_F16            : 
+        case V_SUB_F16            : 
+        case V_SUBREV_F16         : 
+        case V_MUL_F16            : 
+        case V_MAC_F16            : 
+        case V_MADMK_F16          : 
+        case V_MADAK_F16          : 
+        case V_ADD_U16            : 
+        case V_SUB_U16            : 
+        case V_SUBREV_U16         : 
+        case V_MUL_LO_U16         : 
+        case V_LSHLREV_B16        : 
+        case V_LSHRREV_B16        : 
+        case V_ASHRREV_I16        : 
+        case V_MAX_F16            : 
+        case V_MIN_F16            : 
+        case V_MAX_U16            : 
+        case V_MAX_I16            : 
+        case V_MIN_U16            : 
+        case V_MIN_I16            : 
+        case V_LDEXP_F16          : 
+        case V_CNDMASK_B32        :     
         case V_READLANE_B32             :                          
         case V_WRITELANE_B32            :
         case V_ADD_F32                  :
@@ -254,7 +304,75 @@ namespace GCN
         case V_CMPX_CLASS_F32       :
         case V_CMP_CLASS_F64        :
         case V_CMPX_CLASS_F64       :
+
+        case V_CMP_F_F16         :
+        case V_CMP_LT_F16        :
+        case V_CMP_EQ_F16        :
+        case V_CMP_LE_F16        :
+        case V_CMP_GT_F16        :
+        case V_CMP_LG_F16        :
+        case V_CMP_GE_F16        :
+        case V_CMP_O_F16         :
+        case V_CMP_U_F16         :
+        case V_CMP_NGE_F16       :
+        case V_CMP_NLG_F16       :
+        case V_CMP_NGT_F16       :
+        case V_CMP_NLE_F16       :
+        case V_CMP_NEQ_F16       :
+        case V_CMP_NLT_F16       :
+        case V_CMP_TRU_F16       :
+        case V_CMPX_F_F16        :
+        case V_CMPX_LT_F16       :
+        case V_CMPX_EQ_F16       :
+        case V_CMPX_LE_F16       :
+        case V_CMPX_GT_F16       :
+        case V_CMPX_LG_F16       :
+        case V_CMPX_GE_F16       :
+        case V_CMPX_O_F16        :
+        case V_CMPX_U_F16        :
+        case V_CMPX_NGE_F16      :
+        case V_CMPX_NLG_F16      :
+        case V_CMPX_NGT_F16      :
+        case V_CMPX_NLE_F16      :
+        case V_CMPX_NEQ_F16      :
+        case V_CMPX_NLT_F16      :
+        case V_CMPX_TRU_F16      :
+        case V_CMP_F_U16         :
+        case V_CMP_LT_U16        :
+        case V_CMP_EQ_U16        :
+        case V_CMP_LE_U16        :
+        case V_CMP_GT_U16        :
+        case V_CMP_LG_U16        :
+        case V_CMP_GE_U16        :
+        case V_CMP_TRU_U16       :
+        case V_CMPx_F_U16        :
+        case V_CMPx_LT_U16       :
+        case V_CMPx_EQ_U16       :
+        case V_CMPx_LE_U16       :
+        case V_CMPx_GT_U16       :
+        case V_CMPx_LG_U16       :
+        case V_CMPx_GE_U16       :
+        case V_CMPx_TRU_U16      :
+        case V_CMP_F_I16         :
+        case V_CMP_LT_I16        :
+        case V_CMP_EQ_I16        :
+        case V_CMP_LE_I16        :
+        case V_CMP_GT_I16        :
+        case V_CMP_LG_I16        :
+        case V_CMP_GE_I16        :
+        case V_CMP_TRU_I16       :
+        case V_CMPx_F_I16        :
+        case V_CMPx_LT_I16       :
+        case V_CMPx_EQ_I16       :
+        case V_CMPx_LE_I16       :
+        case V_CMPx_GT_I16       :
+        case V_CMPx_LG_I16       :
+        case V_CMPx_GE_I16       :
+        case V_CMPx_TRU_I16      :
+        case V_CMP_CLASS_F16:
+        case V_CMPX_CLASS_F16:
             return 2;
+
         case V_MOV_B32                 :
         case V_READFIRSTLANE_B32       :                                        
         case V_CVT_I32_F64             :
@@ -386,6 +504,9 @@ namespace GCN
         case V_INTERP_P1_F32  :
         case V_INTERP_P2_F32  :
         case V_INTERP_MOV_F32 :
+        case V_INTERP_P1LL_F16:
+        case V_INTERP_P1LV_F16:
+        case V_INTERP_P2_F16  :
             return 1;
         }
     }
@@ -398,6 +519,51 @@ namespace GCN
         switch( e )
         {
         default: return 0;
+        case V_MAD_F16           : 
+        case V_MAD_U16           : 
+        case V_MAD_I16           : 
+        case V_PERM_B32          : 
+        case V_FMA_F16           : 
+        case V_DIV_FIXUP_F16     : 
+        case V_ADD_F16          :   
+        case V_SUB_F16          :   
+        case V_SUBREV_F16       :   
+        case V_MUL_F16          :   
+        case V_MAC_F16          :   
+        case V_MADMK_F16        :   
+        case V_MADAK_F16        :   
+        case V_ADD_U16          :   
+        case V_SUB_U16          :   
+        case V_SUBREV_U16       :   
+        case V_MUL_LO_U16       :   
+        case V_LSHLREV_B16      :   
+        case V_LSHRREV_B16      :   
+        case V_ASHRREV_I16      :   
+        case V_MAX_F16          :   
+        case V_MIN_F16          :   
+        case V_MAX_U16          :   
+        case V_MAX_I16          :   
+        case V_MIN_U16          :   
+        case V_MIN_I16          :   
+        case V_LDEXP_F16        :   
+        case V_CVT_F16_U16            :
+        case V_CVT_F16_I16            :
+        case V_CVT_U16_F16            :
+        case V_CVT_I16_F16            :
+        case V_RCP_F16                :
+        case V_SQRT_F16               :
+        case V_RSQ_F16                :
+        case V_LOG_F16                :
+        case V_EXP_F16                :
+        case V_FREXP_MANT_F16         :
+        case V_FREXP_EXP_I16_F16      :
+        case V_FLOOR_F16              :
+        case V_CEIL_F16               :
+        case V_TRUNC_F16              :
+        case V_RNDNE_F16              :
+        case V_FRACT_F16              :
+        case V_SIN_F16                :
+        case V_COS_F16                :
         case V_CNDMASK_B32              :
         case V_READLANE_B32             :                          
         case V_WRITELANE_B32            :
@@ -450,6 +616,8 @@ namespace GCN
         case V_CVT_PK_I16_I32           :
             return 1;
 
+        case V_CMP_CLASS_F16:
+        case V_CMPX_CLASS_F16:
         case V_CMP_F_F32            :
         case V_CMP_LT_F32           :
         case V_CMP_EQ_F32           :
@@ -646,6 +814,70 @@ namespace GCN
         case V_CMPX_CLASS_F32       :
         case V_CMP_CLASS_F64        :
         case V_CMPX_CLASS_F64       :
+        case V_CMP_F_F16       :
+        case V_CMP_LT_F16      :
+        case V_CMP_EQ_F16      :
+        case V_CMP_LE_F16      :
+        case V_CMP_GT_F16      :
+        case V_CMP_LG_F16      :
+        case V_CMP_GE_F16      :
+        case V_CMP_O_F16       :
+        case V_CMP_U_F16       :
+        case V_CMP_NGE_F16     :
+        case V_CMP_NLG_F16     :
+        case V_CMP_NGT_F16     :
+        case V_CMP_NLE_F16     :
+        case V_CMP_NEQ_F16     :
+        case V_CMP_NLT_F16     :
+        case V_CMP_TRU_F16     :
+        case V_CMPX_F_F16      :
+        case V_CMPX_LT_F16     :
+        case V_CMPX_EQ_F16     :
+        case V_CMPX_LE_F16     :
+        case V_CMPX_GT_F16     :
+        case V_CMPX_LG_F16     :
+        case V_CMPX_GE_F16     :
+        case V_CMPX_O_F16      :
+        case V_CMPX_U_F16      :
+        case V_CMPX_NGE_F16    :
+        case V_CMPX_NLG_F16    :
+        case V_CMPX_NGT_F16    :
+        case V_CMPX_NLE_F16    :
+        case V_CMPX_NEQ_F16    :
+        case V_CMPX_NLT_F16    :
+        case V_CMPX_TRU_F16    :
+        case V_CMP_F_U16       :
+        case V_CMP_LT_U16      :
+        case V_CMP_EQ_U16      :
+        case V_CMP_LE_U16      :
+        case V_CMP_GT_U16      :
+        case V_CMP_LG_U16      :
+        case V_CMP_GE_U16      :
+        case V_CMP_TRU_U16     :
+        case V_CMPx_F_U16      :
+        case V_CMPx_LT_U16     :
+        case V_CMPx_EQ_U16     :
+        case V_CMPx_LE_U16     :
+        case V_CMPx_GT_U16     :
+        case V_CMPx_LG_U16     :
+        case V_CMPx_GE_U16     :
+        case V_CMPx_TRU_U16    :
+        case V_CMP_F_I16       :
+        case V_CMP_LT_I16      :
+        case V_CMP_EQ_I16      :
+        case V_CMP_LE_I16      :
+        case V_CMP_GT_I16      :
+        case V_CMP_LG_I16      :
+        case V_CMP_GE_I16      :
+        case V_CMP_TRU_I16     :
+        case V_CMPx_F_I16      :
+        case V_CMPx_LT_I16     :
+        case V_CMPx_EQ_I16     :
+        case V_CMPx_LE_I16     :
+        case V_CMPx_GT_I16     :
+        case V_CMPx_LG_I16     :
+        case V_CMPx_GE_I16     :
+        case V_CMPx_TRU_I16    :
             return 2;
 
         case V_MOV_B32                 :
@@ -778,6 +1010,9 @@ namespace GCN
         case V_INTERP_P1_F32  :
         case V_INTERP_P2_F32  :
         case V_INTERP_MOV_F32 :
+        case V_INTERP_P1LL_F16:
+        case V_INTERP_P1LV_F16:
+        case V_INTERP_P2_F16  :
             return 1;
         }
     }
@@ -787,7 +1022,51 @@ namespace GCN
         switch( e )
         {
         default: return 0;
-            // VOP2
+        case V_MAD_F16             :
+        case V_MAD_U16             :
+        case V_MAD_I16             :
+        case V_PERM_B32            :
+        case V_FMA_F16             :
+        case V_DIV_FIXUP_F16       :
+        case V_ADD_F16         :    
+        case V_SUB_F16         :    
+        case V_SUBREV_F16      :    
+        case V_MUL_F16         :    
+        case V_MAC_F16         :    
+        case V_MADMK_F16       :    
+        case V_MADAK_F16       :    
+        case V_ADD_U16         :    
+        case V_SUB_U16         :    
+        case V_SUBREV_U16      :    
+        case V_MUL_LO_U16      :    
+        case V_LSHLREV_B16     :    
+        case V_LSHRREV_B16     :    
+        case V_ASHRREV_I16     :    
+        case V_MAX_F16         :    
+        case V_MIN_F16         :    
+        case V_MAX_U16         :    
+        case V_MAX_I16         :    
+        case V_MIN_U16         :    
+        case V_MIN_I16         :    
+        case V_LDEXP_F16       :    
+        case V_CVT_F16_U16         :    
+        case V_CVT_F16_I16         :  
+        case V_CVT_U16_F16         :  
+        case V_CVT_I16_F16         :  
+        case V_RCP_F16             :  
+        case V_SQRT_F16            :  
+        case V_RSQ_F16             :  
+        case V_LOG_F16             :  
+        case V_EXP_F16             :  
+        case V_FREXP_MANT_F16      :  
+        case V_FREXP_EXP_I16_F16   :  
+        case V_FLOOR_F16           :  
+        case V_CEIL_F16            :  
+        case V_TRUNC_F16           :  
+        case V_RNDNE_F16           :  
+        case V_FRACT_F16           :  
+        case V_SIN_F16             :  
+        case V_COS_F16             :  
         case V_CNDMASK_B32              :
         case V_READLANE_B32             :                          
         case V_WRITELANE_B32            :
@@ -841,6 +1120,72 @@ namespace GCN
             return 1;
 
         // VOPC
+        case V_CMP_CLASS_F16:
+        case V_CMPX_CLASS_F16:
+        case V_CMP_F_F16           :
+        case V_CMP_LT_F16          :
+        case V_CMP_EQ_F16          :
+        case V_CMP_LE_F16          :
+        case V_CMP_GT_F16          :
+        case V_CMP_LG_F16          :
+        case V_CMP_GE_F16          :
+        case V_CMP_O_F16           :
+        case V_CMP_U_F16           :
+        case V_CMP_NGE_F16         :
+        case V_CMP_NLG_F16         :
+        case V_CMP_NGT_F16         :
+        case V_CMP_NLE_F16         :
+        case V_CMP_NEQ_F16         :
+        case V_CMP_NLT_F16         :
+        case V_CMP_TRU_F16         :
+        case V_CMPX_F_F16          :
+        case V_CMPX_LT_F16         :
+        case V_CMPX_EQ_F16         :
+        case V_CMPX_LE_F16         :
+        case V_CMPX_GT_F16         :
+        case V_CMPX_LG_F16         :
+        case V_CMPX_GE_F16         :
+        case V_CMPX_O_F16          :
+        case V_CMPX_U_F16          :
+        case V_CMPX_NGE_F16        :
+        case V_CMPX_NLG_F16        :
+        case V_CMPX_NGT_F16        :
+        case V_CMPX_NLE_F16        :
+        case V_CMPX_NEQ_F16        :
+        case V_CMPX_NLT_F16        :
+        case V_CMPX_TRU_F16        :
+        case V_CMP_F_U16           :
+        case V_CMP_LT_U16          :
+        case V_CMP_EQ_U16          :
+        case V_CMP_LE_U16          :
+        case V_CMP_GT_U16          :
+        case V_CMP_LG_U16          :
+        case V_CMP_GE_U16          :
+        case V_CMP_TRU_U16         :
+        case V_CMPx_F_U16          :
+        case V_CMPx_LT_U16         :
+        case V_CMPx_EQ_U16         :
+        case V_CMPx_LE_U16         :
+        case V_CMPx_GT_U16         :
+        case V_CMPx_LG_U16         :
+        case V_CMPx_GE_U16         :
+        case V_CMPx_TRU_U16        :
+        case V_CMP_F_I16           :
+        case V_CMP_LT_I16          :
+        case V_CMP_EQ_I16          :
+        case V_CMP_LE_I16          :
+        case V_CMP_GT_I16          :
+        case V_CMP_LG_I16          :
+        case V_CMP_GE_I16          :
+        case V_CMP_TRU_I16         :
+        case V_CMPx_F_I16          :
+        case V_CMPx_LT_I16         :
+        case V_CMPx_EQ_I16         :
+        case V_CMPx_LE_I16         :
+        case V_CMPx_GT_I16         :
+        case V_CMPx_LG_I16         :
+        case V_CMPx_GE_I16         :
+        case V_CMPx_TRU_I16        :
         case V_CMP_F_F32            :
         case V_CMP_LT_F32           :
         case V_CMP_EQ_F32           :
@@ -1180,6 +1525,9 @@ namespace GCN
         case V_INTERP_P1_F32  :
         case V_INTERP_P2_F32  :
         case V_INTERP_MOV_F32 :
+        case V_INTERP_P1LL_F16:
+        case V_INTERP_P1LV_F16:
+        case V_INTERP_P2_F16  :
             return 1;
         }
     }
@@ -1191,7 +1539,34 @@ namespace GCN
         {
         default: return 0;
             // VOP2
-        case V_CNDMASK_B32              :
+        case V_MAD_F16            :
+        case V_MAD_U16            :
+        case V_MAD_I16            :
+        case V_PERM_B32           :
+        case V_FMA_F16            :
+        case V_DIV_FIXUP_F16      :
+        case V_ADD_F16            :  
+        case V_SUB_F16            :  
+        case V_SUBREV_F16         :  
+        case V_MUL_F16            :  
+        case V_MAC_F16            :  
+        case V_MADMK_F16          :  
+        case V_MADAK_F16          :  
+        case V_ADD_U16            :  
+        case V_SUB_U16            :  
+        case V_SUBREV_U16         :  
+        case V_MUL_LO_U16         :  
+        case V_LSHLREV_B16        :  
+        case V_LSHRREV_B16        :  
+        case V_ASHRREV_I16        :  
+        case V_MAX_F16            :  
+        case V_MIN_F16            :  
+        case V_MAX_U16            :  
+        case V_MAX_I16            :  
+        case V_MIN_U16            :  
+        case V_MIN_I16            :  
+        case V_LDEXP_F16          :  
+        case V_CNDMASK_B32        :      
         case V_READLANE_B32             :                          
         case V_WRITELANE_B32            :
         case V_ADD_F32                  :
@@ -1244,6 +1619,72 @@ namespace GCN
             return 1;
 
         // VOPC
+        case V_CMP_CLASS_F16:
+        case V_CMPX_CLASS_F16:        
+        case V_CMP_F_F16          :
+        case V_CMP_LT_F16         :
+        case V_CMP_EQ_F16         :
+        case V_CMP_LE_F16         :
+        case V_CMP_GT_F16         :
+        case V_CMP_LG_F16         :
+        case V_CMP_GE_F16         :
+        case V_CMP_O_F16          :
+        case V_CMP_U_F16          :
+        case V_CMP_NGE_F16        :
+        case V_CMP_NLG_F16        :
+        case V_CMP_NGT_F16        :
+        case V_CMP_NLE_F16        :
+        case V_CMP_NEQ_F16        :
+        case V_CMP_NLT_F16        :
+        case V_CMP_TRU_F16        :
+        case V_CMPX_F_F16         :
+        case V_CMPX_LT_F16        :
+        case V_CMPX_EQ_F16        :
+        case V_CMPX_LE_F16        :
+        case V_CMPX_GT_F16        :
+        case V_CMPX_LG_F16        :
+        case V_CMPX_GE_F16        :
+        case V_CMPX_O_F16         :
+        case V_CMPX_U_F16         :
+        case V_CMPX_NGE_F16       :
+        case V_CMPX_NLG_F16       :
+        case V_CMPX_NGT_F16       :
+        case V_CMPX_NLE_F16       :
+        case V_CMPX_NEQ_F16       :
+        case V_CMPX_NLT_F16       :
+        case V_CMPX_TRU_F16       :
+        case V_CMP_F_U16          :
+        case V_CMP_LT_U16         :
+        case V_CMP_EQ_U16         :
+        case V_CMP_LE_U16         :
+        case V_CMP_GT_U16         :
+        case V_CMP_LG_U16         :
+        case V_CMP_GE_U16         :
+        case V_CMP_TRU_U16        :
+        case V_CMPx_F_U16         :
+        case V_CMPx_LT_U16        :
+        case V_CMPx_EQ_U16        :
+        case V_CMPx_LE_U16        :
+        case V_CMPx_GT_U16        :
+        case V_CMPx_LG_U16        :
+        case V_CMPx_GE_U16        :
+        case V_CMPx_TRU_U16       :
+        case V_CMP_F_I16          :
+        case V_CMP_LT_I16         :
+        case V_CMP_EQ_I16         :
+        case V_CMP_LE_I16         :
+        case V_CMP_GT_I16         :
+        case V_CMP_LG_I16         :
+        case V_CMP_GE_I16         :
+        case V_CMP_TRU_I16        :
+        case V_CMPx_F_I16         :
+        case V_CMPx_LT_I16        :
+        case V_CMPx_EQ_I16        :
+        case V_CMPx_LE_I16        :
+        case V_CMPx_GT_I16        :
+        case V_CMPx_LG_I16        :
+        case V_CMPx_GE_I16        :
+        case V_CMPx_TRU_I16       :
         case V_CMP_F_F32            :
         case V_CMP_LT_F32           :
         case V_CMP_EQ_F32           :
@@ -1585,7 +2026,8 @@ namespace GCN
         {
         default:
             return 0;
-
+        case DS_PERMUTE_B32:
+        case DS_BPERMUTE_B32:
         case DS_ADD_U32                   :
         case DS_SUB_U32                   :
         case DS_RSUB_U32                  :
@@ -1827,6 +2269,8 @@ namespace GCN
         case S_BITCMP0_B64         :     //: SCC = (S0.u[S1.u[5:0]] == 0).
         case S_BITCMP1_B64         :     //: SCC = (S0.u[S1.u[5:0]] == 1).
         case S_SETVSKIP            :     //: VSKIP = S0.u[S1.u[4:0]].
+        case S_CMP_EQ_U64:
+        case S_CMP_NE_U64:
             return 1;
 
         case S_AND_B64               :   //: D.u = S0.u & S1.u. SCC = 1 if result is non-zero.
@@ -1898,6 +2342,7 @@ namespace GCN
         case S_CBRANCH_CDBGUSER         :  // : If (conditional_debug_user != 0) then PC = PC + signext(SIMM16 * 4) + 4; else NOP.
         case S_CBRANCH_CDBGSYS_OR_USER  :  // : If (conditional_debug_system || conditional_debug_user) then PC = PC + signext(SIMM16 * 4) + 4; else NOP.
         case S_CBRANCH_CDBGSYS_AND_USER :  // : If (conditional_debug_system && conditional_debug_user) then PC = PC + signext(SIMM16 * 4) + 4; else NOP.
+        case S_RFE_RESTORE_B64:
             return 0;
         }
 
@@ -1987,12 +2432,14 @@ namespace GCN
         case S_BITCMP0_B32         :     //: SCC = (S0.u[S1.u[4:0]] == 0).
         case S_BITCMP1_B32         :     //: SCC = (S0.u[S1.u[4:0]] == 1).
         case S_SETVSKIP            :     //: VSKIP = S0.u[S1.u[4:0]].
-        case S_SETREG_B32               : // : hardware register = D.u. Write some or all of the LSBs of D
-        case S_SETREG_IMM32_B32         : //: This instruction uses a 32-bit literal constant. Write
-        case S_MOVRELS_B64              ://: SGPR[D.u] = SGPR[S0.u + M0.u].
-        case S_MOVRELD_B64              ://: SGPR[D.u + M0.u] = SGPR[S0.u].
+        case S_SETREG_B32          : // : hardware register = D.u. Write some or all of the LSBs of D
+        case S_SETREG_IMM32_B32    : //: This instruction uses a 32-bit literal constant. Write
+        case S_SET_GPR_IDX_IDX     : 
+        case S_SET_GPR_IDX_ON:
             return 1;
 
+        case S_MOVRELS_B64         ://: SGPR[D.u] = SGPR[S0.u + M0.u].
+        case S_MOVRELD_B64         ://: SGPR[D.u + M0.u] = SGPR[S0.u].
         case S_BITCMP0_B64         :     //: SCC = (S0.u[S1.u[5:0]] == 0).
         case S_BITCMP1_B64         :     //: SCC = (S0.u[S1.u[5:0]] == 1).
         case S_BCNT0_I32_B64       ://: D.i = CountZeroBits(S0.u). SCC = 1 if result is non-zero.
@@ -2039,6 +2486,9 @@ namespace GCN
         case S_CBRANCH_JOIN             ://: Conditional branch join point. Arg0 = saved CSP value. No dest.
         case S_RFE_B64                  ://: Return from Exception; PC = TTMP1,0.
         case S_SETPC_B64                ://: PC = S0.u; S0.u is a byte address of the instruction to jump to.
+        case S_RFE_RESTORE_B64     :
+        case S_CMP_EQ_U64:
+        case S_CMP_NE_U64:
             return 2;
 
         case S_NOP                      :  //: do nothing. Repeat NOP 1..8 times based on SIMM16[2:0]. 0 = 1 time, 7 = 8 times.
@@ -2126,7 +2576,10 @@ namespace GCN
         case S_BITCMP0_B64           :    //: SCC = (S0.u[S1.u[5:0]] == 0).
         case S_BITCMP1_B64           :    //: SCC = (S0.u[S1.u[5:0]] == 1).
         case S_SETVSKIP              :    //: VSKIP = S0.u[S1.u[4:0]].
+        case S_RFE_RESTORE_B64:
+        case S_SET_GPR_IDX_ON:
             return 1;
+             
         case S_CSELECT_B64    :   //: D.u = SCC ? S0.u : S1.u.       
         case S_AND_B64        :   //: D.u = S0.u & S1.u. SCC = 1 if result is non-zero.
         case S_OR_B64         :   //: D.u = S0.u | S1.u. SCC = 1 if result is non-zero.
@@ -2137,6 +2590,8 @@ namespace GCN
         case S_NOR_B64        :   //: D.u = ~(S0.u | S1.u). SCC = 1 if result is non-zero.
         case S_XNOR_B64       :   //: D.u = ~(S0.u ^ S1.u). SCC = 1 if result is non-zero.
         case S_CBRANCH_G_FORK : // Conditional branch using branch stack. Arg0 = compare mask (VCC or any SGPR), Arg1 = 64-bit byte address of target instruction.
+        case S_CMP_EQ_U64:
+        case S_CMP_NE_U64:
             return 2;
         }
     }
@@ -2215,17 +2670,41 @@ namespace GCN
             return 2;
         case TBUFFER_LOAD_FORMAT_X      :
         case TBUFFER_STORE_FORMAT_X     :
+        case TBUFFER_LOAD_FORMAT_D16_X  :    
+        case TBUFFER_STORE_FORMAT_D16_X :
             return 1;
         case TBUFFER_LOAD_FORMAT_XY     :
         case TBUFFER_STORE_FORMAT_XY    :
+        case TBUFFER_LOAD_FORMAT_D16_XY :
+        case TBUFFER_STORE_FORMAT_D16_XY:  
             return 2;
         case TBUFFER_LOAD_FORMAT_XYZ    :
         case TBUFFER_STORE_FORMAT_XYZ   :
+        case TBUFFER_LOAD_FORMAT_D16_XYZ :  
+        case TBUFFER_STORE_FORMAT_D16_XYZ:
             return 3;
         case TBUFFER_LOAD_FORMAT_XYZW   :
         case TBUFFER_STORE_FORMAT_XYZW  :
+        case TBUFFER_LOAD_FORMAT_D16_XYZW :
+        case TBUFFER_STORE_FORMAT_D16_XYZW: 
             return 4;
+
+        case BUFFER_STORE_LDS_DWORD        :     
+        case BUFFER_LOAD_FORMAT_D16_X      : 
+        case BUFFER_STORE_FORMAT_D16_X     : 
+            return 1;
+        case BUFFER_LOAD_FORMAT_D16_XY     : 
+        case BUFFER_STORE_FORMAT_D16_XY    : 
+            return 2;
+        case BUFFER_LOAD_FORMAT_D16_XYZ    : 
+        case BUFFER_STORE_FORMAT_D16_XYZ   : 
+            return 3;
+        case BUFFER_LOAD_FORMAT_D16_XYZW   : 
+        case BUFFER_STORE_FORMAT_D16_XYZW  : 
+            return 4;
+
         default:
+        case BUFFER_WBINVL1_VOL      :
         case BUFFER_WBINVL1_SC               :
         case BUFFER_WBINVL1                  :
             return 0;
@@ -2245,6 +2724,14 @@ namespace GCN
         case TBUFFER_STORE_FORMAT_XYZ   :
         case TBUFFER_LOAD_FORMAT_XYZW   :
         case TBUFFER_STORE_FORMAT_XYZW  :
+        case TBUFFER_LOAD_FORMAT_D16_X     :  
+        case TBUFFER_LOAD_FORMAT_D16_XY    :
+        case TBUFFER_LOAD_FORMAT_D16_XYZ   :
+        case TBUFFER_LOAD_FORMAT_D16_XYZW  :
+        case TBUFFER_STORE_FORMAT_D16_X    :
+        case TBUFFER_STORE_FORMAT_D16_XY   :
+        case TBUFFER_STORE_FORMAT_D16_XYZ  :
+        case TBUFFER_STORE_FORMAT_D16_XYZW :
             return true;
         default:
             return false;
@@ -2279,6 +2766,8 @@ namespace GCN
         case S_CBRANCH_CDBGUSER            :
         case S_CBRANCH_CDBGSYS_OR_USER     :
         case S_CBRANCH_CDBGSYS_AND_USER    :
+        case S_RFE_RESTORE_B64:
+        case S_ENDPGM_SAVED:
             return true;
         default:
             return false;
@@ -2300,7 +2789,18 @@ namespace GCN
             case S_BUFFER_LOAD_DWORDX4 :    return 4;
             case S_BUFFER_LOAD_DWORDX8 :    return 8;
             case S_BUFFER_LOAD_DWORDX16:    return 16;            
-            case S_MEMTIME             :    return 2;           
+            case S_MEMTIME             :    return 2;      
+            case S_STORE_DWORD         :    return 1;
+            case S_STORE_DWORDX2       :    return 2;
+            case S_STORE_DWORDX4       :    return 4;
+            case S_BUFFER_STORE_DWORD  :    return 1;
+            case S_BUFFER_STORE_DWORDX2:    return 2;
+            case S_BUFFER_STORE_DWORDX4:    return 4;
+            case S_MEMREALTIME         :    return 2;
+            case S_ATC_PROBE           :    
+            case S_ATC_PROBE_BUFFER    :    
+            case S_DCACHE_WB           :     
+            case S_DCACHE_WB_VOL       :     
             case S_DCACHE_INV_VOL      : 
             case S_DCACHE_INV          :   
             default:

@@ -1186,8 +1186,9 @@ namespace _GCN1Decoder_INTERNAL
         ScalarMemoryInstructions GetOpcode()  const { return Translate_SMRDOpcodes(ReadBits(26,22)); }
         Dests GetDest()                 const { return Translate_SDest(ReadBits( 21,15)); }
         Dests GetBase()                 const { return Translate_SDest(2*ReadBits( 14,9 )); } // base of SGPR pair containing address
-        uint GetOffset()               const { return ReadBits( 7, 0 ); }
+        uint GetOffset()               const { return IsOffsetIMM() ? 4*ReadBits(7,0) : ReadBits(7,0); }
         bool IsOffsetIMM()             const { return ReadBits( 8, 8 )!=0; }
+        // SI and CI use dword offsets, but VI uses byte.
     };
 
     class VOP2Instruction : public Instruction
@@ -1668,6 +1669,7 @@ namespace GCN
                 Fields.m_Dest         = pIt->GetDest();
                 Fields.m_nBaseReg     = pIt->GetBase();
                 Fields.m_nOffset      = pIt->GetOffset();
+                Fields.m_bIsGLC       = false;
             }
             break;
 
@@ -1844,6 +1846,7 @@ namespace GCN
                 Fields.m_SSampler = pIt->GetSSampler();
                 Fields.m_VAddr = pIt->GetVAddr();
                 Fields.m_VData = pIt->GetVData();
+                Fields.m_bIsD16 = 0;
             }
             break;
 

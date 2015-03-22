@@ -170,6 +170,10 @@ namespace Disassembler{
             case SRC_EXEC_HI :
                 FormatReg64( buff, "EXEC", nSrc-SRC_EXEC_LO, nDWORDs );
                 return;
+            case SRC_XNACK_MASK_LO:
+            case SRC_XNACK_MASK_HI:
+                FormatReg64( buff, "XNACK", nSrc-SRC_XNACK_MASK_LO,nDWORDs );
+                break;
             }
 
             switch( nSrc )
@@ -184,6 +188,7 @@ namespace Disassembler{
             case SRC_CF_MINUS_TWO:      strcpy( buff, "-2.0");    break;
             case SRC_CF_FOUR:           strcpy( buff, "4.0");     break;
             case SRC_CF_MINUS_FOUR:     strcpy( buff, "-4.0");    break;
+            case SRC_CF_INV_2PI:        strcpy( buff, "1/2PI");   break;
             case SRC_VCCZ       :       strcpy( buff, "VCCZ");    break;
             case SRC_EXECZ      :       strcpy( buff, "EXECZ");   break;
             case SRC_SCC        :       strcpy( buff, "SCC");     break;
@@ -233,6 +238,10 @@ namespace Disassembler{
             case DEST_EXEC_HI :
                 FormatReg64( buff, "EXEC", nSrc-DEST_EXEC_LO, nDWORDs );
                 return;
+            case DEST_XNACK_MASK_HI:
+            case DEST_XNACK_MASK_LO:
+                FormatReg64( buff, "XNACK", nSrc-DEST_XNACK_MASK_LO, nDWORDs);
+                break;
             }
 
             switch( nSrc )
@@ -324,6 +333,8 @@ namespace Disassembler{
             {
             case S_BARRIER:
             case S_ENDPGM:
+            case S_ENDPGM_SAVED:
+            case S_SET_GPR_IDX_OFF:
             case S_ICACHE_INV:
                 Printf( printer, OPCODE_FORMAT"\n",pOpcode); 
                 break;
@@ -463,6 +474,44 @@ namespace Disassembler{
                 }
                 break;
 
+            case S_SET_GPR_IDX_MODE:
+                {
+                    uint nIMM4 = pInst->GetSIMM16();
+                    char flags[256]="";
+                    if( nIMM4 & 1 )
+                        catprintf(flags, ", VSRC0_REL");
+                    if( nIMM4 & 2 )
+                        catprintf(flags, ", VSRC1_REL");
+                    if( nIMM4 & 4 )
+                        catprintf(flags, ", VSRC2_REL");
+                    if( nIMM4 & 8 )
+                        catprintf(flags, ", VDST_REL");
+                    
+                    Printf( printer, OPCODE_FORMAT " %s\n", pOpcode,flags);
+                }
+                break;
+            case S_SET_GPR_IDX_ON:
+                {
+                    char src0[64];
+                    FormatSource(src0,pInst->GetSource(0),1,pInst);
+
+                    uint nIMM4 = pInst->GetSIMM16();
+                    char flags[256]="";
+                    if( nIMM4 & 1 )
+                        catprintf(flags, ", VSRC0_REL");
+                    if( nIMM4 & 2 )
+                        catprintf(flags, ", VSRC1_REL");
+                    if( nIMM4 & 4 )
+                        catprintf(flags, ", VSRC2_REL");
+                    if( nIMM4 & 8 )
+                        catprintf(flags, ", VDST_REL");
+
+                    Printf( printer, OPCODE_FORMAT " %6s%s\n", pOpcode, src0,flags);
+                }
+                break;
+
+
+
             case S_CBRANCH_I_FORK:
                 PrintLabeledBranch(printer,pInst,pLabels);
                 break;
@@ -538,6 +587,10 @@ namespace Disassembler{
 
         void Disassemble( IPrinter& printer, const ScalarMemoryInstruction* pInst )
         {
+            char glc[4]="";
+            if( pInst->IsGLC() )
+                strcpy(glc,"GLC");
+
             switch( pInst->GetOpcode() )
             {
             case S_LOAD_DWORD          : 
@@ -550,6 +603,12 @@ namespace Disassembler{
             case S_BUFFER_LOAD_DWORDX4 : 
             case S_BUFFER_LOAD_DWORDX8 : 
             case S_BUFFER_LOAD_DWORDX16: 
+            case S_STORE_DWORD            :
+            case S_STORE_DWORDX2          :
+            case S_STORE_DWORDX4          :
+            case S_BUFFER_STORE_DWORD     :
+            case S_BUFFER_STORE_DWORDX2   :
+            case S_BUFFER_STORE_DWORDX4   :
                 {
                     char base[64];
                     char dest[64];
@@ -560,24 +619,46 @@ namespace Disassembler{
 
                     uint nOffset = pInst->GetOffset();
                     if( pInst->IsOffsetIMM() )
-                        sprintf( offs, "% u", nOffset*4 );
+                        sprintf( offs, "%u", nOffset );
                     else
                         FormatSReg( offs, nOffset, 1 );
 
-                    Printf( printer, OPCODE_FORMAT " %6s, %6s, %6s\n", EnumToString(pInst->GetOpcode()), dest, base, offs );
+                    Printf( printer, OPCODE_FORMAT " %6s, %6s, %6s %s\n", EnumToString(pInst->GetOpcode()), dest, base, offs, glc);
                 }
                 break;
-            case S_MEMTIME             : 
+            case S_ATC_PROBE:
+            case S_ATC_PROBE_BUFFER:
                 {
-                    char dst[64];
-                    FormatDest(dst,pInst->GetDest(), 2 );
-                    Printf( printer, OPCODE_FORMAT " %6s\n", EnumToString(pInst->GetOpcode()),dst);
+                    char base[64];
+                    char offs[64];
+                    uint nBaseReg = pInst->GetBase();
+                    FormatSReg( base, nBaseReg, 2 );
+
+                    uint nOffset = pInst->GetOffset();
+                    if( pInst->IsOffsetIMM() )
+                        sprintf( offs, "%u", nOffset );
+                    else
+                        FormatSReg( offs, nOffset, 1 );
+
+                    Printf( printer, OPCODE_FORMAT " %6s, %6s  %s\n", EnumToString(pInst->GetOpcode()), base, offs, glc );
+   
                 }
                 break;
 
+            case S_MEMTIME: 
+            case S_MEMREALTIME:
+                {
+                    char dst[64];
+                    FormatDest(dst,pInst->GetDest(), 2 );
+                    Printf( printer, OPCODE_FORMAT " %6s  %s\n", EnumToString(pInst->GetOpcode()),dst, glc);
+                }
+                break;
+
+            case S_DCACHE_WB:
+            case S_DCACHE_WB_VOL:
             case S_DCACHE_INV_VOL      : 
             case S_DCACHE_INV          :   
-                Printf( printer, OPCODE_FORMAT "\n", EnumToString(pInst->GetOpcode()));
+                Printf( printer, OPCODE_FORMAT "  %s \n", EnumToString(pInst->GetOpcode()), glc );
                 break;
             default:
                 Printf( printer, OPCODE_FORMAT "\n", "???SMEM???");
@@ -611,12 +692,15 @@ namespace Disassembler{
            
             switch( pInst->GetOpcode() )
             {
+            case V_MADAK_F16:
             case V_MADAK_F32: 
                 FormatDest(vdst,pInst->GetVDst(),1);
                 FormatVOPSource( src0, 1, pInst->GetSrc0(), (abs & 1) != 0, (negate & 1) != 0, pInst );
                 FormatVOPSource( src1, 1, pInst->GetVSrc1(), (abs & 2) != 0, (negate & 2) != 0, pInst );
                 Printf(printer, OPCODE_FORMAT " %6s=%6s*%s + %f\n", pOpcode, vdst, src0, src1, pInst->GetLiteralAsFloat() );
                 break;
+            
+            case V_MADMK_F16:
             case V_MADMK_F32:
                 FormatDest(vdst,pInst->GetVDst(),1);
                 FormatVOPSource( src0, 1, pInst->GetSrc0(), (abs & 1) != 0, (negate & 1) != 0, pInst );
@@ -714,9 +798,15 @@ namespace Disassembler{
 
             switch(pInst->GetOpcode())
             {
-            case V_INTERP_P1_F32: Printf( printer ,OPCODE_FORMAT " %6s =  P10*v%u + P0\n", op, dst, nSrc ); break;
-            case V_INTERP_P2_F32: Printf( printer, OPCODE_FORMAT " %6s += P20*v%u\n", op, dst, nSrc ); break;
+            case V_INTERP_P1LL_F16:
+            case V_INTERP_P1_F32:   Printf( printer ,OPCODE_FORMAT " %6s =  P10*v%u + P0\n", op, dst, nSrc ); break;
+            case V_INTERP_P2_F16:
+            case V_INTERP_P2_F32:   Printf( printer, OPCODE_FORMAT " %6s += P20*v%u\n", op, dst, nSrc ); break;
             case V_INTERP_MOV_F32:Printf( printer, OPCODE_FORMAT " %6s = %s\n", op, dst, SOURCES[nSrc&3] ); break;
+            default: Printf(printer,"????INTERP????\n"); break;
+                // TODO
+             //V_INTERP_P1LV_F16,     // : D.f32 = P10.f16 * S0.f32 + (S2.u32 >> (attr_word * 16)).f16. 'LV' stands for 'One LDS and one VGPR argument'. S2 holds two parameters, attr_word selects the high or low word of the VGPR for this calculation, as well as the high or low half of the LDS data." Meant for use with 16-bank LDS. NOTE: In textual representations the I/J VGPR is the first source and the attribute is the second source; however in the VOP3 encoding the attribute is stored in the src0 field and the VGPR is stored in the src1 field.
+             
             }
         }
 
@@ -883,6 +973,7 @@ namespace Disassembler{
             if( pInst->IsTFE() ) addprintf(flags,"TFE");
             if( pInst->IsArray() ) addprintf(flags,"ARRAY");
             if( pInst->IsUnnormalized() ) addprintf( flags,"UNNORM");
+            if( pInst->IsD16() ) addprintf(flags,"D16");
 
             // NOTE: There is no way to infer the address width, because
             //      it depends on the resource dimension, which in turn depends on the descriptor
@@ -929,6 +1020,8 @@ namespace Disassembler{
                 Printf( printer, OPCODE_FORMAT"\n", opcode ); 
                 break;
 
+            case DS_PERMUTE_B32:
+            case DS_BPERMUTE_B32:
             case DS_SWIZZLE_B32         :   //  R = swizzle(Data(vgpr), offset1:offset0). Dword swizzle. no data is written to LDS. see ds_opcodes.docx for details.
                 {
                     char R[64];
@@ -1358,6 +1451,7 @@ namespace Disassembler{
             case IF_SOPC:       printer.Push("SOPC    "); break;
             case IF_SOPP:       printer.Push("SOPP    "); break;
             case IF_SMEM:       printer.Push("SMEM    "); break;
+            case IF_SMRD:       printer.Push("SMRD    "); break;
             case IF_VOP2:       printer.Push("VOP2    "); break;
             case IF_VOP1:       printer.Push("VOP1    "); break;
             case IF_VOPC:       printer.Push("VOPC    "); break;
@@ -1372,7 +1466,7 @@ namespace Disassembler{
             }
 
             for( uint i=0; i<nLength; i+= 4 )
-                _INTERNAL::Printf( printer, "0x%08x ", pDWORDS[i]);
+                _INTERNAL::Printf( printer, "0x%08x ", pDWORDS[i/4]);
             printer.Push("\n");
 
             pInst += nLength;

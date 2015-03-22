@@ -71,6 +71,9 @@ namespace GCN
         DEST_VSKIP, // implied dests for compare and vskip instructions
         DEST_VCC,
 
+        DEST_XNACK_MASK_LO,
+        DEST_XNACK_MASK_HI,
+
         DEST_INVALID      = 0xffffffff
     };
 
@@ -79,9 +82,9 @@ namespace GCN
     {
         SRC_SGPR_FIRST  = 0,   
         SRC_SGPR_LAST   = 103, // NOTE: GCN3 only allows 0-101, and stores VCC in s102 and s103
-        SRC_FSCR_LO     = 104, // flat scratch memory descriptor, low (SEA ISLANDS+)
-        SRC_FSCR_HI     = 105, // flat scratcy memory descriptor, hi (SEA ISLANDS)
-        SRC_VCC_LO      = 106,     // Vector condition code
+        SRC_FSCR_LO     , // flat scratch memory descriptor, low (SEA ISLANDS+)
+        SRC_FSCR_HI     , // flat scratcy memory descriptor, hi (SEA ISLANDS)
+        SRC_VCC_LO      ,     // Vector condition code
         SRC_VCC_HI,
         SRC_TBA_LO,         // Trap handler base address
         SRC_TBA_HI,
@@ -89,7 +92,7 @@ namespace GCN
         SRC_TMA_HI,
         SRC_TTMP_FIRST   ,      // Trap handler temporary regs (priviledged)
         SRC_TTMP_LAST    = 123,
-        SRC_M0           = 124,        // Magical memory register used for various things
+        SRC_M0           ,        // Magical memory register used for various things
 
         // 125 reserved
 
@@ -113,6 +116,8 @@ namespace GCN
         SRC_CF_MINUS_FOUR,
         SRC_CF_INV_2PI = 248,
 
+
+
         // 249-250 reserved
 
         SRC_VCCZ        = 251, // Vector condition code
@@ -125,6 +130,9 @@ namespace GCN
 
         SRC_VGPR_FIRST = 256,
         SRC_VGPR_LAST  = 511,
+
+        SRC_XNACK_MASK_LO, // Carrizo apu only.  Something to do with address translation
+        SRC_XNACK_MASK_HI,
 
         SRC_INVALID =0xffffffff
     };
@@ -179,7 +187,9 @@ namespace GCN
         S_BFE_I64               ,
         S_CBRANCH_G_FORK        , // Conditional branch using branch stack. Arg0 = compare mask (VCC or any SGPR), Arg1 = 64-bit byte address of target instruction.
         S_ABSDIFF_I32           ,  //  D.i = abs(S0.i >> S1.i). SCC = 1 if result is non-zero.
-    
+        
+        // VI+
+        S_RFE_RESTORE_B64       , // Return from exception handler and set: INST_ATC = S1.U32[0]
         
         /////////////////////////////////////////
         // SOPK
@@ -266,6 +276,10 @@ namespace GCN
         S_CBRANCH_JOIN         ,//: Conditional branch join point. Arg0 = saved CSP value. No dest.
         S_ABS_I32              ,      //: D.i = abs(S0.i). SCC=1 if result is non-zero.
         S_MOV_FED_B32          ,      //: D.u = S0.u, introduce edc double error upon write to dest sgpr.  
+        
+        // VI+
+        S_SET_GPR_IDX_IDX      ,//: Set offset for GPR indexing (GCN3+) M0[7:0] = S0.U[7:0]
+   
 
         /////////////////////////////////////////
         // SOPC
@@ -288,6 +302,20 @@ namespace GCN
         S_BITCMP0_B64         ,     //: SCC = (S0.u[S1.u[5:0]] == 0).
         S_BITCMP1_B64         ,     //: SCC = (S0.u[S1.u[5:0]] == 1).
         S_SETVSKIP            ,     //: VSKIP = S0.u[S1.u[4:0]].
+
+        // VI+
+        S_CMP_EQ_U64          , // SCC = SCC = (S0.i64 == S1.i64).
+        S_CMP_NE_U64          , // SXCCX = (S0 != S1).
+        S_SET_GPR_IDX_ON      , //: Enable GPR indexing mode. Vector operations after this will perform relative GPR addressing based on the contents of M0.
+                                // The structure SQ_M0_GPR_IDX_WORD may be used to decode M0. 
+                                //  The raw contents of the S1 field are read and used to set the enable bits. 
+                                //  S1[0] = VSRC0_REL, S1[1] = VSRC1_REL, S1[2] = VSRC2_REL, and S1[3] = VDST_REL.
+                                //    MODE.gpr_idx_en = 1;
+                                //    M0[7:0] = S0.u[7:0];
+                                //    M0[15:12] = SIMM4 (direct contents of S1 field);
+
+
+
 
         /////////////////////////////////////////
         // SOPP
@@ -326,6 +354,11 @@ namespace GCN
         S_CBRANCH_CDBGSYS_OR_USER  ,// : If (conditional_debug_system || conditional_debug_user) then PC = PC + signext(SIMM16 * 4) + 4; else NOP.
         S_CBRANCH_CDBGSYS_AND_USER ,// : If (conditional_debug_system && conditional_debug_user) then PC = PC + signext(SIMM16 * 4) + 4; else NOP.
 
+        // VI+
+        S_ENDPGM_SAVED,
+        S_SET_GPR_IDX_OFF,
+        S_SET_GPR_IDX_MODE,
+
     };
 
 
@@ -348,6 +381,21 @@ namespace GCN
         S_DCACHE_INV_VOL           ,// : Invalidate all volatile lines in L1 constant cache.
         S_MEMTIME                  ,// : Return current 64-bit timestamp.
         S_DCACHE_INV               ,// : Invalidate entire L1 K cache.
+
+        // VI+
+        S_STORE_DWORD              ,//: Write one Dword to scalar data cache. If the offset is specified as an SGPR, the SGPR contains an unsigned BYTE offset (the two LSBs are ignored). If the offset is specified as an immediate 20-bit constant, the constant is an unsigned byte offset.
+        S_STORE_DWORDX2            ,//: Write two Dwords to scalar data cache. See S_STORE_DWORD for details on the offset input.
+        S_STORE_DWORDX4            ,//: Write four Dwords to scalar data cache. See S_STORE_DWORD for details on the offset input.
+        S_BUFFER_STORE_DWORD       ,//: Write one Dword to scalar data cache. See S_STORE_DWORD for details on the offset input.
+        S_BUFFER_STORE_DWORDX2     ,//: Write two Dwords to scalar data cache. See S_STORE_DWORD for details on the offset input
+        S_BUFFER_STORE_DWORDX4     ,//: Write four Dwords to scalar data cache. See S_STORE_DWORD for details on the offset input.
+        S_DCACHE_WB                ,//: Write back dirty data in the scalar data cache.
+        S_DCACHE_WB_VOL            ,//: Write back dirty data in the scalar data cache volatile lines.
+        S_MEMREALTIME              ,//: Return current 64-bit RTC.
+        S_ATC_PROBE                ,//: Probe or prefetch an address into the SQC data cache.
+        S_ATC_PROBE_BUFFER         ,//: Probe or prefetch an address into the SQC data cache.
+       
+
     };
 
 
@@ -418,8 +466,32 @@ namespace GCN
         V_CVT_PKRTZ_F16_F32        , // : D = {flt32_to_flt16(S1.f),flt32_to_flt16(S0.f)}, with round-toward-zero.
         V_CVT_PK_U16_U32           , // : D = {(u32->u16)S1.u, (u32->u16)S0.u}.
         V_CVT_PK_I16_I32           , // : D = {(i32->i16)S1.i, (i32->i16)S0.i}.
-                                   // All other values are reserved.
-                                   // 62 – 63 Do not use (maps to VOP1 and VOPC).
+        
+
+        // Volcanic islands
+        V_ADD_F16                  ,//     : D.f16 = S0.f16 + S1.f16. Supports denormals, round mode, exception flags, saturation.
+        V_SUB_F16                  ,//     : D.f16 = S0.f16 - S1.f16. Supports denormals, round mode, exception flags, saturation. SQ translates to V_ADD_F16.
+        V_SUBREV_F16               ,//     : D.f16 = S1.f16 - S0.f16. Supports denormals, round mode, exception flags, saturation. SQ translates to V_ADD_F16.
+        V_MUL_F16                  ,//     : D.f16 = S0.f16 * S1.f16. Supports denormals, round mode, exception flags, saturation.
+        V_MAC_F16                  ,//     : D.f16 = S0.f16 * S1.f16 + D.f16. Supports round mode, exception flags, saturation. SQ translates this to V_MAD_F16.
+        V_MADMK_F16                ,//     : D.f16 = S0.f16 * K.f16 + S1.f16; K is a 16-bit inline constant stored in the following literal Dword. This opcode cannot use the VOP3 encoding and cannot use input/output modifiers. Supports round mode, exception flags, saturation. SQ translates this to V_MAD_F16.
+        V_MADAK_F16                ,//     : D.f16 = S0.f16 * S1.f16 + K.f16; K is a 16-bit inline constant stored in the following literal Dword. This opcode cannot use the VOP3 encoding and cannot use input/output modifiers. Supports round mode, exception flags, saturation. SQ translates this to V_MAD_F16.
+        V_ADD_U16                  ,//     : D.u16 = S0.u16 + S1.u16. Supports saturation (unsigned 16-bit integer domain).
+        V_SUB_U16                  ,//     : D.u16 = S0.u16 - S1.u16. Supports saturation (unsigned 16-bit integer domain).
+        V_SUBREV_U16               ,//     : D.u16 = S1.u16 - S0.u16. Supports saturation (unsigned 16-bit integer domain). SQ translates this to V_SUB_U16 with reversed operands.
+        V_MUL_LO_U16               ,//     : D.u16 = S0.u16 * S1.u16. Supports saturation (unsigned 16-bit integer domain).
+        V_LSHLREV_B16              ,//     : D.u[15:0] = S1.u[15:0] << S0.u[3:0]. SQ translates this to an internal SP opcode.
+        V_LSHRREV_B16              ,//     : D.u[15:0] = S1.u[15:0] >> S0.u[3:0]. The vacated bits are set to zero. SQ translates this to an internal SP opcode.
+        V_ASHRREV_I16              ,//     : D.i[15:0] = signext(S1.i[15:0]) >> S0.i[3:0]. The vacated bits are set to the sign bit of the input value. SQ translates this to an internal SP opcode.
+        V_MAX_F16                  ,//     : D.f16 = max(S0.f16, S1.f16). IEEE compliant. Supports denormals, round mode, exception flags, saturation.
+        V_MIN_F16                  ,//     : D.f16 = min(S0.f16, S1.f16). IEEE compliant. Supports denormals, round mode, exception flags, saturation.
+        V_MAX_U16                  ,//     : D.u[15:0] = max(S0.u[15:0], S1.u[15:0]).
+        V_MAX_I16                  ,//     : D.i[15:0] = max(S0.i[15:0], S1.i[15:0]).
+        V_MIN_U16                  ,//     : D.u[15:0] = min(S0.u[15:0], S1.u[15:0]).
+        V_MIN_I16                  ,//     : D.i[15:0] = min(S0.i[15:0], S1.i[15:0]).
+        V_LDEXP_F16                ,//     : D.f16 = S0.f16 * (2 ** S1.i16).
+        
+
 
         
         /////////////////////////////////////////
@@ -503,6 +575,27 @@ namespace GCN
         // Sea Islands only..
         V_LOG_LEGACY_F32          ,    //: D.f = log2(S0.f). Base 2 logarithm. Same as Southern Islands. (CI Doc says "..same as Sea Islands" typo?)
         V_EXP_LEGACY_F32          ,    //: D.f = pow(2.0, S0.f). Same as Southern Islands.
+
+
+        // VI+
+        V_CVT_F16_U16             ,// : D.f16 = uint16_to_flt16(S.u16). Supports denormals, rounding, exception flags and saturation.
+        V_CVT_F16_I16             ,// : D.f16 = int16_to_flt16(S.i16). Supports denormals, rounding, exception flags and saturation.
+        V_CVT_U16_F16             ,// : D.u16 = flt16_to_uint16(S.f16). Supports rounding, exception flags and saturation.
+        V_CVT_I16_F16             ,// : D.i16 = flt16_to_int16(S.f16). Supports rounding, exception flags and saturation.
+        V_RCP_F16                 ,// : if(S0.f16 == 1.0f), D.f16 = 1.0f; else D.f16 = ApproximateRecip(S0.f16).
+        V_SQRT_F16                ,// : if(S0.f16 == 1.0f)\tD.f16 = 1.0f; else D.f16 = ApproximateSqrt(S0.f16).
+        V_RSQ_F16                 ,// : if(S0.f16 == 1.0f) D.f16 = 1.0f; else D.f16 = ApproximateRecipSqrt(S0.f16).
+        V_LOG_F16                 ,// : if(S0.f16 == 1.0f) D.f16 = 0.0f; else D.f16 = ApproximateLog2(S0.f16).
+        V_EXP_F16                 ,// : if(S0.f16 == 0.0f) D.f16 = 1.0f; else D.f16 = Approximate2ToX(S0.f16).
+        V_FREXP_MANT_F16          ,// : if(S0.f16 == +-INF || S0.f16 == NAN) D.f16 = S0.f16; else D.f16 = mantissa(S0.f16). Result range is (-1.0,-0.5][0.5,1.0). C math library frexp function. Returns binary significand of half precision float input, such that the original single float = significand * (2 ** exponent).
+        V_FREXP_EXP_I16_F16       ,// : if(S0.f16 == +-INF || S0.f16 == NAN) D.i16 = 0; else D.i16 = 2s_complement(exponent(S0.f16) - 15 + 1). C math library frexp function. Returns exponent of half precision float input, such that the original single float = significand * (2 ** exponent).
+        V_FLOOR_F16               ,// : D.f16 = trunc(S0.f16); if(S0.f16 < 0.0f && S0.f16 != D.f16) then D.f16 -= 1.0f.
+        V_CEIL_F16                ,// : D.f16 = trunc(S0.f16); if(S0.f16 > 0.0f && S0.f16 != D.f16) then D.f16 += 1.0f.
+        V_TRUNC_F16               ,// : D.f16 = trunc(S0.f16).\n\nRound-to-zero semantics.
+        V_RNDNE_F16               ,// : D.f16 = FLOOR(S0.f16 + 0.5f); if(floor(S0.f16) is even && fract(S0.f16) == 0.5f) then D.f16 -= 1.0f. Round-to-nearest-even semantics.
+        V_FRACT_F16               ,// : D.f16 = S0.f16 + -floor(S0.f16).
+        V_SIN_F16                 ,// : D.f16 = sin(S0.f16 * 2 * PI).
+        V_COS_F16                 ,// : D.f16 = cos(S0.f16 * 2 * PI).
 
 
         /////////////////////////////////////////
@@ -706,8 +799,75 @@ namespace GCN
         V_CMP_CLASS_F64     , //  D = IEEE numeric class function specified in S1.u, performed on S0.d.
         V_CMPX_CLASS_F64    , //  D = IEEE numeric class function specified inS1.u, performed on S0.d. Also write EXEC.
         
-        
-                                
+        // VI only
+        V_CMP_F_F16          , 
+        V_CMP_LT_F16         ,
+        V_CMP_EQ_F16         ,
+        V_CMP_LE_F16         ,
+        V_CMP_GT_F16         ,
+        V_CMP_LG_F16         ,
+        V_CMP_GE_F16         ,
+        V_CMP_O_F16          ,
+        V_CMP_U_F16          ,
+        V_CMP_NGE_F16        ,
+        V_CMP_NLG_F16        ,
+        V_CMP_NGT_F16        ,
+        V_CMP_NLE_F16        ,
+        V_CMP_NEQ_F16        ,
+        V_CMP_NLT_F16        ,
+        V_CMP_TRU_F16        ,
+        V_CMPX_F_F16         ,
+        V_CMPX_LT_F16        ,
+        V_CMPX_EQ_F16        ,
+        V_CMPX_LE_F16        ,
+        V_CMPX_GT_F16        ,
+        V_CMPX_LG_F16        ,
+        V_CMPX_GE_F16        ,
+        V_CMPX_O_F16         ,
+        V_CMPX_U_F16         ,
+        V_CMPX_NGE_F16       ,
+        V_CMPX_NLG_F16       ,
+        V_CMPX_NGT_F16       ,
+        V_CMPX_NLE_F16       ,
+        V_CMPX_NEQ_F16       ,
+        V_CMPX_NLT_F16       ,
+        V_CMPX_TRU_F16       ,
+        V_CMP_F_U16         , 
+        V_CMP_LT_U16        ,
+        V_CMP_EQ_U16        ,
+        V_CMP_LE_U16        ,
+        V_CMP_GT_U16        ,
+        V_CMP_LG_U16        ,
+        V_CMP_GE_U16        ,
+        V_CMP_TRU_U16       ,
+        V_CMPx_F_U16        ,
+        V_CMPx_LT_U16       ,
+        V_CMPx_EQ_U16       ,
+        V_CMPx_LE_U16       ,
+        V_CMPx_GT_U16       ,
+        V_CMPx_LG_U16       ,
+        V_CMPx_GE_U16       ,
+        V_CMPx_TRU_U16      ,
+        V_CMP_F_I16        ,
+        V_CMP_LT_I16       ,
+        V_CMP_EQ_I16       ,
+        V_CMP_LE_I16       ,
+        V_CMP_GT_I16       ,
+        V_CMP_LG_I16       ,
+        V_CMP_GE_I16       ,
+        V_CMP_TRU_I16      ,
+        V_CMPx_F_I16       ,
+        V_CMPx_LT_I16      ,
+        V_CMPx_EQ_I16      ,
+        V_CMPx_LE_I16      ,
+        V_CMPx_GT_I16      ,
+        V_CMPx_LG_I16      ,
+        V_CMPx_GE_I16      ,
+        V_CMPx_TRU_I16     ,
+        V_CMP_CLASS_F16,
+        V_CMPX_CLASS_F16,
+
+                                 
         //////////////////////////////////////////////////////
         //  VOP3b
         //////////////////////////////////////////////////////
@@ -787,6 +947,28 @@ namespace GCN
         V_MAD_U64_U32     ,   // : {vcc_out,D.u64} = S0.u32 * S1.u32 + S2.u64.
         V_MAD_I64_I32     ,   // : {vcc_out,D.i64} = S0.i32 * S1.i32 + S2.i64.
 
+
+        // new opcodes for VI
+        V_MAD_F16     ,       //: D.f16 = S0.f16 * S1.f16 + S2.f16 Supports round mode, exception flags, saturation.
+        V_MAD_U16     ,       //: D.u16 = S0.u16 * S1.u16 + S2.u16. Supports saturation (unsigned 16-bit integer domain).
+        V_MAD_I16     ,       //: D.i16 = S0.i16 * S1.i16 + S2.i16. Supports saturation (signed 16-bit integer domain).
+        V_PERM_B32    ,       //: D.u[31:24] = permute({S0.u, S1.u}, S2.u[31:24]);
+                             //   D.u[23:16] = permute({S0.u, S1.u}, S2.u[23:16]);
+                             //   D.u[15:8] = permute({S0.u, S1.u}, S2.u[15:8]);
+                             //   D.u[7:0] = permute({S0.u, S1.u}, S2.u[7:0]);
+                             //   byte permute(byte in[8], byte sel) {
+                             //   if(sel>=13) then return 0xff;
+                             //   elsif(sel==12) then return 0x00;
+                             //   elsif(sel==11) then return in[7][7] * 0xff;
+                             //   elsif(sel==10) then return in[5][7] * 0xff;
+                             //   elsif(sel==9) then return in[3][7] * 0xff;
+                             //   elsif(sel==8) then return in[1][7] * 0xff;
+                             //   else return in[sel];
+                             //   }
+                             //   Byte permute.
+        V_FMA_F16        ,    //   : D.f16 = S0.f16 * S1.f16 + S2.f16.\n\nFused half precision multiply add.
+        V_DIV_FIXUP_F16  ,             
+        
         
         //////////////////////////////////////////////////////
         //  VINTERP (can be vop3 on GCN3)
@@ -795,6 +977,12 @@ namespace GCN
         V_INTERP_P1_F32  , //  : D = P10 * S + P0; parameter interpolation.
         V_INTERP_P2_F32  , //  : D = P20 * S + D; parameter interpolation.
         V_INTERP_MOV_F32 , //  : D = {P10,P20,P0}[S]; parameter load.
+        
+        // New interps for VI, encoded as VOP3
+        V_INTERP_P1LL_F16,     // : D.f32 = P10.f16 * S0.f32 + P0.f16. 'LL' stands for 'two LDS arguments'. attr_word selects the high or low half 16 bits of each LDS dword accessed. This opcode is available for 32-bank LDS only. NOTE: In textual representations the I/J VGPR is the first source and the attribute is the second source; however in the VOP3 encoding the attribute is stored in the src0 field and the VGPR is stored in the src1 field.
+        V_INTERP_P1LV_F16,     // : D.f32 = P10.f16 * S0.f32 + (S2.u32 >> (attr_word * 16)).f16. 'LV' stands for 'One LDS and one VGPR argument'. S2 holds two parameters, attr_word selects the high or low word of the VGPR for this calculation, as well as the high or low half of the LDS data." Meant for use with 16-bank LDS. NOTE: In textual representations the I/J VGPR is the first source and the attribute is the second source; however in the VOP3 encoding the attribute is stored in the src0 field and the VGPR is stored in the src1 field.
+        V_INTERP_P2_F16  ,     // : D.f16 = P20.f16 * S0.f32 + S2.f32. Final computation. attr_word selects LDS high or low 16bits. Used for both 16- and 32-bank LDS. Result is always written to the 16 LSBs of the destination VGPR. NOTE: In textual representations the I/J VGPR is the first source and the attribute is the second source; however in the VOP3 encoding the attribute is stored in the src0 field and the VGPR is stored in the src1 field.
+
     };
 
     enum DSInstructions
@@ -943,6 +1131,12 @@ namespace GCN
        DS_READ_B96             = 254,   //Tri-Dword read.
        DS_READ_B128            = 255,   //Qword read.
 
+        // new for VI
+       DS_PERMUTE_B32       , // : Forward permute. Does not write any LDS memory. LDS[dst] = src0
+                              //     returnVal = LDS[thread_id] Where “thread_id” is 0..63.
+       DS_BPERMUTE_B32      , // : Backward permute. Does not actually write any LDS memory. LDS[thread_id] = src0 Where “thread_id” is 0..63.
+                              //     returnVal = LDS[dst]
+
        //All other values are reserved.
     };
 
@@ -1020,7 +1214,19 @@ namespace GCN
         BUFFER_WBINVL1_SC          = 112 , //      : write back and invalidate the shader L1 only for lines of MTYPE SC and GC. Always returns ACK to shader.
         BUFFER_WBINVL1             = 113 , //      : write back and invalidate the shader L1. Always returns ACK to shader.
         
-        
+        // new for VI
+        BUFFER_WBINVL1_VOL              , //: Write back and invalidate the shader L1 only for lines that are marked volatile. Always returns ACK to shader.
+        BUFFER_STORE_LDS_DWORD          , //: Store one Dword from LDS memory to system memory without using VGPRs.
+        BUFFER_LOAD_FORMAT_D16_X        ,//: Untyped buffer load 1 dword with format conversion.
+        BUFFER_LOAD_FORMAT_D16_XY       ,//: Untyped buffer load 2 dwords with format conversion.
+        BUFFER_LOAD_FORMAT_D16_XYZ      ,//: Untyped buffer load 3 dwords with format conversion.
+        BUFFER_LOAD_FORMAT_D16_XYZW     ,//: Untyped buffer load 4 dwords with format conversion.
+        BUFFER_STORE_FORMAT_D16_X       ,//: Untyped buffer store 1 dword with format conversion.
+        BUFFER_STORE_FORMAT_D16_XY      ,//: Untyped buffer store 2 dwords with format conversion.
+        BUFFER_STORE_FORMAT_D16_XYZ     ,//: Untyped buffer store 3 dwords with format conversion.
+        BUFFER_STORE_FORMAT_D16_XYZW    ,//: Untyped buffer store 4 dwords with format conversion.
+
+
         TBUFFER_LOAD_FORMAT_X      , //  : Untyped buffer load 1 Dword with format conversion.
         TBUFFER_LOAD_FORMAT_XY     , //  : Untyped buffer load 2 Dwords with format conversion.
         TBUFFER_LOAD_FORMAT_XYZ    , //  : Untyped buffer load 3 Dwords with format conversion.
@@ -1029,6 +1235,18 @@ namespace GCN
         TBUFFER_STORE_FORMAT_XY    , //  : Untyped buffer store 2 Dwords with format conversion.
         TBUFFER_STORE_FORMAT_XYZ   , //  : Untyped buffer store 3 Dwords with format conversion.
         TBUFFER_STORE_FORMAT_XYZW  , //  : Untyped buffer store 4 Dwords with format conversion.
+
+        TBUFFER_LOAD_FORMAT_D16_X      ,// : Typed buffer load 1 dword with format conversion.
+        TBUFFER_LOAD_FORMAT_D16_XY     ,// : Typed buffer load 2 dwords with format conversion.
+        TBUFFER_LOAD_FORMAT_D16_XYZ    ,// : Typed buffer load 3 dwords with format conversion.
+        TBUFFER_LOAD_FORMAT_D16_XYZW   ,//     : Typed buffer load 4 dwords with format conversion.
+        TBUFFER_STORE_FORMAT_D16_X     ,// : Typed buffer store 1 dword with format conversion.
+        TBUFFER_STORE_FORMAT_D16_XY    ,// : Typed buffer store 2 dwords with format conversion.
+        TBUFFER_STORE_FORMAT_D16_XYZ   ,// : Typed buffer store 3 dwords with format conversion.
+        TBUFFER_STORE_FORMAT_D16_XYZW  ,// : Typed buffer store 4 dwords with format conversion.
+
+
+
         TBUFFER_INVALID = 0xffffffff,
         BUFFER_INVALID = 0xffffffff
     };

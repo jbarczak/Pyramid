@@ -79,6 +79,7 @@ namespace GCN
                 uint m_nOffset;
                 Dests m_Dest;
                 bool m_bIsOffsetIMM; 
+                bool m_bIsGLC;
             } ScalarMem;
 
             struct
@@ -154,6 +155,7 @@ namespace GCN
                 unsigned m_bUnnormalized : 1;
                 unsigned m_bLWE : 1;
                 unsigned m_bRes256 : 1;
+                unsigned m_bIsD16  : 1;
                 unsigned m_nDMask : 4;
                 Sources m_VData;
                 Sources m_VAddr;
@@ -199,6 +201,7 @@ namespace GCN
         uint GetResultWidthInDWORDs() const;
         ScalarMemoryInstructions GetOpcode() const { return Fields.ScalarMem.m_eOpcode; }
         bool  IsOffsetIMM() const { return Fields.ScalarMem.m_bIsOffsetIMM; }
+        bool  IsGLC() const     { return Fields.ScalarMem.m_bIsGLC; }
         uint  GetOffset() const { return Fields.ScalarMem.m_nOffset; }
         Dests GetDest() const { return Fields.ScalarMem.m_Dest; }
         uint  GetBase() const { return Fields.ScalarMem.m_nBaseReg; }
@@ -311,6 +314,7 @@ namespace GCN
         bool IsArray() const                  { return Fields.Image.m_bArray; }
         bool IsUnnormalized() const           { return Fields.Image.m_bUnnormalized; }
         bool IsLWE() const                    { return Fields.Image.m_bLWE; }
+        bool IsD16() const                    { return Fields.Image.m_bIsD16; }
         uint GetDMask() const                 { return Fields.Image.m_nDMask; }
         Sources GetVData() const              { return Fields.Image.m_VData; }
         Sources GetVAddr() const              { return Fields.Image.m_VAddr; }

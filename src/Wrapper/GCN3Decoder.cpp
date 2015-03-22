@@ -3,6 +3,14 @@
 #include "GCNEnums.h"
 #include "GCN3Decoder.h"
 
+// TODO: Special cases:
+//   - V_MADAK_F16 and friends should convert literal from F16 to F32 so disassembler can grok it
+//
+//   - S_SET_GPR_IDX_ON (vopc) is a special little fella.  His Src1 field gets ripped out and used as an immediate
+//       * Move to the SIMM16 field in the scalar instruction class
+//  - BUFFER_STORE_LDS_DWORD
+//          set the LDS bit.  Not sure if this is supposed to use M0 or a vgpr and of course the doc don't say
+
 namespace GCN
 {
     InstructionFormat GCN3Decoder::ReadInstructionFormat( const uint8* pLocation )
