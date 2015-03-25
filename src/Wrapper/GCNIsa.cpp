@@ -37,6 +37,12 @@ namespace GCN
         case V_COS_F16            :   
             return 1;
 
+        case V_ADD_U32:
+        case V_SUB_U32:
+        case V_SUBREV_U32:
+        case V_LSHLREV_B64:
+        case V_LSHRREV_B64:
+        case V_ASHRREV_I64:
         case V_ADD_F16            : 
         case V_SUB_F16            : 
         case V_SUBREV_F16         : 
@@ -519,6 +525,16 @@ namespace GCN
         switch( e )
         {
         default: return 0;
+        case V_ADD_U32:
+        case V_SUB_U32:
+        case V_SUBREV_U32:
+            return 1;
+
+        case V_LSHLREV_B64:
+        case V_LSHRREV_B64:
+        case V_ASHRREV_I64:
+            return 2;
+                
         case V_MAD_F16           : 
         case V_MAD_U16           : 
         case V_MAD_I16           : 
@@ -1022,6 +1038,15 @@ namespace GCN
         switch( e )
         {
         default: return 0;
+        case V_ADD_U32:
+        case V_SUB_U32:
+        case V_SUBREV_U32:
+        case V_LSHLREV_B64 :
+        case V_LSHRREV_B64 :
+        case V_ASHRREV_I64 :
+            return 1;
+
+
         case V_MAD_F16             :
         case V_MAD_U16             :
         case V_MAD_I16             :
@@ -1539,6 +1564,14 @@ namespace GCN
         {
         default: return 0;
             // VOP2
+        case V_ADD_U32:
+        case V_SUB_U32:
+        case V_SUBREV_U32:
+            return 1;
+        case V_LSHLREV_B64 :
+        case V_LSHRREV_B64 :
+        case V_ASHRREV_I64 :
+            return 2;
         case V_MAD_F16            :
         case V_MAD_U16            :
         case V_MAD_I16            :
@@ -2029,6 +2062,7 @@ namespace GCN
         case DS_PERMUTE_B32:
         case DS_BPERMUTE_B32:
         case DS_ADD_U32                   :
+        case DS_ADD_F32                   :
         case DS_SUB_U32                   :
         case DS_RSUB_U32                  :
         case DS_INC_U32                   :
@@ -2771,6 +2805,35 @@ namespace GCN
             return true;
         default:
             return false;
+        }
+    }
+
+    uint ScalarMemoryInstruction::GetResourceWidthInDWORDs() const
+    {
+        switch( GetOpcode() )
+        {
+        case S_LOAD_DWORD          : 
+        case S_LOAD_DWORDX2        : 
+        case S_LOAD_DWORDX4        : 
+        case S_LOAD_DWORDX8        : 
+        case S_LOAD_DWORDX16       : 
+        case S_STORE_DWORD         : 
+        case S_STORE_DWORDX2       : 
+        case S_STORE_DWORDX4       : 
+        case S_ATC_PROBE           : 
+            return 2;
+        case S_BUFFER_LOAD_DWORD   : 
+        case S_BUFFER_LOAD_DWORDX2 : 
+        case S_BUFFER_LOAD_DWORDX4 : 
+        case S_BUFFER_LOAD_DWORDX8 : 
+        case S_BUFFER_LOAD_DWORDX16: 
+        case S_BUFFER_STORE_DWORD  : 
+        case S_BUFFER_STORE_DWORDX2: 
+        case S_BUFFER_STORE_DWORDX4: 
+        case S_ATC_PROBE_BUFFER    : 
+            return 4;
+        default:
+            return 0;
         }
     }
 

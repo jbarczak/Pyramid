@@ -358,6 +358,7 @@ namespace GCN
         S_ENDPGM_SAVED,
         S_SET_GPR_IDX_OFF,
         S_SET_GPR_IDX_MODE,
+        S_SETKILL,
 
     };
 
@@ -969,6 +970,12 @@ namespace GCN
         V_FMA_F16        ,    //   : D.f16 = S0.f16 * S1.f16 + S2.f16.\n\nFused half precision multiply add.
         V_DIV_FIXUP_F16  ,             
         
+        V_ADD_U32,
+        V_SUB_U32,
+        V_SUBREV_U32,
+        V_LSHLREV_B64 ,
+        V_LSHRREV_B64 ,
+        V_ASHRREV_I64 ,
         
         //////////////////////////////////////////////////////
         //  VINTERP (can be vop3 on GCN3)
@@ -1136,7 +1143,7 @@ namespace GCN
                               //     returnVal = LDS[thread_id] Where “thread_id” is 0..63.
        DS_BPERMUTE_B32      , // : Backward permute. Does not actually write any LDS memory. LDS[thread_id] = src0 Where “thread_id” is 0..63.
                               //     returnVal = LDS[dst]
-
+       DS_ADD_F32, 
        //All other values are reserved.
     };
 

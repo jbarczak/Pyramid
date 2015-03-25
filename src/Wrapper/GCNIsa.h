@@ -199,12 +199,14 @@ namespace GCN
     {
     public:
         uint GetResultWidthInDWORDs() const;
+        uint GetResourceWidthInDWORDs() const ;
         ScalarMemoryInstructions GetOpcode() const { return Fields.ScalarMem.m_eOpcode; }
         bool  IsOffsetIMM() const { return Fields.ScalarMem.m_bIsOffsetIMM; }
         bool  IsGLC() const     { return Fields.ScalarMem.m_bIsGLC; }
         uint  GetOffset() const { return Fields.ScalarMem.m_nOffset; }
         Dests GetDest() const { return Fields.ScalarMem.m_Dest; }
         uint  GetBase() const { return Fields.ScalarMem.m_nBaseReg; }
+
     };
 
 

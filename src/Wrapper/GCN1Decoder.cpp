@@ -1463,7 +1463,7 @@ namespace GCN
         //   sopp    is    1011 1111 1
         //   sop1    is    1011 1110 1
         //   vinterp is    1100 10
-        //   smrd    is    1100 0  (for GCN3 SMEM its: 1100 00)
+        //   smrd    is    1100 0
         //   vop3    is    1101 00  
         //   flat    is    1101 11
         //   ds      is    1101 10

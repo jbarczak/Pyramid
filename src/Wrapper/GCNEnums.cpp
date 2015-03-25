@@ -178,6 +178,7 @@ namespace GCN
             ENUM(S_ENDPGM_SAVED)
             ENUM(S_SET_GPR_IDX_OFF)
             ENUM(S_SET_GPR_IDX_MODE)
+            ENUM(S_SETKILL)
         END_ENUM_TABLE
 
         START_ENUM_TABLE(ScalarMemoryInstructions)
@@ -693,6 +694,14 @@ namespace GCN
             ENUM(V_FMA_F16             )  
             ENUM(V_DIV_FIXUP_F16       )
 
+            ENUM( V_ADD_U32    )
+            ENUM( V_SUB_U32    )
+            ENUM( V_SUBREV_U32 )
+            ENUM( V_LSHLREV_B64      )
+            ENUM( V_LSHRREV_B64 )
+            ENUM( V_ASHRREV_I64 )
+
+
 
             ENUM(V_INTERP_P1_F32 )
             ENUM(V_INTERP_P2_F32 )
@@ -848,6 +857,7 @@ namespace GCN
              ENUM( DS_READ_B128           )
              ENUM( DS_PERMUTE_B32 )
              ENUM( DS_BPERMUTE_B32 )
+             ENUM( DS_ADD_F32 )
         END_ENUM_TABLE          
                   
         START_ENUM_TABLE(BufferInstructions)

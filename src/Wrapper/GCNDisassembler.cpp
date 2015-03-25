@@ -615,7 +615,7 @@ namespace Disassembler{
                     char offs[64];
                     uint nBaseReg = pInst->GetBase();
                     FormatDest( dest, pInst->GetDest(), pInst->GetResultWidthInDWORDs() );
-                    FormatSReg( base, nBaseReg, 2 );
+                    FormatSReg( base, nBaseReg, pInst->GetResourceWidthInDWORDs() );
 
                     uint nOffset = pInst->GetOffset();
                     if( pInst->IsOffsetIMM() )
@@ -925,7 +925,7 @@ namespace Disassembler{
             
                 // resource constant
                 char rsrc[64]="";
-                FormatSReg(rsrc, pInst->GetSResource()*4, 4 );
+                FormatSReg(rsrc, pInst->GetSResource(), 4 );
 
                 // address
                 char address[256]="";
