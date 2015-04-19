@@ -1,0 +1,341 @@
+<?xml version="1.0"?>
+<!-- syntaxdefinition for HLSL by Josh Barczak -->
+
+<SyntaxDefinition name = "HLSL" extensions = ".hlsl">
+	
+	<Properties>
+		<Property name="LineComment" value="//"/>
+	</Properties>
+	
+	<Digits name = "Digits" bold = "false" italic = "false" color = "DarkBlue"/>
+	
+	<RuleSets>
+		<RuleSet ignorecase = "false">
+			<Delimiters>~!%^*()-+=|\#/{}[]:;"'&lt;&gt; , .?</Delimiters>
+		
+			<Span name = "PreprocessorDirectives" bold="false" italic="false" color="Green" stopateol = "true">
+				<Begin>#</Begin>
+			</Span>
+			
+			<Span name = "LineComment" bold = "false" italic = "false" color = "Green" stopateol = "true">
+				<Begin>//</Begin>
+			</Span>
+			
+			<Span name = "BlockComment" bold = "false" italic = "false" color = "Green" stopateol = "false">
+				<Begin>/*</Begin>
+				<End>*/</End>
+			</Span>
+			
+			<Span name = "String" bold = "false" italic = "false" color = "Magenta" stopateol = "true" escapecharacter="\">
+				<Begin>"</Begin>
+				<End>"</End>
+			</Span>
+			
+			<Span name = "Char" bold = "false" italic = "false" color = "Magenta" stopateol = "true" escapecharacter="\">
+				<Begin>&apos;</Begin>
+				<End>&apos;</End>
+			</Span>
+			
+			<MarkPrevious bold = "true" italic = "false" color = "MidnightBlue">(</MarkPrevious>
+			
+			<KeyWords name = "Punctuation" bold = "false" italic = "false" color = "DarkGreen">
+				<Key word = "?" />
+				<Key word = "," />
+				<Key word = "." />
+				<Key word = ";" />
+				<Key word = "(" />
+				<Key word = ")" />
+				<Key word = "[" />
+				<Key word = "]" />
+				<Key word = "{" />
+				<Key word = "}" />
+				<Key word = "+" />
+				<Key word = "-" />
+				<Key word = "/" />
+				<Key word = "%" />
+				<Key word = "*" />
+				<Key word = "&lt;" />
+				<Key word = "&gt;" />
+				<Key word = "^" />
+				<Key word = "=" />
+				<Key word = "~" />
+				<Key word = "!" />
+				<Key word = "|" />
+				<Key word = "&amp;" />
+			</KeyWords>
+		
+	
+			
+			<KeyWords name = "AccessModifiers" bold="true" italic="false" color="Blue">
+				<Key word = "const" />
+                <Key word = "column_major" />
+                <Key word = "row_major" />
+				<Key word = "static" />
+                <Key word = "centroid" />
+                <Key word = "sample" />
+                <Key word = "nointerpolation" />
+                <Key word = "extern" />
+                <Key word = "groupshared" />
+                <Key word = "in" />
+                <Key word = "inout" />
+                <Key word = "out" />
+                <Key word = "linear" />
+                <Key word = "noperspective" />
+                <Key word = "line" />
+                <Key word = "lineadj" />
+                <Key word = "point" />
+                <Key word = "triangle" />
+                <Key word = "triangleadj" />
+                <Key word = "packoffset" />
+                <Key word = "register" />
+                <Key word = "precise" />
+                <Key word = "snorm" />
+                <Key word = "shared" />
+                <Key word = "uniform" />
+			</KeyWords>
+			
+			<KeyWords name = "Types" bold="false" italic="false" color="Red">
+				<Key word = "bool" />
+				<Key word = "double" />
+                <Key word = "dword" />
+                <Key word = "float" />
+				<Key word = "short" />
+				<Key word = "signed" />
+                <Key word = "half" />
+                <Key word = "unsigned" />
+				<Key word = "void" />
+				<Key word = "class" />
+                <Key word = "interface" />
+                <Key word = "matrix" />
+                <Key word = "min16float" />
+                <Key word = "min10float" />
+                <Key word = "min16int" />
+                <Key word = "min12int" />
+                <Key word = "min16uint" />
+				<Key word = "struct" />
+                <Key word = "AppendStructuredBuffer" />
+                <Key word = "cbuffer" />
+                <Key word = "tbuffer" />
+                <Key word = "ConsumeStructuredBuffer" />
+                <Key word = "Buffer" />
+                <Key word = "ByteAddressBuffer" />
+                <Key word = "InputPatch" />
+                <Key word = "OutputPatch" />
+                <Key word = "LineStream" />
+                <Key word = "PointStream" />
+                <Key word = "TriangleStream" />
+                <Key word = "RWBuffer" />
+                <Key word = "RWByteAddressBuffer" />
+                <Key word = "RWStructuredBuffer" />
+                <Key word = "RWTexture1D" />
+                <Key word = "RWTexture2D" />
+                <Key word = "RWTexture2DArray" />
+                <Key word = "RWTexture3D" />
+                <Key word = "Buffer" />
+                <Key word = "ByteAddressBuffer" />
+                <Key word = "StructuredBuffer" />
+                <Key word = "Texture1D" />
+                <Key word = "Texture2D" />
+                <Key word = "Texture2DMS" />
+                <Key word = "Texture2DMSArray" />
+                <Key word = "Texture2DArray" />
+                <Key word = "Texture3D" />
+                <Key word = "TextureCube" />
+                <Key word = "TextureCubeArray" />
+                <Key word = "sampler" />
+                <Key word = "SamplerState" />
+                <Key word = "SamplerComparisonState" />
+                <Key word = "StructuredBuffer" />
+                <Key word = "typedef" />
+                <Key word = "uint" />
+                <Key word = "int" />
+                <Key word = "vector" />
+                <Key word = "float2" />
+                <Key word = "float3" />
+                <Key word = "float4" />
+                <Key word = "double2" />
+                <Key word = "double3" />
+                <Key word = "double4" />
+                <Key word = "int2" />
+                <Key word = "int3" />
+                <Key word = "int4" />
+                <Key word = "uint2" />
+                <Key word = "uint3" />
+                <Key word = "uint4" />
+                <Key word = "bool2" />
+                <Key word = "bool3" />
+                <Key word = "bool4" />
+                <Key word = "float2x2" />
+                <Key word = "float3x2" />
+                <Key word = "float4x2" />
+                <Key word = "double2x2" />
+                <Key word = "double3x2" />
+                <Key word = "double4x2" />
+                <Key word = "int2x2" />
+                <Key word = "int3x2" />
+                <Key word = "int4x2" />
+                <Key word = "uint2x2" />
+                <Key word = "uint3x2" />
+                <Key word = "uint4x2" />
+                <Key word = "bool2x2" />
+                <Key word = "bool3x2" />
+                <Key word = "bool4x2" />
+                <Key word = "float2x3" />
+                <Key word = "float3x3" />
+                <Key word = "float4x3" />
+                <Key word = "double2x3" />
+                <Key word = "double3x3" />
+                <Key word = "double4x3" />
+                <Key word = "int2x3" />
+                <Key word = "int3x3" />
+                <Key word = "int4x3" />
+                <Key word = "uint2x3" />
+                <Key word = "uint3x3" />
+                <Key word = "uint4x3" />
+                <Key word = "bool2x3" />
+                <Key word = "bool3x3" />
+                <Key word = "bool4x3" />
+                <Key word = "float2x4" />
+                <Key word = "float3x4" />
+                <Key word = "float4x4" />
+                <Key word = "double2x4" />
+                <Key word = "double3x4" />
+                <Key word = "double4x4" />
+                <Key word = "int2x4" />
+                <Key word = "int3x4" />
+                <Key word = "int4x4" />
+                <Key word = "uint2x4" />
+                <Key word = "uint3x4" />
+                <Key word = "uint4x4" />
+                <Key word = "bool2x4" />
+                <Key word = "bool3x4" />
+                <Key word = "bool4x4" />
+            </KeyWords>
+			
+			<KeyWords name = "Literals" bold="true" italic="false" color="Black">
+				<Key word = "false" />
+				<Key word = "true" />
+			</KeyWords>
+			
+			<KeyWords name = "IterationStatements" bold="true" italic="false" color="Blue">
+				<Key word = "do" />
+				<Key word = "for" />
+				<Key word = "while" />
+			</KeyWords>
+
+            <KeyWords name = "Intrinsics" bold="true" italic="false" color="Blue">
+                <Key word = "GetRenderTargetSampleCount" />
+                <Key word = "GetRenderTargetSamplePosition" />
+                <Key word = "GroupMemoryBarrierWithGroupSync" />
+                <Key word = "GroupMemoryBarrier" />
+                <Key word = "InterlockedAdd" />
+                <Key word = "InterlockedAnd" />
+                <Key word = "InterlockedCompareExchange" />
+                <Key word = "InterlockedCompareStore" />
+                <Key word = "InterlockedExchange" />
+                <Key word = "InterlockedMin" />
+                <Key word = "InterlockedMax" />
+                <Key word = "InterlockedOr" />
+                <Key word = "InterlockedXor" />
+                <Key word = "abs" />
+                <Key word = "clamp" />
+                <Key word = "saturate" />
+                <Key word = "all" />
+                <Key word = "any" />
+                <Key word = "clip" />
+                <Key word = "dot" />
+                <Key word = "cross" />
+                <Key word = "length" />
+                <Key word = "normalize" />
+                <Key word = "ddx" />
+                <Key word = "ddy" />
+                <Key word = "fwidth" />
+                <Key word = "ddx_coarse" />
+                <Key word = "ddy_coarse" />
+                <Key word = "ddx_fine" />
+                <Key word = "ddy_fine" />
+                <Key word = "faceforward" />
+                <Key word = "dst" />
+                <Key word = "distance" />
+                <Key word = "determinant" />
+                <Key word = "transpose" />
+                <Key word = "reflect" />
+                <Key word = "refract" />
+                <Key word = "step" />
+                <Key word = "smoothstep" />
+                <Key word = "lerp" />
+                <Key word = "lit" />
+                <Key word = "mul" />
+                <Key word = "log" />
+                <Key word = "log10" />
+                <Key word = "log2" />
+                <Key word = "exp" />
+                <Key word = "exp2" />
+                <Key word = "pow" />
+                <Key word = "rsqrt" />
+                <Key word = "sqrt" />
+                <Key word = "rcp" />
+                <Key word = "degrees" />
+                <Key word = "radians" />
+                <Key word = "sin" />
+                <Key word = "cos" />
+                <Key word = "sincos" />
+                <Key word = "tan" />
+                <Key word = "sinh" />
+                <Key word = "cosh" />
+                <Key word = "tanh" />
+                <Key word = "asin" />
+                <Key word = "acos" />
+                <Key word = "atan" />
+                <Key word = "atan2" />
+                <Key word = "floor" />
+                <Key word = "ceil" />
+                <Key word = "frac" />
+                <Key word = "sign" />
+                <Key word = "fmod" />
+                <Key word = "modf" />
+                <Key word = "msad4" />
+                <Key word = "round" />
+                <Key word = "frexp" />
+                <Key word = "ldexp" />
+                <Key word = "isfinite" />
+                <Key word = "isinf" />
+                <Key word = "isnan" />
+                <Key word = "fma" />
+                <Key word = "trunc" />
+                <Key word = "min" />
+                <Key word = "max" />
+                <Key word = "countbits" />
+                <Key word = "firstbithigh" />
+                <Key word = "firstbitlow" />
+                <Key word = "reversebits" />
+                <Key word = "f16to32" />
+                <Key word = "f32to16" />
+                <Key word = "asint" />
+                <Key word = "asuint" />
+                <Key word = "asfloat" />
+                <Key word = "asdouble" />
+
+            </KeyWords>
+			
+            <KeyWords name = "JumpStatements" bold="false" italic="false" color="Blue">
+				<Key word = "break" />
+				<Key word = "continue" />
+				<Key word = "discard" />
+                <Key word = "export" />
+				<Key word = "return" />
+			</KeyWords>
+			
+			<KeyWords name = "SelectionStatements" bold="true" italic="false" color="Blue">
+				<Key word = "case" />
+				<Key word = "else" />
+				<Key word = "if" />
+				<Key word = "switch" />
+				<Key word = "default" />
+			</KeyWords>
+			
+			
+		</RuleSet>
+	</RuleSets>
+</SyntaxDefinition>
+

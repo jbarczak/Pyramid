@@ -1,0 +1,426 @@
+<?xml version="1.0"?>
+<!-- syntaxdefinition for GLSL by Josh Barczak -->
+
+<SyntaxDefinition name = "GLSL" extensions = ".glsl">
+	
+	<Properties>
+		<Property name="LineComment" value="//"/>
+	</Properties>
+	
+	<Digits name = "Digits" bold = "false" italic = "false" color = "DarkBlue"/>
+	
+	<RuleSets>
+		<RuleSet ignorecase = "false">
+			<Delimiters>~!%^*()-+=|\#/{}[]:;"'&lt;&gt; , .?</Delimiters>
+		
+			<Span name = "PreprocessorDirectives" bold="false" italic="false" color="Green" stopateol = "true">
+				<Begin>#</Begin>
+			</Span>
+			
+			<Span name = "LineComment" bold = "false" italic = "false" color = "Green" stopateol = "true">
+				<Begin>//</Begin>
+			</Span>
+			
+			<Span name = "BlockComment" bold = "false" italic = "false" color = "Green" stopateol = "false">
+				<Begin>/*</Begin>
+				<End>*/</End>
+			</Span>
+			
+			<Span name = "String" bold = "false" italic = "false" color = "Magenta" stopateol = "true" escapecharacter="\">
+				<Begin>"</Begin>
+				<End>"</End>
+			</Span>
+			
+			<Span name = "Char" bold = "false" italic = "false" color = "Magenta" stopateol = "true" escapecharacter="\">
+				<Begin>&apos;</Begin>
+				<End>&apos;</End>
+			</Span>
+			
+			<MarkPrevious bold = "true" italic = "false" color = "MidnightBlue">(</MarkPrevious>
+			
+			<KeyWords name = "Punctuation" bold = "false" italic = "false" color = "DarkGreen">
+				<Key word = "?" />
+				<Key word = "," />
+				<Key word = "." />
+				<Key word = ";" />
+				<Key word = "(" />
+				<Key word = ")" />
+				<Key word = "[" />
+				<Key word = "]" />
+				<Key word = "{" />
+				<Key word = "}" />
+				<Key word = "+" />
+				<Key word = "-" />
+				<Key word = "/" />
+				<Key word = "%" />
+				<Key word = "*" />
+				<Key word = "&lt;" />
+				<Key word = "&gt;" />
+				<Key word = "^" />
+				<Key word = "=" />
+				<Key word = "~" />
+				<Key word = "!" />
+				<Key word = "|" />
+				<Key word = "&amp;" />
+			</KeyWords>
+		
+	
+			
+			<KeyWords name = "Qualifiers" bold="true" italic="false" color="Blue">
+                <Key word = "attribute" />
+                <Key word = "coherent" />
+                <Key word = "volatile" />
+                <Key word = "restrict" />
+                <Key word = "readonly" />
+                <Key word = "writeonly" />
+                <Key word = "layout" />
+                <Key word = "const" />
+                <Key word = "uniform" />
+                <Key word = "varying" />               
+                <Key word = "centroid" />
+                <Key word = "flat" />
+                <Key word = "smooth" />
+                <Key word = "noperspective" />
+                <Key word = "sample" />
+                <Key word = "patch" />
+                <Key word = "in" />
+                <Key word = "inout" />
+                <Key word = "out" />
+                <Key word = "precise" />
+                <Key word = "invariant" />
+                <Key word = "lowp" />
+                <Key word = "mediump" />
+                <Key word = "highp" />
+                <Key word = "precision" />
+                <Key word = "subroutine" />
+            </KeyWords>
+			
+			<KeyWords name = "Types" bold="false" italic="false" color="Red">
+				<Key word = "bool" />
+				<Key word = "double" />
+                <Key word = "float" />
+				<Key word = "short" />
+                <Key word = "uint" />
+                <Key word = "int" />
+                <Key word = "buffer" />
+                <Key word = "void" />
+                <Key word = "vec2" />
+                <Key word = "vec3" />
+                <Key word = "vec4" />
+                <Key word = "dvec2" />
+                <Key word = "dvec3" />
+                <Key word = "dvec4" />
+                <Key word = "ivec2" />
+                <Key word = "ivec3" />
+                <Key word = "ivec4" />
+                <Key word = "uvec2" />
+                <Key word = "uvec3" />
+                <Key word = "uvec4" />
+                <Key word = "bvec2" />
+                <Key word = "bvec3" />
+                <Key word = "bvec4" />
+                <Key word = "mat2" />
+                <Key word = "mat3" />
+                <Key word = "mat4" />
+                <Key word = "dmat2" />
+                <Key word = "dmat3" />
+                <Key word = "dmat4" />
+                <Key word = "mat2x2" />
+                <Key word = "mat3x2" />
+                <Key word = "mat4x2" />
+                <Key word = "mat2x3" />
+                <Key word = "mat3x3" />
+                <Key word = "mat4x3" />
+                <Key word = "mat2x4" />
+                <Key word = "mat3x4" />
+                <Key word = "mat4x4" />
+                <Key word = "dmat2x4" />
+                <Key word = "dmat3x4" />
+                <Key word = "dmat4x4" />
+                <Key word = "dmat2x2" />
+                <Key word = "dmat3x2" />
+                <Key word = "dmat4x2" />
+                <Key word = "dmat2x3" />
+                <Key word = "dmat3x3" />
+                <Key word = "dmat4x3" />
+                <Key word = "struct" />
+                <Key word = "atomic_uint" />
+                <Key word = "sampler1D" />
+                <Key word = "sampler2D" />
+                <Key word = "sampler2DRECT" />
+                <Key word = "sampler3D" />
+                <Key word = "samplerCube" />
+                <Key word = "sampler1DArray" />
+                <Key word = "sampler2DArray" />
+                <Key word = "samplerCubeArray" />
+                <Key word = "samplerBuffer" />
+                <Key word = "sampler2DMS" />
+                <Key word = "sampler2DMSArray" />
+                <Key word = "image1D" />
+                <Key word = "image2D" />
+                <Key word = "image2DRECT" />
+                <Key word = "image3D" />
+                <Key word = "imageCube" />
+                <Key word = "image1DArray" />
+                <Key word = "image2DArray" />
+                <Key word = "imageCubeArray" />
+                <Key word = "imageBuffer" />
+                <Key word = "image2DMS" />
+                <Key word = "image2DMSArray" />
+                <Key word = "isampler1D" />
+                <Key word = "isampler2D" />
+                <Key word = "isampler2DRECT" />
+                <Key word = "isampler3D" />
+                <Key word = "isamplerCube" />
+                <Key word = "isampler1DArray" />
+                <Key word = "isampler2DArray" />
+                <Key word = "isamplerCubeArray" />
+                <Key word = "isamplerBuffer" />
+                <Key word = "isampler2DMS" />
+                <Key word = "isampler2DMSArray" />
+                <Key word = "iimage1D" />
+                <Key word = "iimage2D" />
+                <Key word = "iimage2DRECT" />
+                <Key word = "iimage3D" />
+                <Key word = "iimageCube" />
+                <Key word = "iimage1DArray" />
+                <Key word = "iimage2DArray" />
+                <Key word = "iimageCubeArray" />
+                <Key word = "iimageBuffer" />
+                <Key word = "iimage2DMS" />
+                <Key word = "iimage2DMSArray" />
+                <Key word = "usampler1D" />
+                <Key word = "usampler2D" />
+                <Key word = "usampler2DRECT" />
+                <Key word = "usampler3D" />
+                <Key word = "usamplerCube" />
+                <Key word = "usampler1DArray" />
+                <Key word = "usampler2DArray" />
+                <Key word = "usamplerCubeArray" />
+                <Key word = "usamplerBuffer" />
+                <Key word = "usampler2DMS" />
+                <Key word = "usampler2DMSArray" />
+                <Key word = "uimage1D" />
+                <Key word = "uimage2D" />
+                <Key word = "uimage2DRECT" />
+                <Key word = "uimage3D" />
+                <Key word = "uimageCube" />
+                <Key word = "uimage1DArray" />
+                <Key word = "uimage2DArray" />
+                <Key word = "uimageCubeArray" />
+                <Key word = "uimageBuffer" />
+                <Key word = "uimage2DMS" />
+                <Key word = "uimage2DMSArray" />
+                <Key word = "sampler1DShadow" />
+                <Key word = "sampler2DShadow" />
+                <Key word = "sampler2DRECTShadow" />
+                <Key word = "sampler3DShadow" />
+                <Key word = "samplerCubeShadow" />
+                <Key word = "sampler1DArrayShadow" />
+                <Key word = "sampler2DArrayShadow" />
+                <Key word = "samplerCubeArrayShadow" />
+            </KeyWords>
+			
+			<KeyWords name = "Literals" bold="true" italic="false" color="Black">
+				<Key word = "false" />
+				<Key word = "true" />
+			</KeyWords>
+			
+			<KeyWords name = "IterationStatements" bold="true" italic="false" color="Blue">
+				<Key word = "do" />
+				<Key word = "for" />
+				<Key word = "while" />
+			</KeyWords>
+
+            <KeyWords name = "Intrinsics" bold="true" italic="false" color="Blue">
+                <Key word = "degrees" />
+                <Key word = "radians" />
+                <Key word = "sin" />
+                <Key word = "cos" />
+                <Key word = "tan" />
+                <Key word = "sinh" />
+                <Key word = "cosh" />
+                <Key word = "tanh" />
+                <Key word = "asin" />
+                <Key word = "acos" />
+                <Key word = "atan" />
+                <Key word = "asinh" />
+                <Key word = "acosh" />
+                <Key word = "atanh" />
+                <Key word = "log" />
+                <Key word = "log2" />
+                <Key word = "exp" />
+                <Key word = "exp2" />
+                <Key word = "pow" />
+                <Key word = "inversesqrt" />
+                <Key word = "sqrt" />
+                <Key word = "abs" />
+                <Key word = "floor" />
+                <Key word = "ceil" />
+                <Key word = "sign" />
+                <Key word = "round" />
+                <Key word = "roundEven" />
+                <Key word = "trunc" />
+                <Key word = "fract" />
+                <Key word = "mod" />
+                <Key word = "modf" />
+                <Key word = "min" />
+                <Key word = "max" />
+                <Key word = "clamp" />
+                <Key word = "mix" />
+                <Key word = "step" />
+                <Key word = "smoothstep" />
+                <Key word = "isinf" />
+                <Key word = "isnan" />
+                <Key word = "fma" />
+                <Key word = "floatBitsToInt" />
+                <Key word = "floatBitsToUInt" />
+                <Key word = "intBitsToFloat" />
+                <Key word = "uintBitsToFloat" />
+                <Key word = "frexp" />
+                <Key word = "ldexp" />
+                <Key word = "faceforward" />
+                <Key word = "reflect" />
+                <Key word = "refract" />
+                <Key word = "dot" />
+                <Key word = "cross" />
+                <Key word = "length" />
+                <Key word = "normalize" />
+                <Key word = "distance" />
+                <Key word = "determinant" />
+                <Key word = "transpose" />
+                <Key word = "outerProduct" />
+                <Key word = "inverse" />
+                <Key word = "matrixCompMult" />
+                <Key word = "lessThan" />
+                <Key word = "lessThanEqual" />
+                <Key word = "greaterThan" />
+                <Key word = "greaterThanEqual" />
+                <Key word = "equal" />
+                <Key word = "notEqual" />
+                <Key word = "any" />
+                <Key word = "all" />
+                <Key word = "not" />
+                <Key word = "textureSize" />
+                <Key word = "textureQueryLod" />
+                <Key word = "textureQueryLevels" />
+                <Key word = "textureSamples" />
+                <Key word = "texture" />
+                <Key word = "textureProj" />
+                <Key word = "textureLod" />
+                <Key word = "textureOffset" />
+                <Key word = "texelFetch" />
+                <Key word = "texelFetchOffset" />
+                <Key word = "textureLodOffset" />
+                <Key word = "textureProjOffset" />
+                <Key word = "textureProjLod" />
+                <Key word = "textureProjLodOffset" />
+                <Key word = "textureGrad" />
+                <Key word = "textureGradOffset" />
+                <Key word = "textureProjGrad" />
+                <Key word = "textureProjGradOffset" />
+                <Key word = "textureGather" />
+                <Key word = "textureGatherOffset" />
+                <Key word = "textureGatherOffsets" />
+                <Key word = "atomicCounterIncrement" />
+                <Key word = "atomicCounterDecrement" />
+                <Key word = "atomicCounter" />
+                <Key word = "atomicAdd" />
+                <Key word = "atomicMin" />
+                <Key word = "atomicMax" />
+                <Key word = "atomicAnd" />
+                <Key word = "atomicOr" />
+                <Key word = "atomicXor" />
+                <Key word = "atomicExchange" />
+                <Key word = "atomicCompSwap" />
+                <Key word = "imageSize" />
+                <Key word = "imageSamples" />
+                <Key word = "imageLoad" />
+                <Key word = "imageStore" />
+                <Key word = "imageAtomicAdd" />
+                <Key word = "imageAtomicMin" />
+                <Key word = "imageAtomicMax" />
+                <Key word = "imageAtomicAnd" />
+                <Key word = "imageAtomicOr" />
+                <Key word = "imageAtomicXor" />
+                <Key word = "imageAtomicExchange" />
+                <Key word = "imageAtomicCompSwap" />
+                <Key word = "dFdx" />
+                <Key word = "dFdy" />
+                <Key word = "dFdxCoarse" />
+                <Key word = "dFdyCoarse" />
+                <Key word = "dFdxFine" />
+                <Key word = "dFdyFine" />
+                <Key word = "fwidth" />
+                <Key word = "fwidthFine" />
+                <Key word = "fwidthCoarse" />
+                <Key word = "interpolateAtCentroid" />
+                <Key word = "interpolateAtSample" />
+                <Key word = "interpolateAtOffset" />
+                <Key word = "EmitStreamVertex" />
+                <Key word = "EndStreamPrimitive" />
+                <Key word = "EmitVertex" />
+                <Key word = "EndPrimitive" />
+                <Key word = "barrier" />
+                <Key word = "memoryBarrier" />
+                <Key word = "memoryBarrierAtomicCounter" />
+                <Key word = "memoryBarrierShared" />
+                <Key word = "memoryBarrierBuffer" />
+                <Key word = "memoryBarrierImage" />
+                <Key word = "groupMemoryBarrier" />
+            </KeyWords>
+
+
+            <KeyWords name = "BuiltInVars" bold="false" italic="false" color="DarkBlue">
+                <Key word = "gl_NumWorkGroups" />
+                <Key word = "gl_WorkGroupSize" />
+                <Key word = "gl_WorkGroupID" />
+                <Key word = "gl_LocalInvocationID" />
+                <Key word = "gl_GlobalInvocationID" />
+                <Key word = "gl_LocalInvocationIndex" />
+                <Key word = "gl_VertexID" />
+                <Key word = "gl_InstanceID" />
+                <Key word = "gl_InvocationID" />
+                <Key word = "gl_PrimitiveIDIn" />
+                <Key word = "gl_PrimitiveID" />
+                <Key word = "gl_Layer" />
+                <Key word = "gl_ViewportIndex" />
+                <Key word = "gl_PatchVerticesIn" />
+                <Key word = "gl_Position" />
+                <Key word = "gl_PointSize" />
+                <Key word = "gl_ClipDistance" />
+                <Key word = "gl_TessLevelOuter" />
+                <Key word = "gl_TessLevelInner" />
+                <Key word = "gl_TessCoord" />
+                <Key word = "gl_FragCoord" />
+                <Key word = "gl_FragColor" />
+                <Key word = "gl_FragDepth" />
+                <Key word = "gl_FrontFacing" />
+                <Key word = "gl_PointCoord" />
+                <Key word = "gl_SampleID" />
+                <Key word = "gl_SamplePosition" />
+                <Key word = "gl_SampleMaskIn" />
+                <Key word = "gl_SampleMask" />
+            </KeyWords>
+
+            <KeyWords name = "JumpStatements" bold="false" italic="false" color="Blue">
+				<Key word = "break" />
+				<Key word = "continue" />
+				<Key word = "discard" />
+                <Key word = "export" />
+				<Key word = "return" />
+			</KeyWords>
+			
+			<KeyWords name = "SelectionStatements" bold="true" italic="false" color="Blue">
+				<Key word = "case" />
+				<Key word = "else" />
+				<Key word = "if" />
+				<Key word = "switch" />
+				<Key word = "default" />
+			</KeyWords>
+			
+			
+		</RuleSet>
+	</RuleSets>
+</SyntaxDefinition>
+

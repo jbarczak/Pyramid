@@ -1,0 +1,15 @@
+<SyntaxModes version="1.0">
+
+    <Mode file       = "HLSL-Mode.xshd"
+          name       = "HLSL"
+          extensions = ".hlsl"/>
+    
+    <Mode file       = "GLSL-Mode.xshd"
+          name       = "GLSL"
+          extensions = ".glsl"/>
+    
+    <Mode file       = "CPP-Mode.xshd"
+	      name       = "C++.NET"
+	      extensions = ".c;.h;.cc;.C;.cpp;.hpp"/>
+
+</SyntaxModes>

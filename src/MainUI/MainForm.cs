@@ -137,7 +137,17 @@ namespace Pyramid
                 ILanguage l = (ILanguage)cmbLanguage.SelectedItem;
                 CompilePanel.Controls.Add(l.OptionsPanel.Panel);
                 m_CompileOptionsPanel = l.OptionsPanel;
+
+                try
+                {
+                    txtCode.SetHighlighting(l.Name);
+                }
+                catch( System.Exception ex )
+                {
+                    MessageBox.Show(ex.Message, "Uh-oh", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
+
         }
 
         private void cmbBackend_SelectedIndexChanged(object sender, EventArgs e)

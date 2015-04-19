@@ -48,7 +48,7 @@
             this.AnalysisPanel = new System.Windows.Forms.Panel();
             this.BackendPanel = new System.Windows.Forms.Panel();
             this.cmbBackend = new System.Windows.Forms.ComboBox();
-            this.txtCode = new System.Windows.Forms.RichTextBox();
+            this.txtCode = new ICSharpCode.TextEditor.TextEditorControl();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -278,13 +278,13 @@
             // txtCode
             // 
             this.txtCode.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtCode.Font = new System.Drawing.Font("Lucida Console", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtCode.EnableFolding = false;
+            this.txtCode.IsReadOnly = false;
             this.txtCode.Location = new System.Drawing.Point(0, 0);
             this.txtCode.Name = "txtCode";
             this.txtCode.Size = new System.Drawing.Size(254, 537);
-            this.txtCode.TabIndex = 0;
-            this.txtCode.Text = "float4 main () : SV_Target { return 0; }";
-            this.txtCode.WordWrap = false;
+            this.txtCode.TabIndex = 2;
+            this.txtCode.Text = "float4 main() : SV_TARGET { return 0; }\r\n";
             // 
             // MainForm
             // 
@@ -336,7 +336,7 @@
         private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
-        private System.Windows.Forms.RichTextBox txtCode;
+        private ICSharpCode.TextEditor.TextEditorControl txtCode;
 
 
 
