@@ -7,7 +7,7 @@ Pyramid is intended to eventually support arbitrary languages and glue together 
 
 IHVs:  You want developers scrutinizing the ISA for your GPUs.  You know you do :) I will work with you to incorporate your disassemblers into this tool.  I am willing to jump through hoops to make this happen, just tell me what I need to do.
 
-The best way to obtain a copy is to ask github to download a zip.  The 'bin' directory will be updated periodically with an up to date binary.
+The best way to obtain a copy is to ask github to download a zip.  The 'bin' directory will be updated periodically with an up to date binary.  
 
 Configuration
 --------------
@@ -29,6 +29,8 @@ Pyramid also includes a managed wrapper that contains interfaces to GLSLOptimize
 
 Building it Yourself
 ---------------------
+
+Due to my use of submodules, downloading a zip will not get you the full source.
 
 The best way to obtain the full source is to install git, open a shell, and type:  
     git clone --recurse https://github.com/jbarczak/Pyramid

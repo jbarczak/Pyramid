@@ -602,6 +602,7 @@
   </data>
   <data name="textBoxDescription.Text" xml:space="preserve">
     <value>Pyramid is a simple, cheap, free shader analysis tool. It is distributed under the GNU GPL.  Third party components included with Pyramid (FXC, CodeXL, AMD DXX Driver,
- PowerVR compilers) are the property of their respective owners and are provided solely for convenience.  </value>
+ PowerVR compilers) are the property of their respective owners and are provided solely for convenience.   
+ICSharpCode.TextEditor was originally written for SharpDevelop, and is distributed under the LGPL.</value>
   </data>
 </root>
