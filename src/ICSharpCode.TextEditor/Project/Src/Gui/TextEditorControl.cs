@@ -62,6 +62,23 @@ namespace ICSharpCode.TextEditor
 		
 		public event EventHandler ActiveTextAreaControlChanged;
 		
+        // JDB -- Change for pyramid
+        //   The drag handler will pass events up to the TextEditor usercontrol
+        //    so that outside event delegates will fire on a drag
+        internal void DispatchDragDrop(DragEventArgs drgevent)
+        {
+            base.OnDragDrop(drgevent);
+        }
+        internal void DispatchDragEnter(DragEventArgs drgevent)
+        {
+            base.OnDragEnter(drgevent);
+        }
+        internal void DispatchDragOver(DragEventArgs drgevent)
+        {
+            base.OnDragLeave(drgevent);
+        }
+        // JDB
+
 		public TextEditorControl()
 		{
 			SetStyle(ControlStyles.ContainerControl, true);

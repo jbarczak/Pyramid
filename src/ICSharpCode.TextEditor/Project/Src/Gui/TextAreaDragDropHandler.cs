@@ -24,9 +24,9 @@ namespace ICSharpCode.TextEditor
 			this.textArea = textArea;
 			textArea.AllowDrop = true;
 			
-			textArea.DragEnter += MakeDragEventHandler(OnDragEnter);
-			textArea.DragDrop  += MakeDragEventHandler(OnDragDrop);
-			textArea.DragOver  += MakeDragEventHandler(OnDragOver);
+		    textArea.DragEnter += MakeDragEventHandler(OnDragEnter);
+		    textArea.DragDrop  += MakeDragEventHandler(OnDragDrop);
+		    textArea.DragOver  += MakeDragEventHandler(OnDragOver);
 		}
 		
 		/// <summary>
@@ -59,9 +59,14 @@ namespace ICSharpCode.TextEditor
 		
 		protected void OnDragEnter(object sender, DragEventArgs e)
 		{
-			if (e.Data.GetDataPresent(typeof(string))) {
-				e.Effect = GetDragDropEffect(e);
-			}
+            // JDB:  Change for pyramid.  Pass the event up to the parent control
+            //  so that external handlers will fire
+            textArea.MotherTextEditorControl.DispatchDragEnter(e);
+
+        //    textArea.Parent.OnDragEnter(sender, e);
+		//	if (e.Data.GetDataPresent(typeof(string))) {
+		//		e.Effect = GetDragDropEffect(e);
+		//	}
 		}
 		
 		
@@ -78,6 +83,10 @@ namespace ICSharpCode.TextEditor
 		
 		protected void OnDragDrop(object sender, DragEventArgs e)
 		{
+            // JDB:  Change for pyramid.  Pass the event up to the parent control
+            //  so that external handlers will fire
+            textArea.MotherTextEditorControl.DispatchDragDrop(e);
+            /*
 			Point p = textArea.PointToClient(new Point(e.X, e.Y));
 			
 			if (e.Data.GetDataPresent(typeof(string))) {
@@ -114,10 +123,15 @@ namespace ICSharpCode.TextEditor
 					textArea.EndUpdate();
 				}
 			}
+            */
 		}
 		
 		protected void OnDragOver(object sender, DragEventArgs e)
 		{
+            // JDB:  Change for pyramid.  Pass the event up to the parent control
+            //  so that external handlers will fire
+            textArea.MotherTextEditorControl.DispatchDragOver(e);
+            /*
 			if (!textArea.Focused) {
 				textArea.Focus();
 			}
@@ -138,7 +152,8 @@ namespace ICSharpCode.TextEditor
 				}
 			} else {
 				e.Effect = DragDropEffects.None;
-			}
+			}*/
+             
 		}
 	}
 }

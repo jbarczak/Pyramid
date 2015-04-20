@@ -40,6 +40,7 @@
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.txtCode = new ICSharpCode.TextEditor.TextEditorControl();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.splitContainer3 = new System.Windows.Forms.SplitContainer();
             this.CompilePanel = new System.Windows.Forms.Panel();
@@ -48,7 +49,6 @@
             this.AnalysisPanel = new System.Windows.Forms.Panel();
             this.BackendPanel = new System.Windows.Forms.Panel();
             this.cmbBackend = new System.Windows.Forms.ComboBox();
-            this.txtCode = new ICSharpCode.TextEditor.TextEditorControl();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -170,6 +170,18 @@
             this.splitContainer1.SplitterDistance = 254;
             this.splitContainer1.TabIndex = 1;
             // 
+            // txtCode
+            // 
+            this.txtCode.AllowDrop = true;
+            this.txtCode.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtCode.EnableFolding = false;
+            this.txtCode.IsReadOnly = false;
+            this.txtCode.Location = new System.Drawing.Point(0, 0);
+            this.txtCode.Name = "txtCode";
+            this.txtCode.Size = new System.Drawing.Size(254, 537);
+            this.txtCode.TabIndex = 2;
+            this.txtCode.Text = "float4 main() : SV_TARGET { return 0; }\r\n";
+            // 
             // splitContainer2
             // 
             this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -274,17 +286,6 @@
             this.cmbBackend.Size = new System.Drawing.Size(316, 21);
             this.cmbBackend.TabIndex = 0;
             this.cmbBackend.SelectedIndexChanged += new System.EventHandler(this.cmbBackend_SelectedIndexChanged);
-            // 
-            // txtCode
-            // 
-            this.txtCode.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtCode.EnableFolding = false;
-            this.txtCode.IsReadOnly = false;
-            this.txtCode.Location = new System.Drawing.Point(0, 0);
-            this.txtCode.Name = "txtCode";
-            this.txtCode.Size = new System.Drawing.Size(254, 537);
-            this.txtCode.TabIndex = 2;
-            this.txtCode.Text = "float4 main() : SV_TARGET { return 0; }\r\n";
             // 
             // MainForm
             // 
