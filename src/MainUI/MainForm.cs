@@ -17,6 +17,7 @@ namespace Pyramid
         private Options m_Options;
         private IWrapper m_Wrapper;
         private string m_FileName = "";
+        private string m_LastBackend = "";
 
         public Options Options { get { return m_Options; } }
 
@@ -108,6 +109,8 @@ namespace Pyramid
 
             ClearResults();
 
+            IResultSet SelectedResultSet = null;
+
             ICompileOptions opts = m_CompileOptionsPanel.ReadOptions();
             foreach (IBackend b in m_Backends)
             {
@@ -116,11 +119,24 @@ namespace Pyramid
 
                 IResultSet r = b.Compile(txtCode.Text, opts);
                 if (r != null)
+                {
+                    if (r.Name.Equals(m_LastBackend))
+                        SelectedResultSet = r;
                     cmbBackend.Items.Add(r);
+                }
             }
 
-            if( cmbBackend.Items.Count > 0 )
-                cmbBackend.SelectedIndex = 0;
+            if (cmbBackend.Items.Count > 0)
+            {
+                if (SelectedResultSet != null)
+                    cmbBackend.SelectedIndex = cmbBackend.Items.IndexOf(SelectedResultSet);
+                else
+                    cmbBackend.SelectedIndex = 0;
+            }
+            else
+            {
+                m_LastBackend = "";
+            }
 
             this.UseWaitCursor = false;
         }
@@ -169,6 +185,7 @@ namespace Pyramid
                     AnalysisPanel.Controls.Add(rs.AnalysisPanel);
                     rs.AnalysisPanel.Dock = DockStyle.Fill;
                 }
+                m_LastBackend = rs.Name;
             }
         }
 
