@@ -10,11 +10,25 @@ namespace Pyramid
     class AMDDriverResultSet : IResultSet
     {
         private AMDDriverResultsPanel m_Results = new AMDDriverResultsPanel();
+        private TextBox m_Analysis = new TextBox();
 
         public string Name { get { return "AMDDXX"; } }
-        public Control AnalysisPanel { get { return null; } }
+        public Control AnalysisPanel { get { return m_Analysis; } }
         public Control ResultsPanel { get { return m_Results; } }
-  
+
+        public AMDDriverResultSet()
+        {
+            m_Analysis.Dock      = DockStyle.Fill;
+            m_Analysis.ReadOnly  = true;
+            m_Analysis.Multiline = true;
+            m_Analysis.Font = new System.Drawing.Font("Lucida Console", 8);
+
+            m_Results.AsicChanged += delegate(IAMDShader sh)
+            {
+                m_Analysis.Text = sh.PrintStats();
+            };
+        }
+
         public void Add( IAMDShader sh )
         {
             m_Results.AddResult(sh);

@@ -17,6 +17,7 @@ namespace Pyramid
         byte[] ReadISABytes();
         string Disassemble();
         string ListEncodings();
+        string PrintStats();
     };
 
     public interface IAMDDriver

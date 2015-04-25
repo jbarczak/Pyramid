@@ -14,6 +14,10 @@ namespace Pyramid
     {
         private List<IAMDShader> m_Shaders = new List<IAMDShader>();
 
+        public delegate void AsicChangedDelegate(IAMDShader shader);
+        public event AsicChangedDelegate AsicChanged;
+
+
         public AMDDriverResultsPanel()
         {
             InitializeComponent();
@@ -72,6 +76,7 @@ namespace Pyramid
                 txtHex.Text = "";
                 txtISA.Text = "";
             }
+            AsicChanged(m_Shaders[i]);
         }
 
     }
