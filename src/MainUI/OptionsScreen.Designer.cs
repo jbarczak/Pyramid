@@ -50,6 +50,9 @@
             this.btnDXX = new System.Windows.Forms.Button();
             this.lstBackends = new System.Windows.Forms.CheckedListBox();
             this.label6 = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
+            this.btnMali = new System.Windows.Forms.Button();
+            this.txtMali = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // txtCodeXL
@@ -149,7 +152,7 @@
             // btnOk
             // 
             this.btnOk.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnOk.Location = new System.Drawing.Point(439, 298);
+            this.btnOk.Location = new System.Drawing.Point(439, 343);
             this.btnOk.Name = "btnOk";
             this.btnOk.Size = new System.Drawing.Size(69, 25);
             this.btnOk.TabIndex = 12;
@@ -159,7 +162,7 @@
             // btnCancel
             // 
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(515, 298);
+            this.btnCancel.Location = new System.Drawing.Point(515, 343);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(69, 25);
             this.btnCancel.TabIndex = 13;
@@ -200,7 +203,7 @@
             // 
             // btnDefaults
             // 
-            this.btnDefaults.Location = new System.Drawing.Point(33, 299);
+            this.btnDefaults.Location = new System.Drawing.Point(33, 344);
             this.btnDefaults.Name = "btnDefaults";
             this.btnDefaults.Size = new System.Drawing.Size(65, 24);
             this.btnDefaults.TabIndex = 17;
@@ -220,8 +223,8 @@
             this.label5.Size = new System.Drawing.Size(56, 13);
             this.label5.TabIndex = 20;
             this.label5.Text = "AMD DXX";
-            this.toolTip1.SetToolTip(this.label5, "Directory where the PowerVR compilers can be found.  Default will be relative to " +
-        "working directory.");
+            this.toolTip1.SetToolTip(this.label5, "Directory where atidxx32.dll can be found.  Default will be relative to working d" +
+        "irectory.");
             // 
             // txtDXX
             // 
@@ -262,11 +265,46 @@
             this.label6.TabIndex = 23;
             this.label6.Text = "Backends";
             // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(24, 289);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(42, 13);
+            this.label7.TabIndex = 26;
+            this.label7.Text = "Mali Dir";
+            this.toolTip1.SetToolTip(this.label7, "Directory where the mali shader compiler can be found.  Default will be relative " +
+        "to working directory.");
+            // 
+            // btnMali
+            // 
+            this.btnMali.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnMali.Location = new System.Drawing.Point(545, 287);
+            this.btnMali.Name = "btnMali";
+            this.btnMali.Size = new System.Drawing.Size(32, 19);
+            this.btnMali.TabIndex = 25;
+            this.btnMali.Text = "...";
+            this.btnMali.UseVisualStyleBackColor = true;
+            this.btnMali.Click += new System.EventHandler(this.btnMali_Click);
+            // 
+            // txtMali
+            // 
+            this.txtMali.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtMali.Enabled = false;
+            this.txtMali.Location = new System.Drawing.Point(86, 286);
+            this.txtMali.Name = "txtMali";
+            this.txtMali.Size = new System.Drawing.Size(459, 20);
+            this.txtMali.TabIndex = 24;
+            // 
             // OptionsScreen
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(596, 335);
+            this.ClientSize = new System.Drawing.Size(596, 399);
+            this.Controls.Add(this.label7);
+            this.Controls.Add(this.btnMali);
+            this.Controls.Add(this.txtMali);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.lstBackends);
             this.Controls.Add(this.label5);
@@ -318,5 +356,8 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.CheckedListBox lstBackends;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Button btnMali;
+        private System.Windows.Forms.TextBox txtMali;
     }
 }

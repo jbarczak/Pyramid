@@ -14,6 +14,7 @@ namespace Pyramid
         public string TempPath { get; set; }
         public string PowerVRCompilerPath { get; set; }
         public string DXXDriverPath { get; set; }
+        public string MaliSCRoot { get; set; }
         public IEnumerable<string> DisabledBackends { get { return m_DisabledBackends; } }
 
         public void DisableBackend(string name)
@@ -32,6 +33,7 @@ namespace Pyramid
             opts.CodeXLPath          = "CodeXLAnalyzer.exe";
             opts.PowerVRCompilerPath = "PowerVR";
             opts.DXXDriverPath = "atidxx32.dll";
+            opts.MaliSCRoot = "MaliSC";
             opts.TempPath = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "Pyramid" );
@@ -83,6 +85,10 @@ namespace Pyramid
                 if (!map.TryGetValue("DXX", out dxx))
                     dxx = defaults.DXXDriverPath;
 
+                string mali;
+                if (!map.TryGetValue("Mali", out mali))
+                    mali = defaults.MaliSCRoot;
+
                 string disabledBackends;
                 if( map.TryGetValue("DisabledBackends", out disabledBackends))
                     opts.m_DisabledBackends.AddRange(disabledBackends.Split(','));
@@ -92,6 +98,7 @@ namespace Pyramid
                 opts.TempPath = temp;
                 opts.PowerVRCompilerPath = pvr;
                 opts.DXXDriverPath = dxx;
+                opts.MaliSCRoot = mali;
                 return opts;
             }
             catch( Exception e)
@@ -113,11 +120,12 @@ namespace Pyramid
                 string DisabledBackends = String.Join(",",m_DisabledBackends.ToArray());
 
                 File.WriteAllText(OptionsFile,
-                                   String.Format("D3DCompiler={0}\nCodeXL={1}\ntemp={2}\nPowerVR={3}\nDisabledBackends={4}\n",
+                                   String.Format("D3DCompiler={0}\nCodeXL={1}\ntemp={2}\nPowerVR={3}\nMali={4}\nDisabledBackends={5}\n",
                                                              D3DCompilerPath,
                                                              CodeXLPath,
                                                              TempPath,
                                                              PowerVRCompilerPath,
+                                                             MaliSCRoot,
                                                              DisabledBackends));
             }
             catch(Exception e)

@@ -66,6 +66,13 @@
     <Compile Include="Backends\AMDDriverResultsPanel.Designer.cs">
       <DependentUpon>AMDDriverResultsPanel.cs</DependentUpon>
     </Compile>
+    <Compile Include="Backends\MaliSCBackend.cs" />
+    <Compile Include="Backends\MaliSCResultsPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Backends\MaliSCResultsPanel.Designer.cs">
+      <DependentUpon>MaliSCResultsPanel.cs</DependentUpon>
+    </Compile>
     <Compile Include="Languages\ILanguage.cs" />
     <Compile Include="MainUI\AboutBox.cs">
       <SubType>Form</SubType>
@@ -135,6 +142,9 @@
     </Compile>
     <EmbeddedResource Include="Backends\AMDDriverResultsPanel.resx">
       <DependentUpon>AMDDriverResultsPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Backends\MaliSCResultsPanel.resx">
+      <DependentUpon>MaliSCResultsPanel.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainUI\AboutBox.resx">
       <DependentUpon>AboutBox.cs</DependentUpon>

@@ -49,6 +49,7 @@ namespace Pyramid
             backends.Add(new GLSlangBackend(m_Wrapper));
             backends.Add(new GLSLOptimizerBackend(m_Wrapper));
             backends.Add(new PowerVRBackend(opts.PowerVRCompilerPath, opts.TempPath));
+            backends.Add(new MaliSCBackend(opts.MaliSCRoot, opts.TempPath));
             m_Backends = backends;
         }
 
