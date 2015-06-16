@@ -395,7 +395,15 @@ namespace Disassembler{
                     uint EXPCNT  = pInst->ReadSIMMBits(6,4);
                     uint LKGMCNT = pInst->ReadSIMMBits(12,8);
                     
-                    Printf( printer, OPCODE_FORMAT"     vmcnt(%u) expcnt(%u) lkgmcnt(%u)\n", "S_WAITCNT", VMCNT,EXPCNT,LKGMCNT );
+                    char COUNTS[256]="";
+                    if( VMCNT != 15 )
+                        catprintf(COUNTS, "vmcnt(%u) ",VMCNT);
+                    if( EXPCNT != 7 )
+                        catprintf(COUNTS, "expcnt(%u) ",EXPCNT);
+                    if( LKGMCNT != 15 )
+                        catprintf(COUNTS, "lkgmcnt(%u) ",LKGMCNT );
+
+                    Printf( printer, OPCODE_FORMAT"     %s\n", "S_WAITCNT", COUNTS );
                 }
                 break;
 
