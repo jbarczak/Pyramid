@@ -40,7 +40,6 @@ namespace Simulator{
             uint8 vmcnt;
             uint8 expcnt;
             uint8 allocated;
-            uint8 retiring;
         };
 
 
@@ -108,9 +107,6 @@ namespace Simulator{
             // one of the freebies
             for( size_t i=0; i<nWaves; i++ )
             {
-                if( pWaves[i]->retiring )
-                    continue;
-
                 const GCN::Instruction* pOp = pOps[pWaves[i]->nCurrentOp].pInstruction;
                 if( pOp->GetClass() != GCN::IC_SCALAR_MEM && pOp->GetClass() != GCN::IC_SCALAR )
                     continue;
@@ -149,9 +145,7 @@ namespace Simulator{
             // look for a wave which has a VALU op to issue
             for( size_t i=0; i<nWaves; i++ )
             {
-                if( pWaves[i]->retiring )
-                    continue;
-
+         
                 // CLARIFICATION NEEDED
                 //   Do VECTOR_INTERP instructions need any special handling?
                 //   They interact with the LDS, but does that have any extra cost?
@@ -177,9 +171,7 @@ namespace Simulator{
             // look for a wave which has a VALU op to issue
             for( size_t i=0; i<nWaves; i++ )
             {
-                if( pWaves[i]->retiring )
-                    continue;
-
+           
                 const GCN::Instruction* pOp = pOps[pWaves[i]->nCurrentOp].pInstruction;
                 if( pOp->GetClass() != GCN::IC_BUFFER &&
                     pOp->GetClass() != GCN::IC_IMAGE )
@@ -202,9 +194,7 @@ namespace Simulator{
             // look for a wave which has an export to issue
             for( size_t i=0; i<nWaves; i++ )
             {
-                if( pWaves[i]->retiring )
-                    continue;
-
+           
                 const GCN::Instruction* pOp = pOps[pWaves[i]->nCurrentOp].pInstruction;
                 if( pOp->GetClass() != GCN::IC_EXPORT )
                     continue;
@@ -417,13 +407,22 @@ namespace Simulator{
             switch( pScalar->GetOpcode() )
             {
             case S_NOP           :         
-            case S_ENDPGM        :        
             case S_BARRIER       :        
             case S_SETHALT       :        
             case S_SLEEP         :        
-            case S_SETPRIO       :        
-            case S_ENDPGM_SAVED  : 
+            case S_SETPRIO       :
                 return true;
+
+                // don't issue endpgm until all the counters drop to zero
+            case S_ENDPGM        :        
+            case S_ENDPGM_SAVED  : 
+                if( pWave->lkgmcnt == 0 &&
+                    pWave->expcnt == 0 &&
+                    pWave->vmcnt == 0 )
+                {
+                    return true;
+                }
+                break;
             case S_WAITCNT       :        
                 {
                     if( pWave->lkgmcnt <= pScalar->GetLCGMWaitCount() &&
@@ -491,7 +490,6 @@ namespace Simulator{
                             pWave->nSIMD       = nSIMD;
                             pWave->nStartClock = nClock;
                             pWave->nCurrentOp  = 0;
-                            pWave->retiring    = 0;
                             nIssuedWaves++;
                         }
                     }
@@ -653,9 +651,7 @@ namespace Simulator{
             for( size_t i=0; i<nWaves; i++ )
             {
                 WaveState* pWave = pSIMDWaves[i];
-                if( pWave->retiring )
-                    continue;
-
+                
                 const SimOp* pOp = &pOps[pWave->nCurrentOp];
                 if( CanIssueFreeScalarOp(pOp->pInstruction, pWave) )
                 {
@@ -672,13 +668,8 @@ namespace Simulator{
                 if( pWaveFronts[i].allocated &&
                     pWaveFronts[i].nCurrentOp == nOps )
                 {
-                    pWaveFronts[i].retiring = 1;
-
-                    if( pWaveFronts[i].expcnt == 0 )
-                    {
-                        pWaveFronts[i].allocated = 0;
-                        nRetiredWaves++;
-                    }
+                    pWaveFronts[i].allocated = 0;
+                    nRetiredWaves++;
                 }
             }
 

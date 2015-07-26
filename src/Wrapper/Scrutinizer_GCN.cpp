@@ -336,22 +336,31 @@ System::String^ Scrutinizer_GCN::AnalyzeExecutionTrace( List<IInstruction^>^ ops
     float fClocks = results.nCycles;
 
     float fStallRate =
-        (results.nStallCycles[0]+results.nStallCycles[1]+results.nStallCycles[2]+results.nStallCycles[3])/fClocks;
+        (results.nStallCycles[0]+results.nStallCycles[1]+results.nStallCycles[2]+results.nStallCycles[3])/(fClocks);
     float fVALUUtil =
         (results.nVALUBusy[0]+results.nVALUBusy[1]+results.nVALUBusy[2]+results.nVALUBusy[3])/(4*fClocks);
 
-    float fVMemUtil = (results.nVMemBusy)/fClocks;
+    float fVMemUtil   = (results.nVMemBusy)/fClocks;
+    float fExpUtil    = (results.nExpBusy) / fClocks;
+    float fScalarUtil = (results.nSALUBusy)/fClocks;
+    float fSMemUtil   = (results.nSMemBusy)/fClocks;
 
     char buffer[4096];
     sprintf( buffer,
             "Clocks: %u\n (%.2f clocks/wave)\n"
-            "VALU util: %.2f%%\n"
-            "VMem util: %.2f%%\n"
+            "VALU util:   %.2f%%\n"
+            "VMem util:   %.2f%%\n"
+            "Exp  util:   %.2f%%\n"
+            "SALU util:   %.2f%%\n"
+            "SMem util:   %.2f%%\n"
             "Stall rate: %.2f%%\n",
             results.nCycles,
             fClocks / settings.nWavesToExecute,
             100.0f*fVALUUtil,
             100.0f*fVMemUtil,
+            100.0f*fExpUtil,
+            100.0f*fScalarUtil,
+            100.0f*fSMemUtil,
             100.0f*fStallRate
         );
 
