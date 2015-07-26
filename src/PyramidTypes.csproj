@@ -42,6 +42,7 @@
     <Compile Include="IAMDDriver.cs" />
     <Compile Include="IWrapper.cs" />
     <Compile Include="LanguageTypes.cs" />
+    <Compile Include="ScrutinizerTypes.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

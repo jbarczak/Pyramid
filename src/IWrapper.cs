@@ -23,5 +23,6 @@ namespace Pyramid
         GLSlang.ICompiler CreateGLSlangCompiler();
 
         IAMDDriver CreateAMDDriver( string DLLPath );
+
     }
 }

@@ -11,13 +11,15 @@ namespace Pyramid
         string Name { get; }
     };
 
-    public interface IAMDShader
+    public interface IAMDShader 
     {
         IAMDAsic Asic { get; }
         byte[] ReadISABytes();
         string Disassemble();
         string ListEncodings();
         string PrintStats();
+
+        Scrutinizer.IScrutinizer CreateScrutinizer( );
     };
 
     public interface IAMDDriver

@@ -140,6 +140,25 @@
     <Compile Include="Backends\PVRResultsPanel.Designer.cs">
       <DependentUpon>PVRResultsPanel.cs</DependentUpon>
     </Compile>
+    <Compile Include="Scrutinizer\Analysis\Algorithms.cs" />
+    <Compile Include="Scrutinizer\UI\CFGWidget.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Scrutinizer\UI\CFGWidget.Designer.cs">
+      <DependentUpon>CFGWidget.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Scrutinizer\UI\InstructionWidget.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Scrutinizer\UI\InstructionWidget.Designer.cs">
+      <DependentUpon>InstructionWidget.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Scrutinizer\UI\ScrutinizerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Scrutinizer\UI\ScrutinizerForm.Designer.cs">
+      <DependentUpon>ScrutinizerForm.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="Backends\AMDDriverResultsPanel.resx">
       <DependentUpon>AMDDriverResultsPanel.cs</DependentUpon>
     </EmbeddedResource>
@@ -183,6 +202,15 @@
     <EmbeddedResource Include="Backends\PVRResultsPanel.resx">
       <DependentUpon>PVRResultsPanel.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Scrutinizer\UI\CFGWidget.resx">
+      <DependentUpon>CFGWidget.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Scrutinizer\UI\InstructionWidget.resx">
+      <DependentUpon>InstructionWidget.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Scrutinizer\UI\ScrutinizerForm.resx">
+      <DependentUpon>ScrutinizerForm.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -222,6 +250,7 @@
       <Name>Wrapper</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy $(TargetPath) $(SolutionDir)\..\bin</PostBuildEvent>

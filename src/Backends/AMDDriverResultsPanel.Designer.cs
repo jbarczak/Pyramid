@@ -33,10 +33,11 @@
             this.txtISA = new System.Windows.Forms.TextBox();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.txtHex = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.cmbAsic = new System.Windows.Forms.ComboBox();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.txtEncodings = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.cmbAsic = new System.Windows.Forms.ComboBox();
+            this.btnScrutinize = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -55,7 +56,7 @@
             this.tabControl1.Location = new System.Drawing.Point(3, 38);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(262, 185);
+            this.tabControl1.Size = new System.Drawing.Size(320, 185);
             this.tabControl1.TabIndex = 5;
             // 
             // tabPage2
@@ -64,7 +65,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 4);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(254, 159);
+            this.tabPage2.Size = new System.Drawing.Size(312, 159);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Asm";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -78,7 +79,7 @@
             this.txtISA.Name = "txtISA";
             this.txtISA.ReadOnly = true;
             this.txtISA.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtISA.Size = new System.Drawing.Size(248, 153);
+            this.txtISA.Size = new System.Drawing.Size(306, 153);
             this.txtISA.TabIndex = 0;
             // 
             // tabPage1
@@ -87,7 +88,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 4);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(254, 159);
+            this.tabPage1.Size = new System.Drawing.Size(312, 159);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Hex";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -101,29 +102,8 @@
             this.txtHex.Name = "txtHex";
             this.txtHex.ReadOnly = true;
             this.txtHex.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtHex.Size = new System.Drawing.Size(248, 153);
+            this.txtHex.Size = new System.Drawing.Size(306, 153);
             this.txtHex.TabIndex = 0;
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(31, 14);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(27, 13);
-            this.label1.TabIndex = 4;
-            this.label1.Text = "Asic";
-            // 
-            // cmbAsic
-            // 
-            this.cmbAsic.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.cmbAsic.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbAsic.FormattingEnabled = true;
-            this.cmbAsic.Location = new System.Drawing.Point(70, 11);
-            this.cmbAsic.Name = "cmbAsic";
-            this.cmbAsic.Size = new System.Drawing.Size(166, 21);
-            this.cmbAsic.TabIndex = 3;
-            this.cmbAsic.SelectedIndexChanged += new System.EventHandler(this.cmbAsic_SelectedIndexChanged);
             // 
             // tabPage3
             // 
@@ -131,7 +111,7 @@
             this.tabPage3.Location = new System.Drawing.Point(4, 4);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(254, 159);
+            this.tabPage3.Size = new System.Drawing.Size(312, 159);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Encodings";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -145,18 +125,51 @@
             this.txtEncodings.Name = "txtEncodings";
             this.txtEncodings.ReadOnly = true;
             this.txtEncodings.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtEncodings.Size = new System.Drawing.Size(248, 153);
+            this.txtEncodings.Size = new System.Drawing.Size(306, 153);
             this.txtEncodings.TabIndex = 1;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(8, 14);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(27, 13);
+            this.label1.TabIndex = 4;
+            this.label1.Text = "Asic";
+            // 
+            // cmbAsic
+            // 
+            this.cmbAsic.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.cmbAsic.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbAsic.FormattingEnabled = true;
+            this.cmbAsic.Location = new System.Drawing.Point(47, 11);
+            this.cmbAsic.Name = "cmbAsic";
+            this.cmbAsic.Size = new System.Drawing.Size(199, 21);
+            this.cmbAsic.TabIndex = 3;
+            this.cmbAsic.SelectedIndexChanged += new System.EventHandler(this.cmbAsic_SelectedIndexChanged);
+            // 
+            // btnScrutinize
+            // 
+            this.btnScrutinize.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnScrutinize.Location = new System.Drawing.Point(252, 7);
+            this.btnScrutinize.Name = "btnScrutinize";
+            this.btnScrutinize.Size = new System.Drawing.Size(64, 27);
+            this.btnScrutinize.TabIndex = 7;
+            this.btnScrutinize.Text = "Scrutinize";
+            this.btnScrutinize.UseVisualStyleBackColor = true;
+            this.btnScrutinize.Click += new System.EventHandler(this.btnScrutinize_Click);
             // 
             // AMDDriverResultsPanel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.btnScrutinize);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.cmbAsic);
             this.Name = "AMDDriverResultsPanel";
-            this.Size = new System.Drawing.Size(268, 235);
+            this.Size = new System.Drawing.Size(326, 235);
             this.tabControl1.ResumeLayout(false);
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
@@ -180,6 +193,7 @@
         private System.Windows.Forms.ComboBox cmbAsic;
         private System.Windows.Forms.TabPage tabPage3;
         private System.Windows.Forms.TextBox txtEncodings;
+        private System.Windows.Forms.Button btnScrutinize;
 
     }
 }

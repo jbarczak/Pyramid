@@ -44,6 +44,18 @@
     <ClCompile Include="GCNDecoder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AMDAsic_Impl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GCNSimulator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AMDShader_Impl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Scrutinizer_GCN.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Utilities.h">
@@ -77,6 +89,21 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="GCN1Decoder.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AMDAsic_Impl.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GCNBufferedPrinter.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GCNSimulator.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AMDShader_Impl.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scrutinizer_GCN.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

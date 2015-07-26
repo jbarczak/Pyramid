@@ -2,9 +2,11 @@
 uint nLights;
 Buffer<float3> g_LightPositions;
 Buffer<float3> g_LightColors;
-
+Texture2D<float3> g_Tx;
+sampler g_S;
 float4 main( float3 P : P, float3 N : N ) : SV_Target
 {
+    float3 Diff = g_Tx.Sample(g_S,P.xy);
     float3 C=0;
     for( uint i=0; i<nLights; i++ )
     {
@@ -13,5 +15,5 @@ float4 main( float3 P : P, float3 N : N ) : SV_Target
         float3 L = normalize( Pl - P );
         C += Cl*saturate(dot(N,L));
     }
-    return float4(C,1);
+    return float4(C*Diff,1);
 }

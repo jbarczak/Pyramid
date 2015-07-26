@@ -1217,7 +1217,6 @@ namespace _GCN3Decoder_INTERNAL
         uint GetOperandWidthInDWORDs() const;
         
 
-        const Instruction* GetBranchTarget() const { return 0; }
         bool IsBranch() const { return false; }
     };
 

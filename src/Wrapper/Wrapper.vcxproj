@@ -80,7 +80,9 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AMDAsic_Impl.cpp" />
     <ClCompile Include="AMDDriver_Impl.cpp" />
+    <ClCompile Include="AMDShader_Impl.cpp" />
     <ClCompile Include="D3DCompiler_Impl.cpp" />
     <ClCompile Include="GCN1Decoder.cpp" />
     <ClCompile Include="GCNDecoder.cpp" />
@@ -89,23 +91,30 @@
     </ClCompile>
     <ClCompile Include="GCNEnums.cpp" />
     <ClCompile Include="GCNIsa.cpp" />
+    <ClCompile Include="GCNSimulator.cpp" />
     <ClCompile Include="GLSlang_Impl.cpp" />
     <ClCompile Include="GLSlang_Stubs.cpp" />
     <ClCompile Include="GLSLOpt_Impl.cpp" />
     <ClCompile Include="GCN3Decoder.cpp" />
+    <ClCompile Include="Scrutinizer_GCN.cpp" />
     <ClCompile Include="Wrapper.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AMDAsic_Impl.h" />
     <ClInclude Include="AMDDriver_Impl.h" />
+    <ClInclude Include="AMDShader_Impl.h" />
     <ClInclude Include="D3DCompiler_Impl.h" />
     <ClInclude Include="GCN1Decoder.h" />
     <ClInclude Include="GCN3Decoder.h" />
+    <ClInclude Include="GCNBufferedPrinter.h" />
     <ClInclude Include="GCNDecoder.h" />
     <ClInclude Include="GCNDisassembler.h" />
     <ClInclude Include="GCNEnums.h" />
     <ClInclude Include="GCNIsa.h" />
+    <ClInclude Include="GCNSimulator.h" />
     <ClInclude Include="GLSlang_Impl.h" />
     <ClInclude Include="GLSLOpt_Impl.h" />
+    <ClInclude Include="Scrutinizer_GCN.h" />
     <ClInclude Include="Utilities.h" />
   </ItemGroup>
   <ItemGroup>

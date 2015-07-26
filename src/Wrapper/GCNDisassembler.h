@@ -18,9 +18,7 @@ namespace Disassembler{
         virtual void Push( const char* pText ) = 0;
     };
 
-    /// Returns a pointer to the instruction following the input instruction
-    ///   Returns NULL if the instruction encoding wasn't recognized
-    const Instruction* Disassemble( IPrinter& printer, const Instruction* pIt );
+    void Disassemble( IPrinter& printer, const Instruction* pIt );
 
     /// Disassemble a full program, returns false if an instruction is encountered whose encoding
     ///  wasn't recognized

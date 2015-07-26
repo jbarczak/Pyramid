@@ -16,8 +16,7 @@ namespace Pyramid
 
         public delegate void AsicChangedDelegate(IAMDShader shader);
         public event AsicChangedDelegate AsicChanged;
-
-
+        
         public AMDDriverResultsPanel()
         {
             InitializeComponent();
@@ -77,6 +76,18 @@ namespace Pyramid
                 txtISA.Text = "";
             }
             AsicChanged(m_Shaders[i]);
+        }
+
+        private void btnScrutinize_Click(object sender, EventArgs e)
+        {
+            int i = cmbAsic.SelectedIndex;
+            if (i >= 0 && i < m_Shaders.Count)
+            {
+                IAMDShader sh = m_Shaders[cmbAsic.SelectedIndex];
+                Scrutinizer.UI.ScrutinizerForm f = new Scrutinizer.UI.ScrutinizerForm(sh);
+                f.ShowDialog();
+            }
+          
         }
 
     }

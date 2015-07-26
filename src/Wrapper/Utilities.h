@@ -2,6 +2,8 @@
 #ifndef _UTILITIES_H_
 #define _UTILITIES_H_
 
+#include <vcclr.h>
+
 #pragma unmanaged
 #include <string.h>
 #include <malloc.h>

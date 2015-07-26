@@ -2774,7 +2774,7 @@ namespace GCN
 
 
 
-    bool ScalarInstruction::IsBranch() const
+    bool ScalarInstruction::IsControlFlowOp() const
     {
         switch( GetOpcode() )
         {
@@ -2807,6 +2807,61 @@ namespace GCN
             return false;
         }
     }
+
+    bool ScalarInstruction::IsConditionalJump() const
+    {
+        switch( GetOpcode() )
+        {
+        case S_CBRANCH_G_FORK              :
+        case S_CBRANCH_I_FORK              :
+        case S_CBRANCH_JOIN                :
+        case S_CBRANCH_SCC0                :
+        case S_CBRANCH_SCC1                :
+        case S_CBRANCH_VCCZ                :
+        case S_CBRANCH_VCCNZ               :
+        case S_CBRANCH_EXECZ               :
+        case S_CBRANCH_EXECNZ              :
+        case S_CBRANCH_CDBGSYS             :
+        case S_CBRANCH_CDBGUSER            :
+        case S_CBRANCH_CDBGSYS_OR_USER     :
+        case S_CBRANCH_CDBGSYS_AND_USER    :
+            return true;
+
+        default:
+            return false;
+        }
+    }
+
+    bool ScalarInstruction::IsUnconditionalJump() const
+    {
+        switch( GetOpcode() )
+        {
+        case S_SETPC_B64                   :
+        case S_SWAPPC_B64                  :
+        case S_RFE_B64                     :
+        case S_TRAP                        :               
+        case S_RFE_RESTORE_B64             :
+        case S_BRANCH                      :
+            return true;
+
+        default:
+            return false;
+        }
+    }
+
+    bool ScalarInstruction::IsWavefrontHalt() const
+    {
+        switch( GetOpcode() )
+        {
+        case S_ENDPGM                      :
+        case S_SETHALT                     :
+        case S_SENDMSGHALT                 :
+            return true;
+        default:
+            return false;
+        }
+    }
+
 
     uint ScalarMemoryInstruction::GetResourceWidthInDWORDs() const
     {
@@ -2957,6 +3012,208 @@ namespace GCN
             break;
 
         }
+    }
+
+
+    bool ImageInstruction::IsFilteredFetch( ) const
+    {
+        switch( GetOpcode() )
+        {
+        case IMAGE_SAMPLE          :   //: sample texture map.
+        case IMAGE_SAMPLE_CL       :   //: sample texture map, with LOD clamp specified in shader.
+        case IMAGE_SAMPLE_D        :   //: sample texture map, with user derivatives.
+        case IMAGE_SAMPLE_D_CL     :   //: sample texture map, with LOD clamp specified in shader, with user derivatives.
+        case IMAGE_SAMPLE_L        :   //: sample texture map, with user LOD.
+        case IMAGE_SAMPLE_B        :   //: sample texture map, with lod bias.
+        case IMAGE_SAMPLE_B_CL     :   //: sample texture map, with LOD clamp specified in shader, with lod bias.
+        case IMAGE_SAMPLE_LZ       :   //: sample texture map, from level 0.
+        case IMAGE_SAMPLE_C        :   //: sample texture map, with PCF.
+        case IMAGE_SAMPLE_C_CL     :   //: SAMPLE_C, with LOD clamp specified in shader.
+        case IMAGE_SAMPLE_C_D      :   //: SAMPLE_C, with user derivatives.
+        case IMAGE_SAMPLE_C_D_CL   :   //: SAMPLE_C, with LOD clamp specified in shader,with user derivatives.
+        case IMAGE_SAMPLE_C_L      :   //: SAMPLE_C, with user LOD.
+        case IMAGE_SAMPLE_C_B      :   //: SAMPLE_C, with lod bias.
+        case IMAGE_SAMPLE_C_B_CL   :   //: SAMPLE_C, with LOD clamp specified in shader, with lod bias.
+        case IMAGE_SAMPLE_C_LZ     : //     : SAMPLE_C, from level 0.
+        case IMAGE_SAMPLE_O        : // : sample texture map, with user offsets.
+        case IMAGE_SAMPLE_CL_O     : //     : SAMPLE_O with LOD clamp specified in shader.
+        case IMAGE_SAMPLE_D_O      : // : SAMPLE_O, with user derivatives.
+        case IMAGE_SAMPLE_D_CL_O   : //     : SAMPLE_O, with LOD clamp specified in shader,with user derivatives.
+        case IMAGE_SAMPLE_L_O      : // : SAMPLE_O, with user LOD.
+        case IMAGE_SAMPLE_B_O      : // : SAMPLE_O, with lod bias.
+        case IMAGE_SAMPLE_B_CL_O   : // : SAMPLE_O, with LOD clamp specified in shader,with lod bias.
+        case IMAGE_SAMPLE_LZ_O     : // : SAMPLE_O, from level 0.
+        case IMAGE_SAMPLE_C_O      : // : SAMPLE_C with user specified offsets.
+        case IMAGE_SAMPLE_C_CL_O   : // : SAMPLE_C_O, with LOD clamp specified in shader.
+        case IMAGE_SAMPLE_C_D_O    : // : SAMPLE_C_O, with user derivatives.
+        case IMAGE_SAMPLE_C_D_CL_O : // : SAMPLE_C_O, with LOD clamp specified in shader, with user derivatives.
+        case IMAGE_SAMPLE_C_L_O    : // : SAMPLE_C_O, with user LOD.
+        case IMAGE_SAMPLE_C_B_O    : // : SAMPLE_C_O, with lod bias.
+        case IMAGE_SAMPLE_C_B_CL_O : // : SAMPLE_C_O, with LOD clamp specified in shader, with lod bias.
+        case IMAGE_SAMPLE_C_LZ_O   : // : SAMPLE_C_O, from level 0.
+        case IMAGE_SAMPLE_CD        : // : sample texture map, with user derivatives (LOD per quad)
+        case IMAGE_SAMPLE_CD_CL     : // : sample texture map, with LOD clamp specified in  shader, with user derivatives (LOD per quad).
+        case IMAGE_SAMPLE_C_CD      : // : SAMPLE_C, with user derivatives (LOD per quad).
+        case IMAGE_SAMPLE_C_CD_CL   : // : SAMPLE_C, with LOD clamp specified in shader, with user derivatives (LOD per quad).
+        case IMAGE_SAMPLE_CD_O      : // : SAMPLE_O, with user derivatives (LOD per quad).
+        case IMAGE_SAMPLE_CD_CL_O   : // : SAMPLE_O, with LOD clamp specified in shader, with user derivatives (LOD per quad).
+        case IMAGE_SAMPLE_C_CD_O    : // : SAMPLE_C_O, with user derivatives (LOD per quad).
+        case IMAGE_SAMPLE_C_CD_CL_O : 
+            return true;
+        default:
+            return false;
+        }
+    }
+
+    bool ImageInstruction::IsGather() const
+    {
+        switch( GetOpcode() )
+        {
+        case IMAGE_GATHER4         :// : gather 4 single component elements (2x2).
+        case IMAGE_GATHER4_CL      :// : gather 4 single component elements (2x2) with user LOD clamp.
+        case IMAGE_GATHER4_L       :// : gather 4 single component elements (2x2) with user LOD.
+        case IMAGE_GATHER4_B       :// : gather 4 single component elements (2x2) with user bias.
+        case IMAGE_GATHER4_B_CL    :// : gather 4 single component elements (2x2) with user bias and clamp.
+        case IMAGE_GATHER4_LZ      :// : gather 4 single component elements (2x2) at level 0.
+        case IMAGE_GATHER4_C       :// : gather 4 single component elements (2x2) with PCF.
+        case IMAGE_GATHER4_C_CL    :// : gather 4 single component elements (2x2) with user LOD clamp and PCF.
+        case IMAGE_GATHER4_C_L     :// : gather 4 single component elements (2x2) with user LOD and PCF.
+        case IMAGE_GATHER4_C_B     :// : gather 4 single component elements (2x2) with user bias and PCF.
+        case IMAGE_GATHER4_C_B_CL  :// : gather 4 single component elements (2x2) with user bias, clamp and PCF.
+        case IMAGE_GATHER4_C_LZ    :// : gather 4 single component elements (2x2) at level 0, with PCF.
+        case IMAGE_GATHER4_O       :// : GATHER4, with user offsets.
+        case IMAGE_GATHER4_CL_O    :// : GATHER4_CL, with user offsets.
+        case IMAGE_GATHER4_L_O     :// : GATHER4_L, with user offsets.
+        case IMAGE_GATHER4_B_O     :// : GATHER4_B, with user offsets.
+        case IMAGE_GATHER4_B_CL_O  :// : GATHER4_B_CL, with user offsets.
+        case IMAGE_GATHER4_LZ_O    :// : GATHER4_LZ, with user offsets.
+        case IMAGE_GATHER4_C_O     :// : GATHER4_C, with user offsets.
+        case IMAGE_GATHER4_C_CL_O  :// : GATHER4_C_CL, with user offsets.
+        case IMAGE_GATHER4_C_L_O   :// : GATHER4_C_L, with user offsets.
+        case IMAGE_GATHER4_C_B_O   :// : GATHER4_B, with user offsets.
+        case IMAGE_GATHER4_C_B_CL_O:// : GATHER4_B_CL, with user offsets.
+        case IMAGE_GATHER4_C_LZ_O  :// : GATHER4_C_LZ, with user offsets.
+            return true;
+        default:
+            return false;
+        }
+    }
+
+    bool ImageInstruction::IsUnfilteredLoadStore() const
+    {
+        switch( GetOpcode() )
+        {
+        case IMAGE_LOAD            :  // Image memory load with format conversion specified in T#. No sampler.
+        case IMAGE_LOAD_MIP        :  // Image memory load with user-supplied mip level. No sampler.
+        case IMAGE_LOAD_PCK        :  // Image memory load with no format conversion. No sampler.
+        case IMAGE_LOAD_PCK_SGN    :  // Image memory load with with no format conversion and sign extension. No sampler.
+        case IMAGE_LOAD_MIP_PCK    :  // Image memory load with user-supplied mip level, no format conversion. No sampler.
+        case IMAGE_LOAD_MIP_PCK_SGN:  // Image memory load with user-supplied mip level, no format conversion and with sign extension. No sampler.
+        case IMAGE_STORE           :  //: Image memory store with format conversion specified in T#. No sampler.
+        case IMAGE_STORE_MIP       :  //: Image memory store with format conversion specified in T# to user specified mip level. No sampler.
+        case IMAGE_STORE_PCK       :  //: Image memory store of packed data without format conversion. No sampler.
+        case IMAGE_STORE_MIP_PCK   : //: Image memory store of packed data without format conversion to user-supplied mip level. No sampler.
+            return true;
+        default:
+            return false;
+        }
+    }
+
+
+    bool ImageInstruction::IsMemoryWrite() const
+    {
+        switch( GetOpcode() )
+        {
+        case IMAGE_STORE          :   //: Image memory store with format conversion specified in T#. No sampler.
+        case IMAGE_STORE_MIP      :   //: Image memory store with format conversion specified in T# to user specified mip level. No sampler.
+        case IMAGE_STORE_PCK      :   //: Image memory store of packed data without format conversion. No sampler.
+        case IMAGE_STORE_MIP_PCK  :  //: Image memory store of packed data without format conversion to user-supplied mip level. No sampler.
+        case IMAGE_ATOMIC_SWAP    :   //: dst=src, returns previous value if glc==1.
+        case IMAGE_ATOMIC_CMPSWAP :   //: dst = (dst==cmp) ? src : dst. Returns previous value if glc==1.
+        case IMAGE_ATOMIC_ADD     :   //: dst += src. Returns previous value if glc==1.
+        case IMAGE_ATOMIC_SUB     :   //: dst -= src. Returns previous value if glc==1.
+        case IMAGE_ATOMIC_RSUB    :   //: dst = src-dst. Returns previous value if glc==1.  SI ONLY
+        case IMAGE_ATOMIC_SMIN    :   //: dst = (src < dst) ? src : dst (signed). Returns previous value if glc==1.
+        case IMAGE_ATOMIC_UMIN    :   //: dst = (src < dst) ? src : dst (unsigned). Returns previous value if glc==1.
+        case IMAGE_ATOMIC_SMAX    :   //: dst = (src > dst) ? src : dst (signed). Returns previous value if glc==1.
+        case IMAGE_ATOMIC_UMAX    :   //: dst = (src > dst) ? src : dst (unsigned). Returns previous value if glc==1.
+        case IMAGE_ATOMIC_AND     :   //: dst &= src. Returns previous value if glc==1.
+        case IMAGE_ATOMIC_OR      :   //: dst |= src. Returns previous value if glc==1.
+        case IMAGE_ATOMIC_XOR     :   //: dst ^= src. Returns previous value if glc==1.
+        case IMAGE_ATOMIC_INC     :   //: dst = (dst >= src) ? 0 : dst+1. Returns previous value if glc==1.
+        case IMAGE_ATOMIC_DEC     :   //: dst = ((dst==0 || (dst > src)) ? src : dst-1. Returns previous value if glc==1.
+        case IMAGE_ATOMIC_FCMPSWAP:   //: dst = (dst == cmp) ? src : dst, returns previous value of dst if glc==1 - double and float atomic compare swap. Obeys floating point compare rules for special values.
+        case IMAGE_ATOMIC_FMIN    :   //: dst = (src < dst) ? src : dst, returns previous value of dst if glc==1 - double and float atomic min (handles NaN/INF/denorm).
+        case IMAGE_ATOMIC_FMAX    :   //: dst = (src > dst) ? src : dst, returns previous value of dst if glc==1 - double and float atomic min (handles NaN/INF/denorm).
+            return true;
+        }
+        return false;
+    }
+
+    bool BufferInstruction::IsMemoryWrite() const
+    {
+        switch( GetOpcode() )
+        {
+        case BUFFER_STORE_FORMAT_X       :
+        case BUFFER_STORE_FORMAT_XY      :
+        case BUFFER_STORE_FORMAT_XYZ     :
+        case BUFFER_STORE_FORMAT_XYZW    :
+        case BUFFER_STORE_BYTE           :
+        case BUFFER_STORE_SHORT          :
+        case BUFFER_STORE_DWORD          :
+        case BUFFER_STORE_DWORDX2        :
+        case BUFFER_STORE_DWORDX4        :
+        case BUFFER_STORE_DWORDX3        :
+        case BUFFER_ATOMIC_SWAP          :
+        case BUFFER_ATOMIC_CMPSWAP       :
+        case BUFFER_ATOMIC_ADD           :
+        case BUFFER_ATOMIC_SUB           :
+        case BUFFER_ATOMIC_RSUB          :
+        case BUFFER_ATOMIC_SMIN          :
+        case BUFFER_ATOMIC_UMIN          :
+        case BUFFER_ATOMIC_SMAX          :
+        case BUFFER_ATOMIC_UMAX          :
+        case BUFFER_ATOMIC_AND           :
+        case BUFFER_ATOMIC_OR            :
+        case BUFFER_ATOMIC_XOR           :
+        case BUFFER_ATOMIC_INC           :
+        case BUFFER_ATOMIC_DEC           :
+        case BUFFER_ATOMIC_FCMPSWAP      :
+        case BUFFER_ATOMIC_FMIN          :
+        case BUFFER_ATOMIC_FMAX          :
+        case BUFFER_ATOMIC_SWAP_X2       :
+        case BUFFER_ATOMIC_CMPSWAP_X2    :
+        case BUFFER_ATOMIC_ADD_X2        :
+        case BUFFER_ATOMIC_SUB_X2        :
+        case BUFFER_ATOMIC_RSUB_X2       :
+        case BUFFER_ATOMIC_SMIN_X2       :
+        case BUFFER_ATOMIC_UMIN_X2       :
+        case BUFFER_ATOMIC_SMAX_X2       :
+        case BUFFER_ATOMIC_UMAX_X2       :
+        case BUFFER_ATOMIC_AND_X2        :
+        case BUFFER_ATOMIC_OR_X2         :
+        case BUFFER_ATOMIC_XOR_X2        :
+        case BUFFER_ATOMIC_INC_X2        :
+        case BUFFER_ATOMIC_DEC_X2        :
+        case BUFFER_ATOMIC_FCMPSWAP_X2   :
+        case BUFFER_ATOMIC_FMIN_X2       :
+        case BUFFER_ATOMIC_FMAX_X2       :
+        case BUFFER_STORE_LDS_DWORD      :   
+        case BUFFER_STORE_FORMAT_D16_X   :   
+        case BUFFER_STORE_FORMAT_D16_XY  :   
+        case BUFFER_STORE_FORMAT_D16_XYZ :   
+        case BUFFER_STORE_FORMAT_D16_XYZW:   
+        case TBUFFER_STORE_FORMAT_X            :
+        case TBUFFER_STORE_FORMAT_XY           :
+        case TBUFFER_STORE_FORMAT_XYZ          :
+        case TBUFFER_STORE_FORMAT_XYZW         :
+        case TBUFFER_STORE_FORMAT_D16_X        :
+        case TBUFFER_STORE_FORMAT_D16_XY       :
+        case TBUFFER_STORE_FORMAT_D16_XYZ      :
+        case TBUFFER_STORE_FORMAT_D16_XYZW     :
+            return true;
+        }
+        return false;
     }
 
 }

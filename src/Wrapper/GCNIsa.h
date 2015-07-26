@@ -172,8 +172,12 @@ namespace GCN
     class ScalarInstruction : public Instruction
     {
     public:
+        bool IsConditionalJump() const;
+        bool IsUnconditionalJump() const;
+        bool IsWavefrontHalt() const;
 
-        bool IsBranch() const;
+        /// Test for any instruction that alters control flow.  Includes branches, jumps, halts, and barriers
+        bool IsControlFlowOp() const;
 
         const uint8* GetBranchTarget() const { return Fields.Scalar.m_pBranchTarget; }
         
@@ -192,6 +196,10 @@ namespace GCN
         Sources GetSource(uint i) const { return Fields.Scalar.m_Sources[i]; }
         Dests GetDest() const { return Fields.Scalar.m_Dest; }
 
+        bool IsWait() const { return GetOpcode() == S_WAITCNT; };
+        uint GetVMwaitCount() const   { return ReadSIMMBits(3,0); }
+        uint GetLCGMWaitCount() const { return ReadSIMMBits(6,4); }
+        uint GetEXPWaitCount() const  { return ReadSIMMBits(12,8); }
     };
 
 
@@ -301,6 +309,8 @@ namespace GCN
         Sources GetSOffset() const { return Fields.Buffer.m_SOffset; }
         uint GetResultWidthInDWORDS() const { return GetResultWidthInDWORDs(GetOpcode()); }
 
+        /// Test for a store or atomic store
+        bool IsMemoryWrite() const;
     };
 
 
@@ -325,6 +335,12 @@ namespace GCN
         uint GetSamplerWidthInDWORDS() const  { return GetSamplerWidthInDWORDs(GetOpcode()); }
         uint GetResourceWidthInDWORDS() const { return Fields.Image.m_bRes256*4 + 4; }
         uint GetResultWidthInDWORDS() const;
+        bool IsFilteredFetch() const;
+        bool IsUnfilteredLoadStore() const;
+        bool IsGather() const;
+
+        /// Test for a store or atomic store
+        bool IsMemoryWrite() const;
     };
 
 };

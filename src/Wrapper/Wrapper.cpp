@@ -36,6 +36,8 @@ namespace Pyramid
         {
             return gcnew AMDDriver_Impl(DLLPath);
         }
+
+        
     };
 
 

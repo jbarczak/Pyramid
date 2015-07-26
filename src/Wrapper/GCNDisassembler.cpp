@@ -1329,6 +1329,12 @@ namespace Disassembler{
         }
     }
 
+
+    void Disassemble( IPrinter& printer, const Instruction* pOp )
+    {
+        _INTERNAL::Disassemble(printer,pOp,0);    
+    }
+
     bool DisassembleProgram( IDecoder& decoder, IPrinter& printer, const void* pISA, size_t nISASize )
     {
         std::vector<const uint8*> Labels;
@@ -1367,7 +1373,7 @@ namespace Disassembler{
             if( tmp.GetClass() == IC_SCALAR )
             {
                 const ScalarInstruction* pI = static_cast<const ScalarInstruction*>(&tmp);
-                if( pI->IsBranch() )
+                if( pI->IsControlFlowOp() )
                 {
                     Branches.push_back( pInst );
                     const uint8* pTarget = pI->GetBranchTarget();
