@@ -3,6 +3,7 @@
 #include "GCNIsa.h"
 
 #include <string.h>
+#include <algorithm>
 
 namespace GCN{
 namespace Simulator{
@@ -462,8 +463,6 @@ namespace Simulator{
         for( size_t i=0; i<nOps; i++ )
             pOps[i].nStalls=0;
 
-        memset(&rResults,0,sizeof(rResults));
-
         while(1)
         {
             // Issue new wavefront if its time
@@ -628,12 +627,6 @@ namespace Simulator{
             }
 
             // Try and issue an export
-            // 
-            // CLARIFICATION NEEDED
-            //  I'm assuming that exports are async with the wave, but that
-            //   waves must wait for their exports to finish before retiring.
-            //  Is that correct?
-            //
             WaveState* pExpWave = FindExportToIssue( pOps, pSIMDWaves, nWaves );
             if( pExpWave )
             {
@@ -701,7 +694,6 @@ namespace Simulator{
                 // VALU waves don't get their IP incremented
                 //   until after the op completes.  This is done to ensure that the wave
                 //   blocks itself if it's doing a long-latency operation
-                //pVALUWave->nCurrentOp++;
                 rResults.nVALUIssued++;
             }
             if( pVMemWave )
@@ -715,15 +707,49 @@ namespace Simulator{
                 rResults.nExpIssued++;
             }
 
+            // check for clocks where nothing happens and track them
+            //  Don't count as a stall if VALU is occupied by a long-latency op
+            bool bVALUStarved = !pVALUWave && !pWavesInVALU[nCurrentSIMD];
 
-            if( !( pScalarWave|| pVALUWave || pVMemWave || pExpWave || !nFreeOps ) )
+            if( !pScalarWave && bVALUStarved && !pVMemWave && !pExpWave && !nFreeOps ) 
             {
                 rResults.nStallCycles[nCurrentSIMD]++;
                 rResults.nStallWaves[nCurrentSIMD] += pWaveCount[nCurrentSIMD];
+
+                // find the set of distinct SimOps on which we're stalled
+                SimOp* pOp[MAX_WAVES_PER_SIMD];
+                size_t nOps=0;
                 for( size_t w=0; w<pWaveCount[nCurrentSIMD]; w++ )
+                    pOp[nOps++] = &pOps[pSIMDWaves[w]->nCurrentOp];
+                
+                // de-duplicate, and increment stall count on each stalled SimOp
+                std::sort( pOp, pOp+nOps );
+                for( size_t i=0; i<nOps; )
                 {
-                    if( pSIMDWaves[w]->nCurrentOp < nOps )
-                        pOps[ pSIMDWaves[w]->nCurrentOp ].nStalls++;
+                    size_t i0 = i;
+                    pOp[i0]->nStalls++;
+                    
+                    do
+                    {
+                        i++;
+                    } while( i<nOps && pOp[i] == pOp[i0] );
+                }
+
+                // do the same for instructions
+                size_t pStallInstructions[MAX_WAVES_PER_SIMD];
+                size_t nInstructions=0;
+                for( size_t i=0; i<nOps; i++ )
+                    pStallInstructions[nInstructions++] = pOp[i]->nInstructionID;
+
+                std::sort( pStallInstructions, pStallInstructions+nInstructions );
+                for( size_t i=0; i<nInstructions; )
+                {
+                    size_t i0 = i;
+                    rResults.pInstructionStallCounts[pStallInstructions[i0]]++;                    
+                    do
+                    {
+                        i++;
+                    } while( i<nOps && pStallInstructions[i] == pStallInstructions[i0] );
                 }
             }
 

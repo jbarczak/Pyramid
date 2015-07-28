@@ -49,10 +49,15 @@ public:
     {
         return Disassemble();
     }
+     property System::String^ SimNotes{
+        virtual System::String^ get() { return m_Notes; }
+        virtual void set( System::String^ s) { m_Notes = s; }
+    }
 
 internal:
     GCN::Instruction* m_pInstruction;
     BasicBlock^ m_pmBlock;
+    System::String^ m_Notes;
 };
 
     
@@ -65,8 +70,10 @@ public:
         virtual IInstruction^ get () { return m_Target; }
     };
 
+ 
 internal:
     IInstruction^ m_Target;
+    
 };
 
 private ref class GCNBranch : public GCNInstruction, public IBranchInstruction
@@ -86,11 +93,12 @@ public:
         virtual BranchCategory get() { return m_eCategory; }
         virtual void set( BranchCategory e ) { m_eCategory = e; }
     }
-
+ 
 internal:
     IInstruction^ m_IfTarget;
     IInstruction^ m_ElseTarget;
     BranchCategory m_eCategory;
+
 };
 
 private ref class GCNSamplingOp : public GCNInstruction, public ISamplingInstruction
@@ -109,6 +117,7 @@ public:
         virtual TexelFormat get () { return m_eFormat; }
         virtual void set( TexelFormat e ) { m_eFormat = e; }
     };
+        
 internal:
     TextureFilter m_eFilter;
     TexelFormat m_eFormat;
@@ -126,9 +135,11 @@ public:
         virtual TexelFormat get () { return m_eFormat; }
         virtual void set( TexelFormat e ) { m_eFormat = e; }
     };
+            
 
 internal:
     TexelFormat m_eFormat;
+    
 };
 
    
@@ -276,14 +287,13 @@ List<IInstruction^>^ Scrutinizer_GCN::BuildProgram(  )
         
 System::String^ Scrutinizer_GCN::AnalyzeExecutionTrace( List<IInstruction^>^ ops )
 {
-    std::vector<GCN::Simulator::SimOp> pOps(ops->Count);
-
+    std::vector<GCN::Simulator::SimOp> pSimOps(ops->Count);
     for( size_t i=0; i<ops->Count; i++ )
     {
         GCNInstruction^ gcnOp = static_cast<GCNInstruction^>( ops[i] );
-        pOps[i].pInstruction = gcnOp->m_pInstruction;
-        pOps[i].eFilter = GCN::Simulator::FILT_POINT;
-        pOps[i].eFormat = GCN::Simulator::FMT_RGBA8;
+        pSimOps[i].pInstruction = gcnOp->m_pInstruction;
+        pSimOps[i].eFilter = GCN::Simulator::FILT_POINT;
+        pSimOps[i].eFormat = GCN::Simulator::FMT_RGBA8;
 
         GCNSamplingOp^ sampling = dynamic_cast<GCNSamplingOp^>( gcnOp );
         if( sampling != nullptr )
@@ -291,39 +301,57 @@ System::String^ Scrutinizer_GCN::AnalyzeExecutionTrace( List<IInstruction^>^ ops
             // map Scrutinizer's enums onto the unmanaged simulator ones
             switch( sampling->Filter )
             {
-            case TextureFilter::POINT:      pOps[i].eFilter = GCN::Simulator::FILT_POINT;      break;
-            case TextureFilter::BILINEAR:   pOps[i].eFilter = GCN::Simulator::FILT_BILINEAR;   break;
-            case TextureFilter::TRILINEAR:  pOps[i].eFilter = GCN::Simulator::FILT_TRILINEAR;  break;
-            case TextureFilter::ANISO_2X:   pOps[i].eFilter = GCN::Simulator::FILT_ANISO_2X;   break;
-            case TextureFilter::ANISO_4X:   pOps[i].eFilter = GCN::Simulator::FILT_ANISO_4X;   break;
-            case TextureFilter::ANISO_8X:   pOps[i].eFilter = GCN::Simulator::FILT_ANISO_8X;   break;
+            case TextureFilter::POINT:      pSimOps[i].eFilter = GCN::Simulator::FILT_POINT;      break;
+            case TextureFilter::BILINEAR:   pSimOps[i].eFilter = GCN::Simulator::FILT_BILINEAR;   break;
+            case TextureFilter::TRILINEAR:  pSimOps[i].eFilter = GCN::Simulator::FILT_TRILINEAR;  break;
+            case TextureFilter::ANISO_2X:   pSimOps[i].eFilter = GCN::Simulator::FILT_ANISO_2X;   break;
+            case TextureFilter::ANISO_4X:   pSimOps[i].eFilter = GCN::Simulator::FILT_ANISO_4X;   break;
+            case TextureFilter::ANISO_8X:   pSimOps[i].eFilter = GCN::Simulator::FILT_ANISO_8X;   break;
             }
 
             switch( sampling->Format )
             {
-            case TexelFormat::R8     :  pOps[i].eFormat = GCN::Simulator::FMT_R8       ; break;
-            case TexelFormat::RG8    :  pOps[i].eFormat = GCN::Simulator::FMT_RG8      ; break;
-            case TexelFormat::RGBA8  :  pOps[i].eFormat = GCN::Simulator::FMT_RGBA8    ; break;
-            case TexelFormat::R16    :  pOps[i].eFormat = GCN::Simulator::FMT_R16      ; break;
-            case TexelFormat::RG16   :  pOps[i].eFormat = GCN::Simulator::FMT_RG16     ; break;
-            case TexelFormat::RGBA16 :  pOps[i].eFormat = GCN::Simulator::FMT_RGBA16   ; break;
-            case TexelFormat::R16F   :  pOps[i].eFormat = GCN::Simulator::FMT_R16F     ; break;
-            case TexelFormat::RG16F  :  pOps[i].eFormat = GCN::Simulator::FMT_RG16F    ; break;
-            case TexelFormat::RGBA16F:  pOps[i].eFormat = GCN::Simulator::FMT_RGBA16F  ; break;
-            case TexelFormat::R32F   :  pOps[i].eFormat = GCN::Simulator::FMT_R32F     ; break;
-            case TexelFormat::RG32F  :  pOps[i].eFormat = GCN::Simulator::FMT_RG32F    ; break;
-            case TexelFormat::RGBA32F:  pOps[i].eFormat = GCN::Simulator::FMT_RGBA32F  ; break;
-            case TexelFormat::BC1    :  pOps[i].eFormat = GCN::Simulator::FMT_BC1      ; break;
-            case TexelFormat::BC2    :  pOps[i].eFormat = GCN::Simulator::FMT_BC2      ; break;
-            case TexelFormat::BC3    :  pOps[i].eFormat = GCN::Simulator::FMT_BC3      ; break;
-            case TexelFormat::BC4    :  pOps[i].eFormat = GCN::Simulator::FMT_BC4      ; break;
-            case TexelFormat::BC5    :  pOps[i].eFormat = GCN::Simulator::FMT_BC5      ; break;
-            case TexelFormat::BC6    :  pOps[i].eFormat = GCN::Simulator::FMT_BC6      ; break;
-            case TexelFormat::BC7    :  pOps[i].eFormat = GCN::Simulator::FMT_BC7      ; break;
+            case TexelFormat::R8     :  pSimOps[i].eFormat = GCN::Simulator::FMT_R8       ; break;
+            case TexelFormat::RG8    :  pSimOps[i].eFormat = GCN::Simulator::FMT_RG8      ; break;
+            case TexelFormat::RGBA8  :  pSimOps[i].eFormat = GCN::Simulator::FMT_RGBA8    ; break;
+            case TexelFormat::R16    :  pSimOps[i].eFormat = GCN::Simulator::FMT_R16      ; break;
+            case TexelFormat::RG16   :  pSimOps[i].eFormat = GCN::Simulator::FMT_RG16     ; break;
+            case TexelFormat::RGBA16 :  pSimOps[i].eFormat = GCN::Simulator::FMT_RGBA16   ; break;
+            case TexelFormat::R16F   :  pSimOps[i].eFormat = GCN::Simulator::FMT_R16F     ; break;
+            case TexelFormat::RG16F  :  pSimOps[i].eFormat = GCN::Simulator::FMT_RG16F    ; break;
+            case TexelFormat::RGBA16F:  pSimOps[i].eFormat = GCN::Simulator::FMT_RGBA16F  ; break;
+            case TexelFormat::R32F   :  pSimOps[i].eFormat = GCN::Simulator::FMT_R32F     ; break;
+            case TexelFormat::RG32F  :  pSimOps[i].eFormat = GCN::Simulator::FMT_RG32F    ; break;
+            case TexelFormat::RGBA32F:  pSimOps[i].eFormat = GCN::Simulator::FMT_RGBA32F  ; break;
+            case TexelFormat::BC1    :  pSimOps[i].eFormat = GCN::Simulator::FMT_BC1      ; break;
+            case TexelFormat::BC2    :  pSimOps[i].eFormat = GCN::Simulator::FMT_BC2      ; break;
+            case TexelFormat::BC3    :  pSimOps[i].eFormat = GCN::Simulator::FMT_BC3      ; break;
+            case TexelFormat::BC4    :  pSimOps[i].eFormat = GCN::Simulator::FMT_BC4      ; break;
+            case TexelFormat::BC5    :  pSimOps[i].eFormat = GCN::Simulator::FMT_BC5      ; break;
+            case TexelFormat::BC6    :  pSimOps[i].eFormat = GCN::Simulator::FMT_BC6      ; break;
+            case TexelFormat::BC7    :  pSimOps[i].eFormat = GCN::Simulator::FMT_BC7      ; break;
             }
         }
     }
 
+    // assign an index to each distinct instruction in the trace
+    Dictionary<IInstruction^,size_t>^ pInstructionIDs = gcnew Dictionary<IInstruction^,size_t>();
+    List<IInstruction^>^ pDistinctInstructions = gcnew List<IInstruction^>();
+    for( size_t i=0; i<ops->Count; i++ )
+    {
+        if( !pInstructionIDs->ContainsKey( ops[i] ) )
+        {
+            pInstructionIDs->Add( ops[i], pDistinctInstructions->Count );
+            pDistinctInstructions->Add( ops[i] );
+        }
+
+        pSimOps[i].nInstructionID = pInstructionIDs[ops[i]];
+    }
+
+    // allocate and initialize per-instruction stall counters
+    std::vector<size_t> pInstructionStalls( pDistinctInstructions->Count, 0 );
+
+    // setup the sim
     GCN::Simulator::Settings settings;
     settings.nExportCost = 256;      // Based on Layla's "packman" slide.  1 export -> 64 ALU            // TODO: Sane number
     settings.nWaveIssueRate = 10;    // Assumes 1 wave/rasterizer/clk, round-robined among 10 CUs/slice   TODO: Sane number.
@@ -331,19 +359,38 @@ System::String^ Scrutinizer_GCN::AnalyzeExecutionTrace( List<IInstruction^>^ ops
     settings.nMaxWavesPerSIMD = m_pmShader->GetOccupancy();
 
     GCN::Simulator::Results results;
-    GCN::Simulator::Simulate( results, settings, pOps.data(), pOps.size() );
+    memset(&results,0,sizeof(results));
+    results.pInstructionStallCounts = pInstructionStalls.data();
+
+    GCN::Simulator::Simulate( results, settings, pSimOps.data(), pSimOps.size() );
 
     float fClocks = results.nCycles;
+    float fStallClocks = results.nStallCycles[0]+results.nStallCycles[1]+results.nStallCycles[2]+results.nStallCycles[3];
 
-    float fStallRate =
-        (results.nStallCycles[0]+results.nStallCycles[1]+results.nStallCycles[2]+results.nStallCycles[3])/(fClocks);
+    // annotate instructions with stall counts
+    Dictionary< IInstruction^, size_t >^ InstructionStalls = gcnew Dictionary<IInstruction^,size_t>();
+    for( size_t i=0; i<pInstructionStalls.size(); i++ )
+    {
+        if( pInstructionStalls[i] )
+        {
+            char buffer[64];
+            size_t nOpStalls = pInstructionStalls[i];
+            sprintf( buffer, "Stall: %.2f%%", (100.0f*nOpStalls)/fClocks);
+            System::String^ notes = gcnew System::String( buffer );     
+
+            pDistinctInstructions[i]->SimNotes = notes;
+        }
+    }
+
+    
+    float fStallRate = fStallClocks/(fClocks);
     float fVALUUtil =
         (results.nVALUBusy[0]+results.nVALUBusy[1]+results.nVALUBusy[2]+results.nVALUBusy[3])/(4*fClocks);
 
     float fVMemUtil   = (results.nVMemBusy)/fClocks;
     float fExpUtil    = (results.nExpBusy) / fClocks;
     float fScalarUtil = (results.nSALUBusy)/fClocks;
-    float fSMemUtil   = (results.nSMemBusy)/fClocks;
+    float fSMemUtil   = (results.nSMemBusy)/fClocks; 
 
     char buffer[4096];
     sprintf( buffer,

@@ -10,7 +10,7 @@ namespace Simulator{
     struct Settings
     {
         size_t nWaveIssueRate;      ///< Issue one wave every N clocks
-        size_t nWavesToExecute;     ///< Execute this many waves
+        size_t nWavesToExecute;     ///< Execute this many waves before stopping
         size_t nMaxWavesPerSIMD;    ///< Occupancy limit per SIMD
         size_t nExportCost;         ///< How long an export should take
                                     ///<  This is presumed to be a function of the number of CUs to a slice
@@ -19,6 +19,11 @@ namespace Simulator{
 
     struct Results
     {
+        ///< Count the number of clocks where at least one wave was stalled on a given instruction
+        ///<  Indexed by the InstructionID field in the 'SimOp'
+        ///< Caller is responsible for zeroing this
+        size_t* pInstructionStallCounts; 
+
         size_t nCycles;
         size_t nSALUBusy;
         size_t nVALUBusy[4];
@@ -70,21 +75,24 @@ namespace Simulator{
     };
 
 
+
     struct SimOp
     {
         const GCN::Instruction* pInstruction;
+        size_t nInstructionID;  ///< Index of the instruction in the results.pInstructionStallCounts
 
-        // These are used only for corresponding image instructions
+        // These are used only if 'pInstruction' is a corresponding image instruction
         Format eFormat;
         Filter eFilter;
 
-        ///< Number of times a wave was stalled on this op
+        ///< Number of times that at least one wave was stalled on this op
         ///< Incremented once per stalled clock/stalled wave
         size_t nStalls; 
     };
 
 
     /// Simulate wavefront execution on a single CU
+    /// 
     void Simulate( Results& rResults, const Settings& rSettings, SimOp* pOps, size_t nOps );
 
 }};

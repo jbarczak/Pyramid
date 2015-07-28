@@ -77,6 +77,7 @@ namespace Pyramid.Scrutinizer
     public interface IInstruction
     {
         BasicBlock Block { get; set;  }
+        string SimNotes { get; set; } // String field used to display simulation results
         string Disassemble();
     };
 

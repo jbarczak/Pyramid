@@ -98,6 +98,11 @@ namespace Pyramid.Scrutinizer.UI
                 return;
 
             e.Graphics.DrawString(m_Op.Disassemble(), this.Font, this.Brush, new PointF(80+96, 0));
+
+            if( !String.IsNullOrEmpty(m_Op.SimNotes)  )
+            {
+                e.Graphics.DrawString(m_Op.SimNotes, this.Font, this.Brush, new PointF(this.Width - 100, 0));
+            }
         }
 
         private void InstructionWidget_MouseDown(object sender, MouseEventArgs e)

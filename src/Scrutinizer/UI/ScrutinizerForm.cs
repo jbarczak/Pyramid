@@ -139,6 +139,7 @@ namespace Pyramid.Scrutinizer.UI
 
             string sim = m_Backend.AnalyzeExecutionTrace(trace);
             MessageBox.Show(sim);
+            panel1.Refresh();
         }
 
 
