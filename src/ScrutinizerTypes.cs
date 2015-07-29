@@ -126,23 +126,23 @@ namespace Pyramid.Scrutinizer
     };
 
     /// <summary>
-    ///  Interface for texturing instructions
-    ///    These have variable performance depending on filter and texel format
+    ///  Interface for instructions which can be annoted with a texture format
     /// </summary>
-    public interface ISamplingInstruction : IInstruction
-    {
-        TexelFormat   Format { get; set; }
-        TextureFilter Filter { get; set; }
-    };
-
-    /// <summary>
-    ///  Interface for instructions which perform format conversion but no sampling
-    ///    These can have variable performance depending on texel format
-    /// </summary>
-    public interface ITexelLoadInstruction : IInstruction
+    public interface ITextureInstruction : IInstruction
     {
         TexelFormat Format { get; set; }
     };
+
+    /// <summary>
+    ///  Interface for instructions which can be annoted with a texture format
+    ///   or a filtering mode
+    /// </summary>
+    public interface ISamplingInstruction : ITextureInstruction
+    {
+        TextureFilter Filter { get; set; }
+    };
+
+   
 
     public interface IScrutinizer
     {

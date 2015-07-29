@@ -44,7 +44,7 @@
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.panel1.Location = new System.Drawing.Point(13, 13);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(523, 326);
+            this.panel1.Size = new System.Drawing.Size(622, 460);
             this.panel1.TabIndex = 2;
             this.panel1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.panel1_MouseDown);
             // 
@@ -52,7 +52,7 @@
             // 
             this.lblIterations.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.lblIterations.AutoSize = true;
-            this.lblIterations.Location = new System.Drawing.Point(577, 291);
+            this.lblIterations.Location = new System.Drawing.Point(676, 191);
             this.lblIterations.Name = "lblIterations";
             this.lblIterations.Size = new System.Drawing.Size(50, 13);
             this.lblIterations.TabIndex = 4;
@@ -61,7 +61,7 @@
             // txtLoopCount
             // 
             this.txtLoopCount.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtLoopCount.Location = new System.Drawing.Point(629, 288);
+            this.txtLoopCount.Location = new System.Drawing.Point(728, 188);
             this.txtLoopCount.Name = "txtLoopCount";
             this.txtLoopCount.Size = new System.Drawing.Size(100, 20);
             this.txtLoopCount.TabIndex = 3;
@@ -72,9 +72,9 @@
             // 
             this.cfgWidget1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.cfgWidget1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.cfgWidget1.Location = new System.Drawing.Point(551, 12);
+            this.cfgWidget1.Location = new System.Drawing.Point(650, 12);
             this.cfgWidget1.Name = "cfgWidget1";
-            this.cfgWidget1.Size = new System.Drawing.Size(178, 270);
+            this.cfgWidget1.Size = new System.Drawing.Size(178, 170);
             this.cfgWidget1.TabIndex = 1;
             this.cfgWidget1.BlockSelected += new Pyramid.Scrutinizer.UI.CFGWidget.BlockSelectionHandler(this.cfgWidget1_BlockSelected);
             this.cfgWidget1.LoopSelected += new Pyramid.Scrutinizer.UI.CFGWidget.LoopSelectionHandler(this.cfgWidget1_LoopSelected);
@@ -83,7 +83,7 @@
             // btnSimulate
             // 
             this.btnSimulate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSimulate.Location = new System.Drawing.Point(564, 317);
+            this.btnSimulate.Location = new System.Drawing.Point(663, 217);
             this.btnSimulate.Name = "btnSimulate";
             this.btnSimulate.Size = new System.Drawing.Size(62, 21);
             this.btnSimulate.TabIndex = 5;
@@ -95,7 +95,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(741, 360);
+            this.ClientSize = new System.Drawing.Size(840, 494);
             this.Controls.Add(this.btnSimulate);
             this.Controls.Add(this.lblIterations);
             this.Controls.Add(this.txtLoopCount);

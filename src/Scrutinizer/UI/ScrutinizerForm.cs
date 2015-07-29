@@ -16,9 +16,74 @@ namespace Pyramid.Scrutinizer.UI
         private List<BasicBlock> m_Blocks;
         private List<Loop> m_Loops;
         private IScrutinizer m_Backend;
-       
 
-        private Dictionary<IInstruction, InstructionWidget> m_Instructions = new Dictionary<IInstruction, InstructionWidget>();
+        private HashSet<InstructionWidget> m_SelectedOps = new HashSet<InstructionWidget>();
+        private InstructionWidget m_LastClicked = null;
+
+        private Dictionary<IInstruction, InstructionWidget> m_InstructionWidgets = new Dictionary<IInstruction, InstructionWidget>();
+        private Dictionary<IInstruction, int> m_InstructionIndexMap = new Dictionary<IInstruction, int>();
+
+        private void OnInstructionClick( InstructionWidget w, MouseEventArgs e )
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                if (Form.ModifierKeys == Keys.Control)
+                {
+                    // ctrl+click: toggle state of one widget
+                    w.Selected = !w.Selected;
+                    w.Refresh();
+                    if (w.Selected)
+                        m_SelectedOps.Add(w);
+                    else
+                        m_SelectedOps.Remove(w);
+                }
+                else if( Form.ModifierKeys == Keys.Shift && m_LastClicked != null )
+                {
+                    // shift+click: select everything between last clicked widget
+                    //  and current widget
+                   
+
+                    int i = m_InstructionIndexMap[m_LastClicked.Instruction];
+                    int j = m_InstructionIndexMap[w.Instruction];
+                    int first = Math.Min(i, j);
+                    int last = Math.Max(i, j);
+                    for( int x=first; x<=last; x++ )
+                    {
+                        InstructionWidget widget = m_InstructionWidgets[m_Ops[x]];
+                        m_SelectedOps.Add(widget);
+                        widget.Selected = true;
+                        widget.Refresh();
+                    }
+                }
+                else
+                {
+                    // unmodified click.  Select only the clicked widget
+                    foreach (InstructionWidget i in m_SelectedOps)
+                    {
+                        i.Selected = false;
+                        i.Refresh();
+                    }
+                    m_SelectedOps.Clear();
+
+                    w.Selected = true;
+                    w.Refresh();
+                    m_SelectedOps.Add(w);
+                }
+                
+                m_LastClicked = w;
+
+            }
+            else if (e.Button == MouseButtons.Right)
+            {
+                // de-select everything on a right click
+                foreach (InstructionWidget i in m_SelectedOps)
+                {
+                    i.Selected = false;
+                    i.Refresh();
+                }
+            }
+        }
+
 
         public ScrutinizerForm( IAMDShader sh )
         {
@@ -50,7 +115,42 @@ namespace Pyramid.Scrutinizer.UI
                     foreach (IInstruction op in b.Instructions)
                     {
                         InstructionWidget widget = new InstructionWidget(op);
-                        m_Instructions.Add(op, widget);
+                        m_InstructionIndexMap.Add(op, m_InstructionWidgets.Count);
+                        m_InstructionWidgets.Add(op, widget);
+                        
+                        widget.Click += delegate(object s, EventArgs e)
+                        {
+                            this.OnInstructionClick(widget, e as MouseEventArgs);
+                        };
+
+                        // change format on all selected instructions whenever one of them is changed
+                        widget.TexelFormatChanged += delegate(ITextureInstruction inst )
+                        {
+                            if (!widget.Selected)
+                                return;
+                            foreach( InstructionWidget s in m_SelectedOps )
+                            {
+                                ITextureInstruction tx = s.Instruction as ITextureInstruction;
+                                if( tx != null && tx != inst )
+                                    tx.Format = inst.Format;
+                                s.RefreshInstruction();
+                            }
+                        };
+
+                        // change filter on all selected instructions whenever one of them is changed
+                        widget.FilterChanged += delegate(ISamplingInstruction inst)
+                        {
+                            if (!widget.Selected)
+                                return;
+
+                            foreach (InstructionWidget s in m_SelectedOps)
+                            {
+                                ISamplingInstruction tx = s.Instruction as ISamplingInstruction;
+                                if (tx != null && tx != inst)
+                                    tx.Filter = inst.Filter;
+                                s.RefreshInstruction();
+                            }
+                        };
 
                         panel1.Controls.Add(widget);
                         widget.Top = Y;
@@ -72,11 +172,11 @@ namespace Pyramid.Scrutinizer.UI
 
         private void cfgWidget1_BlockSelected(object sender, BasicBlock SelectedBlock)
         {
-            foreach( InstructionWidget w in m_Instructions.Values )
+            foreach (InstructionWidget w in m_InstructionWidgets.Values)
                 w.Brush = Brushes.DarkGray ;
 
             foreach (IInstruction op in SelectedBlock.Instructions)
-                m_Instructions[op].Brush = Brushes.Black;
+                m_InstructionWidgets[op].Brush = Brushes.Black;
 
             panel1.Refresh();
             panel1.Focus();
@@ -87,12 +187,12 @@ namespace Pyramid.Scrutinizer.UI
 
         private void cfgWidget1_LoopSelected(object sender, Loop SelectedLoop)
         {
-            foreach (InstructionWidget w in m_Instructions.Values)
+            foreach (InstructionWidget w in m_InstructionWidgets.Values)
                 w.Brush = Brushes.DarkGray;
 
             foreach( BasicBlock b in SelectedLoop.Blocks )
                 foreach (IInstruction op in b.Instructions)
-                    m_Instructions[op].Brush = Brushes.Black;
+                    m_InstructionWidgets[op].Brush = Brushes.Black;
 
             panel1.Refresh();
             panel1.Focus();
@@ -104,7 +204,7 @@ namespace Pyramid.Scrutinizer.UI
 
         private void cfgWidget1_SelectionCleared(object sender)
         {
-            foreach (InstructionWidget w in m_Instructions.Values)
+            foreach (InstructionWidget w in m_InstructionWidgets.Values)
                 w.Brush = Brushes.Black;
 
             panel1.Refresh(); 

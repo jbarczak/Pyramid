@@ -4,6 +4,7 @@
 
 #include <string.h>
 #include <algorithm>
+#include <assert.h>
 
 namespace GCN{
 namespace Simulator{
@@ -16,7 +17,7 @@ namespace Simulator{
             MAX_WAVES_PER_SIMD      = 10,
             MAX_WAVES_PER_CU        = NUM_SIMDS * MAX_WAVES_PER_SIMD,
 
-            MAX_LCGMCNT             = 15,
+            MAX_LCGMCNT             = 31,
             MAX_VMCNT               = 15,
             MAX_EXPCNT              = 7,
         };
@@ -61,6 +62,7 @@ namespace Simulator{
             {
                 size_t nLoc = m_nLast++;
                 m_Items[nLoc % MAX] = op;
+                assert( m_nLast - m_nFirst <= MAX );
             }
 
         private:
@@ -110,6 +112,14 @@ namespace Simulator{
             {
                 const GCN::Instruction* pOp = pOps[pWaves[i]->nCurrentOp].pInstruction;
                 if( pOp->GetClass() != GCN::IC_SCALAR_MEM && pOp->GetClass() != GCN::IC_SCALAR )
+                    continue;
+
+                // Throttle instruction issue of there are more scalars in flight
+                //  than we have counter bits for
+                //
+                // CLARIFICATION NEEDED:  Is this what HW does?
+                //
+                if( pOp->GetClass() == GCN::IC_SCALAR_MEM && pWaves[i]->lkgmcnt == MAX_LCGMCNT )
                     continue;
 
                 if( pOp->GetClass() == IC_SCALAR )
@@ -164,18 +174,52 @@ namespace Simulator{
             return pIssueWave;
         }
 
+        /// Is instruction a vector memory write?
+        static bool IsVMEMWrite( const GCN::Instruction* pOp )
+        {
+            switch( pOp->GetClass() )
+            {
+            default:
+                return false;
+
+            case GCN::IC_IMAGE:
+                {
+                    const GCN::ImageInstruction* pImg = static_cast<const GCN::ImageInstruction*>(pOp);
+                    return pImg->IsMemoryWrite();
+                }
+                break;
+                     
+            case GCN::IC_BUFFER:
+                {
+                    const GCN::BufferInstruction* pImg = static_cast<const GCN::BufferInstruction*>(pOp);
+                    return pImg->IsMemoryWrite();
+                }
+                break;
+            }
+        }
+
         /// Search a list of waves for oldest one that wants to issue a vmem
         static WaveState* FindVMEMToIssue( const SimOp* pOps, WaveState** pWaves, size_t nWaves )
         {
-             WaveState* pIssueWave=0;
+            WaveState* pIssueWave=0;
 
             // look for a wave which has a VALU op to issue
             for( size_t i=0; i<nWaves; i++ )
             {
-           
                 const GCN::Instruction* pOp = pOps[pWaves[i]->nCurrentOp].pInstruction;
                 if( pOp->GetClass() != GCN::IC_BUFFER &&
                     pOp->GetClass() != GCN::IC_IMAGE )
+                    continue;
+
+                
+                // Throttle instruction issue of there are more OPS in flight
+                //  than we have counter bits for
+                //
+                // CLARIFICATION NEEDED:  Is this what HW does?
+                //
+                if( pWaves[i]->vmcnt == MAX_VMCNT ) 
+                    continue;
+                if( IsVMEMWrite(pOp) && pWaves[i]->expcnt == MAX_EXPCNT )
                     continue;
 
                 // We can issue this one.  
@@ -200,6 +244,15 @@ namespace Simulator{
                 if( pOp->GetClass() != GCN::IC_EXPORT )
                     continue;
 
+                 
+                // Throttle instruction issue of there are more OPS in flight
+                //  than we have counter bits for
+                //
+                // CLARIFICATION NEEDED:  Is this what HW does?
+                //
+                if( pWaves[i]->expcnt == MAX_EXPCNT )
+                    continue;
+
                 // We can issue this one.  
                 //  but give priority to older waves
                 if( !pIssueWave || pIssueWave->nStartClock > pWaves[i]->nStartClock )
@@ -209,29 +262,7 @@ namespace Simulator{
             return pIssueWave;
         }
 
-        /// Is instruction a vector memory write?
-        static bool IsVMEMWrite( const GCN::Instruction* pOp )
-        {
-            switch( pOp->GetClass() )
-            {
-            default:
-                return false;
-
-            case GCN::IC_IMAGE:
-                {
-                    const GCN::ImageInstruction* pImg = static_cast<const GCN::ImageInstruction*>(pOp);
-                    return pImg->IsMemoryWrite();
-                }
-                break;
-                     
-            case GCN::IC_BUFFER:
-                {
-                    const GCN::BufferInstruction* pImg = static_cast<const GCN::BufferInstruction*>(pOp);
-                    return pImg->IsMemoryWrite();
-                }
-                break;
-            }
-        }
+      
 
         /// Determine the cost in cycles of a VMEM instruction,
         ///  Taking format and filtering into account
@@ -456,7 +487,7 @@ namespace Simulator{
         WaveState* pWavesInVALU[NUM_SIMDS] = {0}; ///< Wave currently occupying each VALU
         size_t pVALUCycles[NUM_SIMDS] = {0};      ///< Number of cycles remaining on each VALU op
     
-        RingQueue<SMemOp,MAX_WAVES_PER_CU*16>   SMemQueue;
+        RingQueue<SMemOp,MAX_WAVES_PER_CU*32>   SMemQueue;
         RingQueue<VMemOp,MAX_WAVES_PER_CU*16>   VMemQueue;
         RingQueue<ExportOp,MAX_WAVES_PER_CU*16> EXPQueue;
 
@@ -717,29 +748,29 @@ namespace Simulator{
                 rResults.nStallWaves[nCurrentSIMD] += pWaveCount[nCurrentSIMD];
 
                 // find the set of distinct SimOps on which we're stalled
-                SimOp* pOp[MAX_WAVES_PER_SIMD];
-                size_t nOps=0;
+                SimOp* pDistinctSimOps[MAX_WAVES_PER_SIMD];
+                size_t nDistinctSimOps=0;
                 for( size_t w=0; w<pWaveCount[nCurrentSIMD]; w++ )
-                    pOp[nOps++] = &pOps[pSIMDWaves[w]->nCurrentOp];
+                    pDistinctSimOps[nDistinctSimOps++] = &pOps[pSIMDWaves[w]->nCurrentOp];
                 
                 // de-duplicate, and increment stall count on each stalled SimOp
-                std::sort( pOp, pOp+nOps );
-                for( size_t i=0; i<nOps; )
+                std::sort( pDistinctSimOps, pDistinctSimOps+nDistinctSimOps );
+                for( size_t i=0; i<nDistinctSimOps; )
                 {
                     size_t i0 = i;
-                    pOp[i0]->nStalls++;
+                    pDistinctSimOps[i0]->nStalls++;
                     
                     do
                     {
                         i++;
-                    } while( i<nOps && pOp[i] == pOp[i0] );
+                    } while( i<nDistinctSimOps && pDistinctSimOps[i] == pDistinctSimOps[i0] );
                 }
 
                 // do the same for instructions
                 size_t pStallInstructions[MAX_WAVES_PER_SIMD];
                 size_t nInstructions=0;
-                for( size_t i=0; i<nOps; i++ )
-                    pStallInstructions[nInstructions++] = pOp[i]->nInstructionID;
+                for( size_t i=0; i<nDistinctSimOps; i++ )
+                    pStallInstructions[nInstructions++] = pDistinctSimOps[i]->nInstructionID;
 
                 std::sort( pStallInstructions, pStallInstructions+nInstructions );
                 for( size_t i=0; i<nInstructions; )

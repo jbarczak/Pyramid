@@ -28,7 +28,9 @@ public:
         *m_pInstruction = inst;
     }
 
-    virtual ~GCNInstruction() { delete m_pInstruction; }
+    virtual ~GCNInstruction() { 
+        delete m_pInstruction; 
+    }
         
     property BasicBlock^ Block
     {
@@ -101,10 +103,12 @@ internal:
 
 };
 
-private ref class GCNSamplingOp : public GCNInstruction, public ISamplingInstruction
+private ref class GCNSamplingOp : public GCNInstruction,  public ISamplingInstruction
 {
 public:
-    GCNSamplingOp( const GCN::Instruction& inst ) : GCNInstruction(inst)
+    GCNSamplingOp( const GCN::Instruction& inst ) : GCNInstruction(inst),
+        m_eFormat(TexelFormat::RGBA8),
+        m_eFilter(TextureFilter::TRILINEAR)
     {
     }
 
@@ -124,10 +128,11 @@ internal:
 };
 
 
-private ref class GCNTBufferOp : public GCNInstruction, public ITexelLoadInstruction
+private ref class GCNTBufferOp : public GCNInstruction, public ITextureInstruction
 {
 public:
-    GCNTBufferOp( const GCN::Instruction& inst ) : GCNInstruction(inst)
+    GCNTBufferOp( const GCN::Instruction& inst ) : GCNInstruction(inst), 
+        m_eFormat(TexelFormat::RGBA32F)
     {
     }
 
@@ -288,18 +293,20 @@ List<IInstruction^>^ Scrutinizer_GCN::BuildProgram(  )
 System::String^ Scrutinizer_GCN::AnalyzeExecutionTrace( List<IInstruction^>^ ops )
 {
     std::vector<GCN::Simulator::SimOp> pSimOps(ops->Count);
+
     for( size_t i=0; i<ops->Count; i++ )
     {
-        GCNInstruction^ gcnOp = static_cast<GCNInstruction^>( ops[i] );
+        GCNInstruction^ gcnOp = safe_cast<GCNInstruction^>( ops[i] );
         pSimOps[i].pInstruction = gcnOp->m_pInstruction;
         pSimOps[i].eFilter = GCN::Simulator::FILT_POINT;
         pSimOps[i].eFormat = GCN::Simulator::FMT_RGBA8;
-
-        GCNSamplingOp^ sampling = dynamic_cast<GCNSamplingOp^>( gcnOp );
+        
+        GCNSamplingOp^ sampling = dynamic_cast<GCNSamplingOp^>( ops[i] );
         if( sampling != nullptr )
         {
-            // map Scrutinizer's enums onto the unmanaged simulator ones
-            switch( sampling->Filter )
+           
+           // map Scrutinizer's enums onto the unmanaged simulator ones
+            switch( sampling->m_eFilter )
             {
             case TextureFilter::POINT:      pSimOps[i].eFilter = GCN::Simulator::FILT_POINT;      break;
             case TextureFilter::BILINEAR:   pSimOps[i].eFilter = GCN::Simulator::FILT_BILINEAR;   break;
@@ -309,7 +316,7 @@ System::String^ Scrutinizer_GCN::AnalyzeExecutionTrace( List<IInstruction^>^ ops
             case TextureFilter::ANISO_8X:   pSimOps[i].eFilter = GCN::Simulator::FILT_ANISO_8X;   break;
             }
 
-            switch( sampling->Format )
+            switch( sampling->m_eFormat )
             {
             case TexelFormat::R8     :  pSimOps[i].eFormat = GCN::Simulator::FMT_R8       ; break;
             case TexelFormat::RG8    :  pSimOps[i].eFormat = GCN::Simulator::FMT_RG8      ; break;
