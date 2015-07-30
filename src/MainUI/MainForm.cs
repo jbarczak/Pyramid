@@ -205,6 +205,8 @@ namespace Pyramid
         {
             this.Text = "Pyramid";
             txtCode.Text = "";
+            txtCode.Refresh();
+            m_FileName = "";
             ClearResults();
         }
 

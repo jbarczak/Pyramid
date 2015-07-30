@@ -1,0 +1,33 @@
+
+float4x4 mViewProj;
+float4x4 mSkin[30];
+
+struct VSOut
+{
+   float4 P : SV_Position;
+   float3 N : n;
+   float2 uv : uv;
+};
+
+VSOut main( float3 P : p,
+            float3 N : n,
+            float2 uv : uv,
+            float4 w : weights,
+            uint4 idx : indices )
+{
+    float3 vP=0;
+    float3 vN=0;
+    
+    [unroll]
+    for( int i=0; i<4; i++ )
+    {
+        vP += mul( float4(P,1), mSkin[idx[i]] ) * w[i];
+        vN += mul( float4(N,0), mSkin[idx[i]] ) * w[i];
+    }
+    
+	VSOut o;
+	o.P   = mul( float4(vP,1), mViewProj );
+	o.N   = vN;
+	o.uv  = uv;
+	return o;
+}

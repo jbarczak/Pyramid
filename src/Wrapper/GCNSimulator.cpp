@@ -491,8 +491,6 @@ namespace Simulator{
         RingQueue<VMemOp,MAX_WAVES_PER_CU*16>   VMemQueue;
         RingQueue<ExportOp,MAX_WAVES_PER_CU*16> EXPQueue;
 
-        for( size_t i=0; i<nOps; i++ )
-            pOps[i].nStalls=0;
 
         while(1)
         {
@@ -714,6 +712,12 @@ namespace Simulator{
             if( nRetiredWaves == rSettings.nWavesToExecute )
                 break;
 
+            // track peak occupancy
+            size_t nOcc=0;
+            for( size_t i=0; i<NUM_SIMDS; i++ )
+                nOcc += pWaveCount[i];
+            if(nOcc > rResults.nPeakOccupancy)
+                rResults.nPeakOccupancy = nOcc;
 
             if( pScalarWave )
             {
@@ -748,17 +752,17 @@ namespace Simulator{
                 rResults.nStallWaves[nCurrentSIMD] += pWaveCount[nCurrentSIMD];
 
                 // find the set of distinct SimOps on which we're stalled
-                SimOp* pDistinctSimOps[MAX_WAVES_PER_SIMD];
+                size_t pDistinctSimOps[MAX_WAVES_PER_SIMD];
                 size_t nDistinctSimOps=0;
                 for( size_t w=0; w<pWaveCount[nCurrentSIMD]; w++ )
-                    pDistinctSimOps[nDistinctSimOps++] = &pOps[pSIMDWaves[w]->nCurrentOp];
+                    pDistinctSimOps[nDistinctSimOps++] = pSIMDWaves[w]->nCurrentOp;
                 
                 // de-duplicate, and increment stall count on each stalled SimOp
                 std::sort( pDistinctSimOps, pDistinctSimOps+nDistinctSimOps );
                 for( size_t i=0; i<nDistinctSimOps; )
                 {
                     size_t i0 = i;
-                    pDistinctSimOps[i0]->nStalls++;
+                    rResults.pSimOpStallCounts[pDistinctSimOps[i0]];
                     
                     do
                     {
@@ -770,7 +774,7 @@ namespace Simulator{
                 size_t pStallInstructions[MAX_WAVES_PER_SIMD];
                 size_t nInstructions=0;
                 for( size_t i=0; i<nDistinctSimOps; i++ )
-                    pStallInstructions[nInstructions++] = pDistinctSimOps[i]->nInstructionID;
+                    pStallInstructions[nInstructions++] = pOps[pDistinctSimOps[i]].nInstructionID;
 
                 std::sort( pStallInstructions, pStallInstructions+nInstructions );
                 for( size_t i=0; i<nInstructions; )

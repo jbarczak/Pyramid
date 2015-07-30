@@ -21,9 +21,15 @@ namespace Simulator{
     {
         ///< Count the number of clocks where at least one wave was stalled on a given instruction
         ///<  Indexed by the InstructionID field in the 'SimOp'
-        ///< Caller is responsible for zeroing this
+        ///< Caller must allocate and zero before simulating
         size_t* pInstructionStallCounts; 
 
+        ///< Number of times that at least one wave was stalled on each SimOp
+        ///<   Index space is the same as the SimOp array passed to the simulator
+        ///< Each op's counter is Incremented once per stalled clock/stalled wave  
+        size_t* pSimOpStallCounts;
+
+        ///< Caller must zero all these fields before simulating
         size_t nCycles;
         size_t nSALUBusy;
         size_t nVALUBusy[4];
@@ -35,6 +41,8 @@ namespace Simulator{
         size_t nVALUIssued;
         size_t nScalarIssued;
         size_t nExpIssued;
+
+        size_t nPeakOccupancy;
 
         size_t nStallCycles[4];    ///< Number of times each SIMD was stalled
         size_t nStallWaves[4];     ///< Incremented once per stalled wave on each stall
@@ -85,9 +93,6 @@ namespace Simulator{
         Format eFormat;
         Filter eFilter;
 
-        ///< Number of times that at least one wave was stalled on this op
-        ///< Incremented once per stalled clock/stalled wave
-        size_t nStalls; 
     };
 
 

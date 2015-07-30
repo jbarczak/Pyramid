@@ -357,17 +357,19 @@ System::String^ Scrutinizer_GCN::AnalyzeExecutionTrace( List<IInstruction^>^ ops
 
     // allocate and initialize per-instruction stall counters
     std::vector<size_t> pInstructionStalls( pDistinctInstructions->Count, 0 );
+    std::vector<size_t> pSimOpStalls(ops->Count, 0 );
 
     // setup the sim
     GCN::Simulator::Settings settings;
     settings.nExportCost = 256;      // Based on Layla's "packman" slide.  1 export -> 64 ALU            // TODO: Sane number
-    settings.nWaveIssueRate = 10;    // Assumes 1 wave/rasterizer/clk, round-robined among 10 CUs/slice   TODO: Sane number.
+    settings.nWaveIssueRate = 880;    // Assumes 1 wave/rasterizer/4 clk, round-robined among 11 CUs/slice   TODO: Sane number.
     settings.nWavesToExecute = 500;
     settings.nMaxWavesPerSIMD = m_pmShader->GetOccupancy();
 
     GCN::Simulator::Results results;
     memset(&results,0,sizeof(results));
     results.pInstructionStallCounts = pInstructionStalls.data();
+    results.pSimOpStallCounts = pSimOpStalls.data();
 
     GCN::Simulator::Simulate( results, settings, pSimOps.data(), pSimOps.size() );
 
@@ -401,21 +403,26 @@ System::String^ Scrutinizer_GCN::AnalyzeExecutionTrace( List<IInstruction^>^ ops
 
     char buffer[4096];
     sprintf( buffer,
-            "Clocks: %u\n (%.2f clocks/wave)\n"
+            "Clocks: %u (%.2f clocks/wave)\n"
+            "Peak Thoroughput: (%.2f threads/GHz/CU)\n"
             "VALU util:   %.2f%%\n"
             "VMem util:   %.2f%%\n"
             "Exp  util:   %.2f%%\n"
             "SALU util:   %.2f%%\n"
             "SMem util:   %.2f%%\n"
-            "Stall rate: %.2f%%\n",
+            "Stall rate: %.2f%%\n"
+            "Occupancy: %.2f%%/%.2f%%\n",
             results.nCycles,
             fClocks / settings.nWavesToExecute,
+            ((settings.nWavesToExecute*64.0)/(results.nCycles))*1000000000.0,
             100.0f*fVALUUtil,
             100.0f*fVMemUtil,
             100.0f*fExpUtil,
             100.0f*fScalarUtil,
             100.0f*fSMemUtil,
-            100.0f*fStallRate
+            100.0f*fStallRate,
+            100.0f*results.nPeakOccupancy / (40) ,
+            10.0f*settings.nMaxWavesPerSIMD // 100 * waves / 10
         );
 
     System::String^ str = gcnew System::String(buffer);
