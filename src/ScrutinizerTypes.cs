@@ -148,7 +148,11 @@ namespace Pyramid.Scrutinizer
     {
         List<IInstruction> BuildProgram( );
 
-        string AnalyzeExecutionTrace(List<IInstruction> ops);
+        List<IInstruction> BuildDXFetchShader(IDXShaderReflection refl);
+
+
+
+        string AnalyzeExecutionTrace(List<IInstruction> ops, uint nWaveIssueRate);
     };
 
 }

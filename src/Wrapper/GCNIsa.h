@@ -44,9 +44,22 @@ namespace GCN
     {
     public:
 
+        Instruction( )
+        {
+        }
+
+     
+
         InstructionClass GetClass() const { return m_eClass; }
         
     protected:
+
+        Instruction( InstructionClass eClass ) : m_eClass(eClass)
+        {
+            char* pFields = (char*) &Fields;
+            for( size_t i=0; i<sizeof(Fields); i++ )
+                pFields[i]=0;
+        }
 
         friend class GCN1Decoder;
         friend class GCN3Decoder;
@@ -172,6 +185,9 @@ namespace GCN
     class ScalarInstruction : public Instruction
     {
     public:
+        ScalarInstruction()  : Instruction(IC_SCALAR){}
+        
+
         bool IsConditionalJump() const;
         bool IsUnconditionalJump() const;
         bool IsWavefrontHalt() const;
@@ -197,15 +213,24 @@ namespace GCN
         Dests GetDest() const { return Fields.Scalar.m_Dest; }
 
         bool IsWait() const { return GetOpcode() == S_WAITCNT; };
-        uint GetVMwaitCount() const   { return ReadSIMMBits(3,0); }
-        uint GetLCGMWaitCount() const { return ReadSIMMBits(6,4); }
-        uint GetEXPWaitCount() const  { return ReadSIMMBits(12,8); }
+        uint GetVMwaitCount() const    { return ReadSIMMBits(3,0); }
+        uint GetEXPWaitCount() const   { return ReadSIMMBits(6,4); }
+        uint GetLCGMWaitCount() const  { return ReadSIMMBits(12,8); }
+
+        void EncodeWait( uint vmcnt, uint lcgmcount, uint expcount )
+        {
+            uint simm = vmcnt | (expcount<<4) | (lcgmcount<<8);
+            Fields.Scalar.m_nSIMM16 = simm;
+            Fields.Scalar.m_eOpcode = S_WAITCNT;
+        }
     };
 
 
     class ScalarMemoryInstruction : public Instruction
     {
     public:
+        ScalarMemoryInstruction() : Instruction(IC_SCALAR_MEM){}
+
         uint GetResultWidthInDWORDs() const;
         uint GetResourceWidthInDWORDs() const ;
         ScalarMemoryInstructions GetOpcode() const { return Fields.ScalarMem.m_eOpcode; }
@@ -221,6 +246,8 @@ namespace GCN
     class VectorInstruction : public Instruction
     {
     public:
+        VectorInstruction() : Instruction(IC_VECTOR){}
+
           
         VectorInstructions GetOpcode() const { return Fields.Vector.m_eOpcode; }
         float GetLiteralAsFloat() const { return Fields.Vector.m_Literal.Float; }
@@ -250,6 +277,8 @@ namespace GCN
     class InterpolationInstruction : public Instruction
     {
     public:
+        InterpolationInstruction() : Instruction(IC_VECTOR_INTERP){}
+
         VectorInstructions GetOpcode() const { return Fields.Interp.m_eOpcode; }
         Sources GetVSrc() const { return Fields.Interp.m_VSrc; }
         Dests GetVDst() const { return Fields.Interp.m_VDst; }
@@ -260,6 +289,8 @@ namespace GCN
     class ExportInstruction : public Instruction
     {
     public:
+        ExportInstruction() : Instruction(IC_EXPORT){}
+
         bool GetCompressBit() const { return Fields.Export.m_Compress; }
         bool GetDoneBit() const { return Fields.Export.m_Done; }
         bool GetValidMaskBit() const { return Fields.Export.m_ValidMask; }
@@ -274,6 +305,8 @@ namespace GCN
     class DataShareInstruction : public Instruction
     {
     public:
+        DataShareInstruction() : Instruction(IC_DS){}
+
         DSInstructions GetOpcode() const { return Fields.DS.m_eOpcode; }
         uint GetOffset0()  const   { return Fields.DS.m_nOffset0; }  // Instructions can have one 16 bit offset field or two 8-bit offset fields
         uint GetOffset1()  const   { return Fields.DS.m_nOffset1; }
@@ -290,6 +323,8 @@ namespace GCN
     class BufferInstruction : public Instruction
     {
     public:
+
+        BufferInstruction() : Instruction(IC_BUFFER){}
 
         BufferInstructions GetOpcode() const { return Fields.Buffer.m_eOpcode; }
         bool IsDirectToLDS() const { return Fields.Buffer.m_bLDSDirect; }
@@ -311,6 +346,9 @@ namespace GCN
 
         /// Test for a store or atomic store
         bool IsMemoryWrite() const;
+
+        void SetOpcode( BufferInstructions eOp ) { Fields.Buffer.m_eOpcode = eOp; }
+        
     };
 
 
@@ -318,6 +356,8 @@ namespace GCN
     class ImageInstruction : public Instruction
     {
     public:
+        ImageInstruction() : Instruction(IC_IMAGE){}
+
 
         ImageInstructions GetOpcode() const   { return Fields.Image.m_eOpcode; }
         bool IsTFE() const                    { return Fields.Image.m_bTFE; }

@@ -9,15 +9,16 @@ namespace Pyramid
 {
     class AMDDriverResultSet : IResultSet
     {
-        private AMDDriverResultsPanel m_Results = new AMDDriverResultsPanel();
+        private AMDDriverResultsPanel m_Results;
         private TextBox m_Analysis = new TextBox();
 
         public string Name { get { return "AMDDXX"; } }
         public Control AnalysisPanel { get { return m_Analysis; } }
         public Control ResultsPanel { get { return m_Results; } }
 
-        public AMDDriverResultSet()
+        public AMDDriverResultSet( IDXShaderReflection reflection )
         {
+            m_Results = new AMDDriverResultsPanel(reflection);
             m_Analysis.Dock      = DockStyle.Fill;
             m_Analysis.ReadOnly  = true;
             m_Analysis.Multiline = true;
@@ -53,12 +54,15 @@ namespace Pyramid
             if (opts.Language != Languages.HLSL)
                 return null;
 
+            IHLSLOptions hlslOpts = opts as IHLSLOptions;
             try
             {
                 IDXShaderBlob blob;
                 string messages;
-                if (!m_FXC.Compile(shader, opts as IHLSLOptions, out blob, out messages))
+                if (!m_FXC.Compile(shader, hlslOpts, out blob, out messages))
                     return null;
+
+                IDXShaderReflection reflect = blob.Reflect();
 
                 IDXShaderBlob exe = blob.GetExecutableBlob();
                 if (exe == null)
@@ -66,7 +70,7 @@ namespace Pyramid
 
                 byte[] bytes = exe.ReadBytes();
 
-                AMDDriverResultSet rs = new AMDDriverResultSet();
+                AMDDriverResultSet rs = new AMDDriverResultSet(reflect);
 
                 foreach (IAMDAsic a in m_Driver.Asics)
                 {

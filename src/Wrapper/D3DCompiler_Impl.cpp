@@ -3,6 +3,9 @@
 
 #include <Windows.h>
 
+
+
+
 DXShaderBlob_Impl::DXShaderBlob_Impl( ID3DBlob* pBlob, D3DCompiler_Impl^ pCompiler ) : m_pBlob(pBlob), m_pmCompiler(pCompiler)
 {
 }
@@ -104,6 +107,17 @@ Pyramid::IDXShaderBlob^ DXShaderBlob_Impl::GetExecutableBlob()
     return nullptr; // no code in this blob
 }
 
+Pyramid::IDXShaderReflection^ DXShaderBlob_Impl::Reflect()
+{
+    ID3D11ShaderReflection* pReflect=0;
+    HRESULT hr = m_pmCompiler->m_pReflect( m_pBlob->GetBufferPointer(), m_pBlob->GetBufferSize(), __uuidof(ID3D11ShaderReflection), (void**) &pReflect );
+    if( FAILED(hr) )
+        throw gcnew System::Exception("Shader reflection failed");
+
+    return gcnew DXShaderReflection_Impl(pReflect);
+}
+
+
 D3DCompiler_Impl::D3DCompiler_Impl( System::String^ DLLPath )
 {
     MarshalledString DLL(DLLPath);
@@ -132,11 +146,16 @@ D3DCompiler_Impl::D3DCompiler_Impl( System::String^ DLLPath )
     if( !pCreateBlobFunc )
         throw gcnew System::Exception(System::String::Format("GetProcAddress failed for 'D3DCreateBlob'"));
 
+    void* pReflectFunc = GetProcAddress(hDLL, "D3DReflect");
+    if( !pReflectFunc )
+        throw gcnew System::Exception(System::String::Format("GetProcAddress failed for 'D3DReflect'"));
+
     m_pCompile     = (D3DCOMPILE_FUNC) pCompileFunc;
     m_pDisassemble = (D3DDISASSEMBLE_FUNC) pDisassembleFunc;
     m_pStrip       = (D3DSTRIP_FUNC)pStripFunc;
     m_pGetBlob     = (D3DGETBLOBPART_FUNC)pGetBlobPartFunc;
     m_pCreateBlob  = (D3DCREATEBLOB_FUNC) pCreateBlobFunc;
+    m_pReflect     = (D3DREFLECT_FUNC) pReflectFunc;
 }
 
 bool D3DCompiler_Impl::Compile( System::String^ Shader, 

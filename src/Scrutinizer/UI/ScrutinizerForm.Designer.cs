@@ -31,8 +31,12 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.lblIterations = new System.Windows.Forms.Label();
             this.txtLoopCount = new System.Windows.Forms.TextBox();
-            this.cfgWidget1 = new Pyramid.Scrutinizer.UI.CFGWidget();
             this.btnSimulate = new System.Windows.Forms.Button();
+            this.lblACMR = new System.Windows.Forms.Label();
+            this.txtACMR = new System.Windows.Forms.TextBox();
+            this.txtPixels = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.cfgWidget1 = new Pyramid.Scrutinizer.UI.CFGWidget();
             this.SuspendLayout();
             // 
             // panel1
@@ -68,6 +72,55 @@
             this.txtLoopCount.WordWrap = false;
             this.txtLoopCount.TextChanged += new System.EventHandler(this.txtLoopCount_TextChanged);
             // 
+            // btnSimulate
+            // 
+            this.btnSimulate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnSimulate.Location = new System.Drawing.Point(664, 249);
+            this.btnSimulate.Name = "btnSimulate";
+            this.btnSimulate.Size = new System.Drawing.Size(62, 21);
+            this.btnSimulate.TabIndex = 5;
+            this.btnSimulate.Text = "Simulate";
+            this.btnSimulate.UseVisualStyleBackColor = true;
+            this.btnSimulate.Click += new System.EventHandler(this.btnSimulate_Click);
+            // 
+            // lblACMR
+            // 
+            this.lblACMR.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblACMR.AutoSize = true;
+            this.lblACMR.Location = new System.Drawing.Point(678, 280);
+            this.lblACMR.Name = "lblACMR";
+            this.lblACMR.Size = new System.Drawing.Size(48, 13);
+            this.lblACMR.TabIndex = 6;
+            this.lblACMR.Text = "Verts/Tri";
+            // 
+            // txtACMR
+            // 
+            this.txtACMR.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtACMR.Location = new System.Drawing.Point(728, 277);
+            this.txtACMR.Name = "txtACMR";
+            this.txtACMR.Size = new System.Drawing.Size(41, 20);
+            this.txtACMR.TabIndex = 7;
+            this.txtACMR.Text = "1";
+            // 
+            // txtPixels
+            // 
+            this.txtPixels.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtPixels.Location = new System.Drawing.Point(728, 303);
+            this.txtPixels.Name = "txtPixels";
+            this.txtPixels.Size = new System.Drawing.Size(41, 20);
+            this.txtPixels.TabIndex = 9;
+            this.txtPixels.Text = "64";
+            // 
+            // label1
+            // 
+            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(678, 306);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(51, 13);
+            this.label1.TabIndex = 8;
+            this.label1.Text = "Pixels/Tri";
+            // 
             // cfgWidget1
             // 
             this.cfgWidget1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -80,22 +133,15 @@
             this.cfgWidget1.LoopSelected += new Pyramid.Scrutinizer.UI.CFGWidget.LoopSelectionHandler(this.cfgWidget1_LoopSelected);
             this.cfgWidget1.SelectionCleared += new Pyramid.Scrutinizer.UI.CFGWidget.SelectionClearedHandler(this.cfgWidget1_SelectionCleared);
             // 
-            // btnSimulate
-            // 
-            this.btnSimulate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSimulate.Location = new System.Drawing.Point(663, 217);
-            this.btnSimulate.Name = "btnSimulate";
-            this.btnSimulate.Size = new System.Drawing.Size(62, 21);
-            this.btnSimulate.TabIndex = 5;
-            this.btnSimulate.Text = "Simulate";
-            this.btnSimulate.UseVisualStyleBackColor = true;
-            this.btnSimulate.Click += new System.EventHandler(this.btnSimulate_Click);
-            // 
             // ScrutinizerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(840, 494);
+            this.Controls.Add(this.txtPixels);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.txtACMR);
+            this.Controls.Add(this.lblACMR);
             this.Controls.Add(this.btnSimulate);
             this.Controls.Add(this.lblIterations);
             this.Controls.Add(this.txtLoopCount);
@@ -115,5 +161,9 @@
         private System.Windows.Forms.Label lblIterations;
         private System.Windows.Forms.TextBox txtLoopCount;
         private System.Windows.Forms.Button btnSimulate;
+        private System.Windows.Forms.Label lblACMR;
+        private System.Windows.Forms.TextBox txtACMR;
+        private System.Windows.Forms.TextBox txtPixels;
+        private System.Windows.Forms.Label label1;
     }
 }

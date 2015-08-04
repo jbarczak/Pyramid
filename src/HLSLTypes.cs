@@ -34,6 +34,16 @@ namespace Pyramid
         LEVEL3
     };
 
+    public enum HLSLShaderType
+    {
+        VERTEX,
+        PIXEL,
+        GEOMETRY,
+        DOMAIN,
+        HULL,
+        COMPUTE
+    };
+
     public interface IHLSLOptions : ICompileOptions
     {
         string EntryPoint { get; }
@@ -45,6 +55,12 @@ namespace Pyramid
         uint GetD3DCompileFlagBits();
     }
 
+    public interface IDXShaderReflection
+    {
+        HLSLShaderType GetShaderType();
+
+    };
+
     public interface IDXShaderBlob
     {
         string Disassemble();
@@ -52,6 +68,7 @@ namespace Pyramid
         IDXShaderBlob Strip();
         IDXShaderBlob GetSignatureBlob();
         IDXShaderBlob GetExecutableBlob();
+        IDXShaderReflection Reflect();
     }
 
     public interface ID3DCompiler

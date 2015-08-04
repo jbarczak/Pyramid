@@ -391,9 +391,9 @@ namespace Disassembler{
 
             case S_WAITCNT:
                 {
-                    uint VMCNT   = pInst->ReadSIMMBits(3,0);
-                    uint EXPCNT  = pInst->ReadSIMMBits(6,4);
-                    uint LKGMCNT = pInst->ReadSIMMBits(12,8);
+                    uint VMCNT   = pInst->GetVMwaitCount();
+                    uint EXPCNT  = pInst->GetEXPWaitCount();
+                    uint LKGMCNT = pInst->GetLCGMWaitCount();
                     
                     char COUNTS[256]="";
                     if( VMCNT != 15 )
@@ -402,6 +402,9 @@ namespace Disassembler{
                         catprintf(COUNTS, "expcnt(%u) ",EXPCNT);
                     if( LKGMCNT != 15 )
                         catprintf(COUNTS, "lkgmcnt(%u) ",LKGMCNT );
+
+                    // NOTE: Max for LKGMCNT is really 31, but AMD driver seems to
+                    //  think its 15, because it constantly waits on that.
 
                     Printf( printer, OPCODE_FORMAT"     %s\n", "S_WAITCNT", COUNTS );
                 }

@@ -4,6 +4,8 @@
 #include "AMDShader_Impl.h"
 #include "Utilities.h"
 
+#include "D3DCompiler_Impl.h"
+
 #pragma unmanaged
 #include "GCNIsa.h"
 #include "GCNDecoder.h"
@@ -289,8 +291,52 @@ List<IInstruction^>^ Scrutinizer_GCN::BuildProgram(  )
     return pmManagedInstructions;
 }
 
+List<IInstruction^>^ Scrutinizer_GCN::BuildDXFetchShader( Pyramid::IDXShaderReflection^ refl )
+{
+    DXShaderReflection_Impl^ reflImpl = dynamic_cast<DXShaderReflection_Impl^>(refl);
+    ID3D11ShaderReflection* pRefl = reflImpl->m_pRef;
+
+    List<IInstruction^>^ ops = gcnew List<IInstruction^>();
+
+    D3D11_SHADER_DESC sd;
+    pRefl->GetDesc(&sd);
+    for( size_t i=0; i<sd.InputParameters; i++ )
+    {
+        D3D11_SIGNATURE_PARAMETER_DESC param;
+        pRefl->GetInputParameterDesc(i,&param);
+       
+        // count how many elements we need to fetch
+        UINT nComps=0;
+        while( param.Mask )
+        {
+            nComps++;
+            param.Mask = param.Mask>>1;
+        }
+
+        if( !nComps )
+            continue; // strange...
+
+        GCN::BufferInstruction inst;
+        switch( nComps )
+        {
+        case 1: inst.SetOpcode( GCN::BUFFER_LOAD_FORMAT_X );    break;
+        case 2: inst.SetOpcode( GCN::BUFFER_LOAD_FORMAT_XY );   break;
+        case 3: inst.SetOpcode( GCN::BUFFER_LOAD_FORMAT_XYZ );  break;
+        case 4: inst.SetOpcode( GCN::BUFFER_LOAD_FORMAT_XYZW ); break;
+        }
+
+        GCNTBufferOp^ op = gcnew GCNTBufferOp( inst );
+        ops->Add(op);
+    }
+
+    GCN::ScalarInstruction wait;
+    wait.EncodeWait(0,31,7);
+    ops->Add( gcnew GCNInstruction(wait));
+    return ops;
+}
+
         
-System::String^ Scrutinizer_GCN::AnalyzeExecutionTrace( List<IInstruction^>^ ops )
+System::String^ Scrutinizer_GCN::AnalyzeExecutionTrace( List<IInstruction^>^ ops, unsigned int nWaveIssueRate )
 {
     std::vector<GCN::Simulator::SimOp> pSimOps(ops->Count);
 
@@ -362,7 +408,7 @@ System::String^ Scrutinizer_GCN::AnalyzeExecutionTrace( List<IInstruction^>^ ops
     // setup the sim
     GCN::Simulator::Settings settings;
     settings.nExportCost = 256;      // Based on Layla's "packman" slide.  1 export -> 64 ALU            // TODO: Sane number
-    settings.nWaveIssueRate = 880;    // Assumes 1 wave/rasterizer/4 clk, round-robined among 11 CUs/slice   TODO: Sane number.
+    settings.nWaveIssueRate = nWaveIssueRate;    // Assumes 1 wave/rasterizer/4 clk, round-robined among 11 CUs/slice   TODO: Sane number.
     settings.nWavesToExecute = 500;
     settings.nMaxWavesPerSIMD = m_pmShader->GetOccupancy();
 

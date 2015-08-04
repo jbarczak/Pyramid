@@ -16,7 +16,9 @@ public:
 
     virtual List<IInstruction^>^ BuildProgram( );
 
-    virtual System::String^ AnalyzeExecutionTrace( List<IInstruction^>^ ops );
+    virtual List<IInstruction^>^ BuildDXFetchShader( Pyramid::IDXShaderReflection^ refl );
+
+    virtual System::String^ AnalyzeExecutionTrace( List<IInstruction^>^ ops, unsigned int nWaveIssueRate );
 
 private:
     AMDAsic_Impl^ m_pmAsic;

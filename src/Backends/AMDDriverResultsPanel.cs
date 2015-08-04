@@ -14,12 +14,17 @@ namespace Pyramid
     {
         private List<IAMDShader> m_Shaders = new List<IAMDShader>();
 
+        IDXShaderReflection m_DXReflection;
+
         public delegate void AsicChangedDelegate(IAMDShader shader);
         public event AsicChangedDelegate AsicChanged;
         
-        public AMDDriverResultsPanel()
+        public AMDDriverResultsPanel( IDXShaderReflection shader )
         {
             InitializeComponent();
+            m_DXReflection = shader;
+            btnScrutinize.Enabled =  (shader.GetShaderType() == HLSLShaderType.VERTEX ||
+                                      shader.GetShaderType() == HLSLShaderType.PIXEL) ;
         }
 
         public void AddResult(IAMDShader shader)
@@ -84,7 +89,7 @@ namespace Pyramid
             if (i >= 0 && i < m_Shaders.Count)
             {
                 IAMDShader sh = m_Shaders[cmbAsic.SelectedIndex];
-                Scrutinizer.UI.ScrutinizerForm f = new Scrutinizer.UI.ScrutinizerForm(sh);
+                Scrutinizer.UI.ScrutinizerForm f = new Scrutinizer.UI.ScrutinizerForm(sh,m_DXReflection);
                 f.ShowDialog();
             }
           

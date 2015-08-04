@@ -11,7 +11,7 @@
 
 typedef unsigned int UINT;
 
-using namespace System::Runtime::InteropServices;
+using System::Runtime::InteropServices::Marshal;
 
 private ref class MarshalledString
 {
