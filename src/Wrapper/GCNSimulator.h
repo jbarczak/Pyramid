@@ -46,6 +46,8 @@ namespace Simulator{
 
         size_t nStallCycles[4];    ///< Number of times each SIMD was stalled
         size_t nStallWaves[4];     ///< Incremented once per stalled wave on each stall
+
+        size_t nStarveCycles; ///< Number of clocks during which CU is completely empty
     };
 
 

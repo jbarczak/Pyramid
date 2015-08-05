@@ -151,6 +151,7 @@ namespace Pyramid.Scrutinizer.UI
                 Wrapper w = new Wrapper();
                 m_Backend = sh.CreateScrutinizer();
 
+                txtOccupancy.Text = m_Backend.GetDefaultOccupancy().ToString();
                 List<IInstruction> Ops = m_Backend.BuildProgram();
 
                 m_Ops = Ops;
@@ -301,7 +302,12 @@ namespace Pyramid.Scrutinizer.UI
 
                 trace.AddRange(Algorithms.DoTrace(m_Ops, m_Blocks, m_Loops));
 
-                uint nCUs = 11;
+                uint nOccupancy = Convert.ToUInt32(txtOccupancy.Text);
+                if (nOccupancy < 0 || nOccupancy > 10)
+                    throw new System.Exception("Occupancy must be 1-10");
+
+                uint nCUs = Convert.ToUInt32(txtCUCount.Text);
+
 
                 uint nWaveIssueRate = 0;
                 switch( m_Reflection.GetShaderType() )
@@ -340,7 +346,8 @@ namespace Pyramid.Scrutinizer.UI
                     throw new System.Exception("Bad shader type");
                 }
 
-                string sim = m_Backend.AnalyzeExecutionTrace(trace, nWaveIssueRate);
+            
+                string sim = m_Backend.AnalyzeExecutionTrace(trace, nWaveIssueRate, nOccupancy, nCUs );
                 MessageBox.Show(sim);
                 panel1.Refresh();
             }

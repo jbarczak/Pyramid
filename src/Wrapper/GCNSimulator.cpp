@@ -65,6 +65,10 @@ namespace Simulator{
                 assert( m_nLast - m_nFirst <= MAX );
             }
 
+            size_t size() const { return m_nLast - m_nFirst; }
+
+            const T& at( size_t i ) const { return m_Items[ (m_nFirst+i)%MAX ]; }
+
         private:
 
             T m_Items[MAX];
@@ -427,6 +431,15 @@ namespace Simulator{
             }
         }
 
+        static uint GetExportCost( const GCN::Instruction* pOp, uint nBaseCost )
+        {
+            const GCN::ExportInstruction* pExp = static_cast<const GCN::ExportInstruction*>( pOp );
+            if( pExp->GetCompressBit() )
+                return nBaseCost;
+            else
+                return nBaseCost*2;
+        }
+
 
         /// Test whether a given wave can issue one of the "free" scalar operations
         static bool CanIssueFreeScalarOp( const GCN::Instruction* pOp, WaveState* pWave )
@@ -660,7 +673,8 @@ namespace Simulator{
             if( pExpWave )
             {
                 ExportOp op;
-                op.nClocksLeft = rSettings.nExportCost;
+                op.nClocksLeft = GetExportCost( pOps[pExpWave->nCurrentOp].pInstruction, rSettings.nExportCost );
+                
                 op.pWave = pExpWave;
                 pExpWave->expcnt++;
                 EXPQueue.push_back(op);
@@ -719,6 +733,9 @@ namespace Simulator{
             if(nOcc > rResults.nPeakOccupancy)
                 rResults.nPeakOccupancy = nOcc;
 
+            if( nOcc == 0 )
+                rResults.nStarveCycles++;
+
             if( pScalarWave )
             {
                 pScalarWave->nCurrentOp++;
@@ -746,7 +763,7 @@ namespace Simulator{
             //  Don't count as a stall if VALU is occupied by a long-latency op
             bool bVALUStarved = !pVALUWave && !pWavesInVALU[nCurrentSIMD];
 
-            if( !pScalarWave && bVALUStarved && !pVMemWave && !pExpWave && !nFreeOps ) 
+            if( !pScalarWave && bVALUStarved && !pVMemWave && !pExpWave && !nFreeOps && nOcc ) 
             {
                 rResults.nStallCycles[nCurrentSIMD]++;
                 rResults.nStallWaves[nCurrentSIMD] += pWaveCount[nCurrentSIMD];
@@ -786,6 +803,7 @@ namespace Simulator{
                         i++;
                     } while( i<nOps && pStallInstructions[i] == pStallInstructions[i0] );
                 }
+
             }
 
         } 

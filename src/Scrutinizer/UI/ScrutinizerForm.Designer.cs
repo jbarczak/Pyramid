@@ -37,6 +37,10 @@
             this.txtPixels = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.cfgWidget1 = new Pyramid.Scrutinizer.UI.CFGWidget();
+            this.txtCUCount = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.txtOccupancy = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // panel1
@@ -133,11 +137,53 @@
             this.cfgWidget1.LoopSelected += new Pyramid.Scrutinizer.UI.CFGWidget.LoopSelectionHandler(this.cfgWidget1_LoopSelected);
             this.cfgWidget1.SelectionCleared += new Pyramid.Scrutinizer.UI.CFGWidget.SelectionClearedHandler(this.cfgWidget1_SelectionCleared);
             // 
+            // txtCUCount
+            // 
+            this.txtCUCount.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtCUCount.Location = new System.Drawing.Point(728, 345);
+            this.txtCUCount.Name = "txtCUCount";
+            this.txtCUCount.Size = new System.Drawing.Size(41, 20);
+            this.txtCUCount.TabIndex = 10;
+            this.txtCUCount.Text = "11";
+            // 
+            // label2
+            // 
+            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(691, 348);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(27, 13);
+            this.label2.TabIndex = 11;
+            this.label2.Text = "CUs";
+            // 
+            // txtOccupancy
+            // 
+            this.txtOccupancy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtOccupancy.Location = new System.Drawing.Point(728, 371);
+            this.txtOccupancy.Name = "txtOccupancy";
+            this.txtOccupancy.Size = new System.Drawing.Size(41, 20);
+            this.txtOccupancy.TabIndex = 12;
+            this.txtOccupancy.Text = "0";
+            // 
+            // label3
+            // 
+            this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(653, 374);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(73, 13);
+            this.label3.TabIndex = 13;
+            this.label3.Text = "Waves/SIMD";
+            // 
             // ScrutinizerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(840, 494);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.txtOccupancy);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.txtCUCount);
             this.Controls.Add(this.txtPixels);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.txtACMR);
@@ -148,7 +194,7 @@
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.cfgWidget1);
             this.Name = "ScrutinizerForm";
-            this.Text = "WS";
+            this.Text = "Scrutinizer";
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -165,5 +211,9 @@
         private System.Windows.Forms.TextBox txtACMR;
         private System.Windows.Forms.TextBox txtPixels;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox txtCUCount;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TextBox txtOccupancy;
+        private System.Windows.Forms.Label label3;
     }
 }
