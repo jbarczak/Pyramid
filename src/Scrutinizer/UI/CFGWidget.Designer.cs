@@ -39,6 +39,7 @@
             this.treeView1.Size = new System.Drawing.Size(280, 270);
             this.treeView1.TabIndex = 0;
             this.treeView1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView1_AfterSelect);
+            this.treeView1.Leave += new System.EventHandler(this.treeView1_Leave);
             // 
             // CFGWidget
             // 

@@ -258,9 +258,15 @@ namespace Pyramid.Scrutinizer.UI
 
         private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
         {
-            if( treeView1.SelectedNode == null )
-                if( SelectionCleared != null )
+            if (treeView1.SelectedNode == null)
+            {
+                if (SelectionCleared != null)
+                {
+                    SelectedLoop  = null;
+                    SelectedBlock = null;
                     SelectionCleared(this);
+                }
+            }
 
             object tag = treeView1.SelectedNode.Tag;
             if (tag == null)
@@ -293,6 +299,17 @@ namespace Pyramid.Scrutinizer.UI
                         BlockSelected(this, n.Block);
                     }
                 }
+            }
+        }
+
+        private void treeView1_Leave(object sender, EventArgs e)
+        {
+            treeView1.SelectedNode = null;
+            if (SelectionCleared != null)
+            {
+                SelectedLoop = null;
+                SelectedBlock = null;
+                SelectionCleared(this);
             }
         }
     }
