@@ -37,16 +37,9 @@ namespace Simulator{
         size_t nExpBusy;
         size_t nSMemBusy;
 
-        size_t nVMemIssued;
-        size_t nVALUIssued;
-        size_t nScalarIssued;
-        size_t nExpIssued;
-
         size_t nPeakOccupancy;
 
         size_t nStallCycles[4];    ///< Number of times each SIMD was stalled
-        size_t nStallWaves[4];     ///< Incremented once per stalled wave on each stall
-
         size_t nStarveCycles; ///< Number of clocks during which CU is completely empty
     };
 

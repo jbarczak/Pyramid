@@ -433,24 +433,8 @@ System::String^ Scrutinizer_GCN::AnalyzeExecutionTrace( List<IInstruction^>^ ops
     float fClocks = results.nCycles;
     float fStallClocks = results.nStallCycles[0]+results.nStallCycles[1]+results.nStallCycles[2]+results.nStallCycles[3];
 
-    // annotate instructions with stall counts
-    Dictionary< IInstruction^, size_t >^ InstructionStalls = gcnew Dictionary<IInstruction^,size_t>();
-    for( size_t i=0; i<pInstructionStalls.size(); i++ )
-    {
-        if( pInstructionStalls[i] )
-        {
-            char buffer[64];
-            size_t nOpStalls = pInstructionStalls[i];
-            sprintf( buffer, "Stall: %.2f%%", (100.0f*nOpStalls)/fClocks);
-            System::String^ notes = gcnew System::String( buffer );     
-
-            pDistinctInstructions[i]->SimNotes = notes;
-        }
-    }
-
-    
     double fUnstarvedClocks = results.nCycles-results.nStarveCycles;
-    float fStallRate = fStallClocks/(fClocks);
+    float fStallRate = fStallClocks/(fUnstarvedClocks);
     float fVALUUtil =
         (results.nVALUBusy[0]+results.nVALUBusy[1]+results.nVALUBusy[2]+results.nVALUBusy[3])/(4*fClocks);
 
@@ -465,6 +449,24 @@ System::String^ Scrutinizer_GCN::AnalyzeExecutionTrace( List<IInstruction^>^ ops
  
     double fThroughput =  ((settings.nWavesToExecute*64.0)/(fClocks))*1000000000.0;
    
+
+    // annotate instructions with stall counts
+    Dictionary< IInstruction^, size_t >^ InstructionStalls = gcnew Dictionary<IInstruction^,size_t>();
+    for( size_t i=0; i<pInstructionStalls.size(); i++ )
+    {
+        if( pInstructionStalls[i] )
+        {
+            char buffer[64];
+            size_t nOpStalls = pInstructionStalls[i];
+            sprintf( buffer, "Stall: %.2f%%", (100.0f*nOpStalls)/fUnstarvedClocks);
+            System::String^ notes = gcnew System::String( buffer );     
+
+            pDistinctInstructions[i]->SimNotes = notes;
+        }
+    }
+
+    
+ 
     char buffer[4096];
     sprintf( buffer,
             "Clocks:  (%.2f clocks/wave)\n"

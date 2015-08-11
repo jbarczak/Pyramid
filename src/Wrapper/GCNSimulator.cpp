@@ -739,34 +739,28 @@ namespace Simulator{
             if( pScalarWave )
             {
                 pScalarWave->nCurrentOp++;
-                rResults.nScalarIssued++;
             }
-            if( pVALUWave )
-            {
-                // VALU waves don't get their IP incremented
-                //   until after the op completes.  This is done to ensure that the wave
-                //   blocks itself if it's doing a long-latency operation
-                rResults.nVALUIssued++;
-            }
+
+            // VALU waves don't get their IP incremented
+            //   until after the op completes.  This is done to ensure that the wave
+            //   blocks itself if it's doing a long-latency operation
+            
             if( pVMemWave )
             {
                 pVMemWave->nCurrentOp++;
-                rResults.nVMemIssued++;
             }
             if( pExpWave )
             {
                 pExpWave->nCurrentOp++;
-                rResults.nExpIssued++;
             }
 
             // check for clocks where nothing happens and track them
             //  Don't count as a stall if VALU is occupied by a long-latency op
             bool bVALUStarved = !pVALUWave && !pWavesInVALU[nCurrentSIMD];
 
-            if( !pScalarWave && bVALUStarved && !pVMemWave && !pExpWave && !nFreeOps && nOcc ) 
+            if( !pScalarWave && bVALUStarved && !pVMemWave && !pExpWave && !nFreeOps && pWaveCount[nCurrentSIMD] ) 
             {
                 rResults.nStallCycles[nCurrentSIMD]++;
-                rResults.nStallWaves[nCurrentSIMD] += pWaveCount[nCurrentSIMD];
 
                 // find the set of distinct SimOps on which we're stalled
                 size_t pDistinctSimOps[MAX_WAVES_PER_SIMD];
@@ -803,9 +797,7 @@ namespace Simulator{
                         i++;
                     } while( i<nOps && pStallInstructions[i] == pStallInstructions[i0] );
                 }
-
             }
-
         } 
 
         rResults.nCycles = nClock;
