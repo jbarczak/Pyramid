@@ -483,14 +483,13 @@ System::String^ Scrutinizer_GCN::AnalyzeExecutionTrace( List<IInstruction^>^ ops
    
 
     // annotate instructions with stall counts
-    Dictionary< IInstruction^, size_t >^ InstructionStalls = gcnew Dictionary<IInstruction^,size_t>();
     for( size_t i=0; i<pInstructionStalls.size(); i++ )
     {
         if( pInstructionStalls[i] )
         {
             char buffer[64];
             size_t nOpStalls = pInstructionStalls[i];
-            sprintf( buffer, "Stall: %.2f%%", (100.0f*nOpStalls)/fUnstarvedClocks);
+            sprintf( buffer, "Stalled here %.2f%%", (100.0f*nOpStalls)/fUnstarvedClocks);
             System::String^ notes = gcnew System::String( buffer );     
 
             pDistinctInstructions[i]->SimNotes = notes;

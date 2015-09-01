@@ -135,7 +135,7 @@ namespace Pyramid.Scrutinizer.UI
             e.Graphics.DrawString(m_Op.Disassemble(), f, br, new PointF(80+96, 0));
 
             if( !String.IsNullOrEmpty(m_Op.SimNotes)  )
-                e.Graphics.DrawString(m_Op.SimNotes, this.Font, SystemBrushes.ControlText, new PointF(this.Width - 100, 0));
+                e.Graphics.DrawString(m_Op.SimNotes, this.Font, SystemBrushes.ControlText, new PointF(this.Width - 200, 0));
             
            
         }
