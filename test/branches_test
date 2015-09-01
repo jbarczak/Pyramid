@@ -1,0 +1,35 @@
+
+bool b;
+bool c;
+int n;
+Buffer<float> f;
+
+float4 main() : SV_TARGET 
+{ 
+  int i=0;
+  float q=0;
+
+  while(1)
+  {
+     q+= f[i++];
+     if( i >= n )
+        break;
+  } 
+
+  if( b )
+  {
+     if(c)
+     {
+        return 1+q;
+     }
+     else
+     {
+        return 2+q;
+     }
+  }
+  else
+  {
+      return 3+q;
+  }
+
+}

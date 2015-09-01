@@ -1,0 +1,154 @@
+static const float HUGE = 100000000;
+
+struct Vertex
+{
+    float3 P;
+    float3 N;
+};
+
+struct Box
+{
+    float3 Min;
+    float3 Max;
+};
+
+struct Node
+{
+    Box box;
+    int ChildIndex;
+    int PrimCount;    
+};
+
+struct TriHit
+{
+    float T;
+    float U;
+    float V;
+};
+
+struct Ray
+{
+    float3 Origin;
+    float3 Direction;
+    float tmax;
+    int nTriHit;
+    float u;
+    float v;
+};
+
+float hmax( float3 v )
+{
+   return max( max(v.x,v.y), v.z );
+}
+float hmin( float3 v )
+{
+   return min( min(v.x,v.y), v.z );
+}
+
+bool RayBoxTest( Box box, float3 O, float3 DInv, float tmax )
+{
+    float3 tMin = (O.xyz - box.Min.xyz)*DInv.xyz;
+    float3 tMax = (O.xyz - box.Max.xyz)*DInv.xyz;
+    float3 t0 = min(tMin,tMax);
+    float3 t1 = max(tMin,tMax);
+    t0.x = hmax( t0 );
+    t1.x = hmin( t1 );
+    return (t0.x < min(t1.x,tmax)) && t1.x > 0;        
+}
+
+
+bool RayTriangleTest( float3 P0, float3 P1, float3 P2, float3 O, float3 D, 
+                      float TMax, out TriHit hit )
+{   
+    float3 v10 = P1 - P0;
+    float3 v02 = P0 - P2;
+    float3 v10x02 = cross(v10,v02);
+    float3 v0a = P0 - O;
+    float3 v02x0a = cross(v02,v0a);
+    
+    float V = 1 / dot( v10x02, D );
+    float A = V * dot( v02x0a, D );
+ 
+    if( A >= 0.0)
+    {
+        float3 v10x0a = cross(v10,v0a);
+        float B = V * dot( v10x0a, D );
+        
+        if( B >= 0.0 && (A+B) <= 1.0 )
+        {
+            float VA = dot( v10x02, v0a );
+            float T = VA*V;
+            if( T > 0 && T < TMax )
+            {
+                hit.T = T;
+                hit.U = 1.0 - (A+B);
+                hit.V = A;
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+StructuredBuffer<Node> bvh;
+StructuredBuffer<Vertex> verts;
+Buffer<int> indices;
+RWStructuredBuffer<Ray> rays;
+
+[numthreads(64,1,1)]
+void main( uint3 tid : SV_DispatchThreadID )
+{
+    Ray ray = rays[tid.x];
+    float3 O = ray.Origin;
+    float3 D = ray.Direction;
+    float3 DInv = 1/D;
+    float tmax = ray.tmax;
+    ray.nTriHit = -1;
+    
+    int n = 0;
+    int sp=0;
+    int stack[64];
+    
+    while( true )
+    {
+        while( RayBoxTest( bvh[n].box, O, DInv, tmax ) )
+        {
+            if( bvh[n].PrimCount > 0 )
+            {
+                for( int i=0; i<bvh[n].PrimCount; i++ )
+                {
+                    int prim = 3*(bvh[n].ChildIndex+i);
+                    float3 v0 = verts[ indices[prim] ].P;
+                    float3 v1 = verts[ indices[prim+1] ].P;
+                    float3 v2 = verts[ indices[prim+2] ].P;
+                    
+                    TriHit h;
+                    if( RayTriangleTest( v0,v1,v2,O,D,tmax,h) )
+                    {
+                        tmax = h.T;
+                        ray.tmax = tmax;
+                        ray.u = h.U;
+                        ray.v = h.V;
+                        ray.nTriHit = prim;
+                    }                    
+                }                    
+            }
+            else
+            {
+                stack[sp] = bvh[n].ChildIndex+1;
+                sp = sp+1;
+                n = bvh[n].ChildIndex;            
+            }
+        }
+      
+        // pop stack
+        if( sp == 0 )
+            break;  
+            
+        sp = sp-1;
+        n = stack[sp];        
+    }   
+    
+    rays[tid.x] = ray;
+   
+}

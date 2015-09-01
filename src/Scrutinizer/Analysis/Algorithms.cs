@@ -162,12 +162,39 @@ namespace Pyramid.Scrutinizer
             return Blocks;
         }
 
-
-
-        public static void FindDominators(List<BasicBlock> Blocks)
+        /// <summary>
+        ///  Test whether node a dominates node b
+        ///     That is, a is equal to be, or an ancestor of b in the dom tree
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <param name="IDOM"></param>
+        /// <returns></returns>
+        public static bool Dominates<T>( T a, T b, Dictionary<T,T> IDOM ) where T : class
         {
-            if ( Blocks.Count == 0 )
-                return;
+            if (a == b)
+                return true;
+
+            T n = IDOM[b];
+            while( n != null && n != a )
+                n = IDOM[n];
+            
+            return n == a;
+        }
+
+
+        /// <summary>
+        ///  Find immediate dominators for each node in a graph
+        /// </summary>
+        /// <param name="nodes"></param>
+        /// <param name="edges"></param>
+        /// <returns></returns>
+
+        public static Dictionary<T,T> FindDominators<T>( T[] nodes, T[][] predecessors ) where T : class
+        {
+            if( nodes.Length == 0 )
+                return new Dictionary<T,T>();
 
             // Algorithm here is based on Keith Kooper's COMP512 lecture nodes
             //   from: http://www.cs.rice.edu/~keith/512/2011/Lectures/
@@ -184,22 +211,25 @@ namespace Pyramid.Scrutinizer
             //    for each n in N - {n0}:  // JDB: Note, just N also works...
             //        Dom(n) = {n} union with intersection over all p in pred(n) of Dom(p)
 
-            Dictionary<BasicBlock, HashSet<BasicBlock>> doms = new Dictionary<BasicBlock, HashSet<BasicBlock>>();
 
+            Dictionary<T,HashSet<T>> doms = new Dictionary<T,HashSet<T>>();
+            
+
+            
             // dominator of start node is the node itself
             //  dom-set of other nodes initially set to entire graph
-            BasicBlock start = Blocks[0];
-            foreach (BasicBlock b in Blocks)
+            T start = nodes[0];
+            foreach (T b in nodes)
             {
                 if (b == start)
                 {
-                    HashSet<BasicBlock> s = new HashSet<BasicBlock>();
+                    HashSet<T> s = new HashSet<T>();
                     s.Add(b);
-                    doms.Add(b, s);
+                    doms.Add(b,s);
                 }
                 else
                 {
-                    doms.Add(b, new HashSet<BasicBlock>(Blocks));
+                    doms.Add(b, new HashSet<T>(nodes));
                 }
             }
 
@@ -211,18 +241,19 @@ namespace Pyramid.Scrutinizer
             do
             {
                 changes = 0;
-                foreach (BasicBlock n in Blocks)
+                for (int i = 0; i < nodes.Length; i++  )
                 {
-                    HashSet<BasicBlock> s = new HashSet<BasicBlock>();
-                    BasicBlock[] preds = n.Predecessors.ToArray();
+                    HashSet<T> s = new HashSet<T>();
+                    T[] preds = predecessors[i];
                     if (preds.Length > 0)
                     {
-                        foreach (BasicBlock d in doms[preds[0]])
+                        foreach (T d in doms[preds[0]])
                             s.Add(d);
-                        for (int i = 1; i < preds.Length; i++)
-                            s.IntersectWith(doms[preds[i]]);
+                        for (int j = 1; j < preds.Length; j++)
+                            s.IntersectWith(doms[preds[j]]);
                     }
 
+                    T n = nodes[i];
                     s.Add(n);
 
                     if (!s.SetEquals(doms[n]))
@@ -240,12 +271,13 @@ namespace Pyramid.Scrutinizer
             //
             //  IDOM[start] = null
             //
-            Dictionary<BasicBlock, BasicBlock> IDOM = new Dictionary<BasicBlock, BasicBlock>();
-            foreach (BasicBlock b in Blocks)
+            Dictionary<T, T> IDOM = new Dictionary<T, T>();
+            for( int i=0; i<nodes.Length; i++ )
             {
-                b.ImmediateDominator = null;
+                IDOM.Add(nodes[i],default(T));
                 int depth = 0;
-                foreach (BasicBlock d in doms[b])
+                T b = nodes[i];
+                foreach (T d in doms[b])
                 {
                     if (d == b)
                         continue;
@@ -253,11 +285,27 @@ namespace Pyramid.Scrutinizer
                     int count = doms[d].Count;
                     if (depth < count)
                     {
-                        b.ImmediateDominator = d;
+                        IDOM[nodes[i]] = d;
                         depth = count;
                     }
                 }
             }
+
+            return IDOM;
+        }
+
+
+
+        public static void FindDominators(List<BasicBlock> Blocks)
+        {
+            BasicBlock[] nodes = Blocks.ToArray();
+            BasicBlock[][] preds = new BasicBlock[nodes.Length][];
+            for (int i = 0; i < nodes.Length; i++)
+                preds[i] = nodes[i].Predecessors.ToArray();
+
+            Dictionary<BasicBlock,BasicBlock> IDOM = FindDominators(nodes, preds);
+            for( int i=0; i<nodes.Length; i++ )
+                nodes[i].ImmediateDominator = IDOM[nodes[i]];
         }
 
 
@@ -477,7 +525,24 @@ namespace Pyramid.Scrutinizer
         }
 
 
-        public static List<IInstruction> DoTrace(List<IInstruction> ops, List<BasicBlock> blocks, List<Loop> loops )
+        public static void AssignLabels(List<IInstruction> ops)
+        {
+            int nBlock = 0;
+            BasicBlock bl = null;
+            for( int i=0; i<ops.Count; i++ )
+            {
+                if (ops[i].Block != bl)
+                {
+                    ops[i].Label = String.Format("Block_{0}", nBlock++);
+                    bl = ops[i].Block;
+                }
+            }
+
+        }
+
+
+
+        public static List<IInstruction> DoTrace(List<IInstruction> ops, List<BasicBlock> blocks, List<Loop> loops, HashSet<IInstruction> takenBranches )
         {
             List<IInstruction> Exec = new List<IInstruction>();
             Dictionary<Loop, int> LoopCounts = new Dictionary<Loop, int>();
@@ -523,7 +588,10 @@ namespace Pyramid.Scrutinizer
                     else
                     {
                         // for now, always go left...
-                        next = branch.IfTarget.Block;
+                        if (takenBranches.Contains(branch))
+                            next = branch.IfTarget.Block;
+                        else
+                            next = branch.ElseTarget.Block;
                     }
                 }
                 else if( blockEnd is IJumpInstruction )

@@ -295,8 +295,8 @@ namespace Disassembler{
             strcpy(buff,tmp0);
         }
 
-        template< class TInstruction >
-        void PrintLabeledBranch( IPrinter& printer, const TInstruction* pInst, const std::vector<const uint8*>* pLabels )
+
+        static void SynthesizeLabelName( char* out, const GCN::ScalarInstruction* pInst, const std::vector<const uint8*>* pLabels )
         {
             const uint8* pTarget = pInst->GetBranchTarget();
             size_t i=0;
@@ -309,20 +309,25 @@ namespace Disassembler{
 
             if( pLabels && i < pLabels->size() )
             {
-                Printf( printer, OPCODE_FORMAT" Label_%04u\n", EnumToString(pInst->GetOpcode()), i );
+                sprintf( out, "Label_%04u", i );
             }
-            else if( pTarget )
+            else if( pInst->GetBranchTarget() )
             {
-                Printf( printer, OPCODE_FORMAT" PC + %d\n", EnumToString(pInst->GetOpcode()), pTarget - reinterpret_cast<const uint8*>(pInst) );
+                sprintf( out, "PC + %d", pInst->GetBranchOffset() );
             }
             else
             {
-                Printf( printer, OPCODE_FORMAT" ????\n", EnumToString(pInst->GetOpcode()) );
+                sprintf( out, "????");
             }
         }
 
+        void PrintLabeledBranch( IPrinter& printer, const ScalarInstruction* pInst, const char* pLabelName )
+        {
+            Printf( printer, OPCODE_FORMAT" %s\n", EnumToString(pInst->GetOpcode()), pLabelName );
+        }
+
         
-        void Disassemble( IPrinter& printer, const ScalarInstruction* pInst, const std::vector<const uint8*>* pLabels )
+        void Disassemble( IPrinter& printer, const ScalarInstruction* pInst, const char* pLabelName )
         {
             const char* pOpcode = EnumToString(pInst->GetOpcode());
             char src0[64];
@@ -421,7 +426,7 @@ namespace Disassembler{
             case S_CBRANCH_CDBGUSER:        // : If (conditional_debug_user != 0) then PC = PC + signext(SIMM16 * 4) + 4; else NOP.
             case S_CBRANCH_CDBGSYS_OR_USER: // : I f (conditional_debug_system || conditional_debug_user) then PC = PC + signext(SIMM16 * 4) + 4; else NOP.
             case S_CBRANCH_CDBGSYS_AND_USER:// : If (conditional_debug_system && conditional_debug_user) then PC = PC + signext(SIMM16 * 4) + 4; else NOP.
-                PrintLabeledBranch(printer,pInst,pLabels);
+                PrintLabeledBranch(printer,pInst,pLabelName);
                 break;
             case S_CBRANCH_G_FORK:
                 {
@@ -524,7 +529,7 @@ namespace Disassembler{
 
 
             case S_CBRANCH_I_FORK:
-                PrintLabeledBranch(printer,pInst,pLabels);
+                PrintLabeledBranch(printer,pInst,pLabelName);
                 break;
 
             case S_GETREG_B32:
@@ -1312,12 +1317,14 @@ namespace Disassembler{
             }
         }
         
+
+
         
-        static void Disassemble( IPrinter& printer, const Instruction* pInst, const std::vector<const uint8*>* pLabels )
+        static void Disassemble( IPrinter& printer, const Instruction* pInst, const char* pLabelName )
         {
             switch( pInst->GetClass() )
             {
-            case IC_SCALAR:         _INTERNAL::Disassemble( printer, (const ScalarInstruction*)pInst, pLabels ); break;
+            case IC_SCALAR:         _INTERNAL::Disassemble( printer, (const ScalarInstruction*)pInst, pLabelName ); break;
             case IC_SCALAR_MEM:     _INTERNAL::Disassemble( printer, (const ScalarMemoryInstruction*)pInst ); break;
             case IC_VECTOR:         _INTERNAL::Disassemble( printer, (const VectorInstruction*)pInst ); break;
             case IC_VECTOR_INTERP:  _INTERNAL::Disassemble( printer, (const InterpolationInstruction*)pInst ); break;
@@ -1331,11 +1338,18 @@ namespace Disassembler{
             }
         }
     }
-
-
-    void Disassemble( IPrinter& printer, const Instruction* pOp )
+     
+    void Disassemble( IPrinter& printer, const Instruction* pOp, const char* pLabelName )
     {
-        _INTERNAL::Disassemble(printer,pOp,0);    
+        char n[128]="";
+        if( !pLabelName && pOp->GetClass() == IC_SCALAR )
+        {
+            const GCN::ScalarInstruction* pScalar = static_cast<const GCN::ScalarInstruction*>(pOp);
+            _INTERNAL::SynthesizeLabelName(n,pScalar,0);
+            pLabelName = n;
+        }
+            
+        _INTERNAL::Disassemble(printer, pOp, pLabelName);    
     }
 
     bool DisassembleProgram( IDecoder& decoder, IPrinter& printer, const void* pISA, size_t nISASize )
@@ -1411,7 +1425,12 @@ namespace Disassembler{
             Instruction tmp;
             decoder.Decode( &tmp, pInst, eFormat );
             
-            _INTERNAL::Disassemble(printer,&tmp,&Labels);
+            // resolve label names for branch targets
+            char name[128]="";
+            if( tmp.GetClass() == GCN::IC_SCALAR )
+                _INTERNAL::SynthesizeLabelName(name, static_cast<GCN::ScalarInstruction*>(&tmp),&Labels);
+
+            _INTERNAL::Disassemble(printer,&tmp,name);
 
             // extra newline after a branch or before a label
             if( pInst == Branches[nBranch] ) 

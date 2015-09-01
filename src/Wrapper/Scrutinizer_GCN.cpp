@@ -40,10 +40,20 @@ public:
         virtual void set( BasicBlock^ bl ) { m_pmBlock = bl; }
     }
 
+    property System::String^ Label
+    {
+        virtual System::String^ get() { return m_Label; }
+        virtual void set( System::String^ s ) { m_Label = s; }
+    }
+    property System::String^ SimNotes{
+        virtual System::String^ get() { return m_Notes; }
+        virtual void set( System::String^ s) { m_Notes = s; }
+    }
+
     virtual System::String^ Disassemble()
     {
         GCN::Disassembler::BufferedPrinter printer;
-        GCN::Disassembler::Disassemble( printer, m_pInstruction );
+        GCN::Disassembler::Disassemble( printer, m_pInstruction, 0);
         printer.m_Bytes.push_back(0);
 
         System::String^ str = MakeString( printer.m_Bytes.data() );
@@ -53,15 +63,13 @@ public:
     {
         return Disassemble();
     }
-     property System::String^ SimNotes{
-        virtual System::String^ get() { return m_Notes; }
-        virtual void set( System::String^ s) { m_Notes = s; }
-    }
+    
 
 internal:
     GCN::Instruction* m_pInstruction;
     BasicBlock^ m_pmBlock;
     System::String^ m_Notes;
+    System::String^ m_Label;
 };
 
     
@@ -73,6 +81,18 @@ public:
     property IInstruction^ Target{
         virtual IInstruction^ get () { return m_Target; }
     };
+
+    virtual System::String^ Disassemble() override
+    {
+        MarshalledString^ label = gcnew MarshalledString( m_Target->Label );
+
+        GCN::Disassembler::BufferedPrinter printer;
+        GCN::Disassembler::Disassemble( printer, m_pInstruction, label->GetString() );
+        printer.m_Bytes.push_back(0);
+
+        System::String^ str = MakeString( printer.m_Bytes.data() );
+        return str->Replace( "\n", System::Environment::NewLine );
+    }
 
  
 internal:
@@ -96,6 +116,18 @@ public:
     property BranchCategory Category{
         virtual BranchCategory get() { return m_eCategory; }
         virtual void set( BranchCategory e ) { m_eCategory = e; }
+    }
+
+    virtual System::String^ Disassemble() override
+    {
+        MarshalledString^ label = gcnew MarshalledString( m_IfTarget->Label );
+
+        GCN::Disassembler::BufferedPrinter printer;
+        GCN::Disassembler::Disassemble( printer, m_pInstruction, label->GetString() );
+        printer.m_Bytes.push_back(0);
+
+        System::String^ str = MakeString( printer.m_Bytes.data() );
+        return str->Replace( "\n", System::Environment::NewLine );
     }
  
 internal:

@@ -19,6 +19,7 @@ namespace Pyramid.Scrutinizer.UI
         private IScrutinizer m_Backend;
         private IDXShaderReflection m_Reflection;
 
+        private HashSet<IInstruction> m_TakenBranches = new HashSet<IInstruction>();
         private HashSet<InstructionWidget> m_SelectedOps = new HashSet<InstructionWidget>();
         private InstructionWidget m_LastClicked = null;
 
@@ -129,6 +130,8 @@ namespace Pyramid.Scrutinizer.UI
         }
 
 
+
+       
         public ScrutinizerForm( IAMDShader sh, IDXShaderReflection reflection)
         {
             InitializeComponent();
@@ -167,6 +170,7 @@ namespace Pyramid.Scrutinizer.UI
                 m_Loops = Algorithms.FindLoops(m_Blocks);
                 Algorithms.ClassifyBranches(m_Ops);
 
+                Algorithms.AssignLabels(m_Ops);
 
                 int Y = 0;
                 if( reflection.GetShaderType() == HLSLShaderType.VERTEX )
@@ -201,6 +205,18 @@ namespace Pyramid.Scrutinizer.UI
                 {
                     foreach (IInstruction op in b.Instructions)
                     {
+                        if( !String.IsNullOrEmpty(op.Label))
+                        {
+                            Label l = new Label();
+                            l.Font = new Font("Lucida Console", 8);
+                            l.AutoSize = true;
+                            l.Text = op.Label;
+                            l.Left = 100;
+                            l.Top = Y;
+                            panel1.Controls.Add(l);
+                            Y += l.Height;
+                        }
+
                         InstructionWidget widget = new InstructionWidget(op);
                         AddInstructionToPanel(widget, op);
                         widget.Top = Y;
@@ -211,13 +227,23 @@ namespace Pyramid.Scrutinizer.UI
                 }
 
                 cfgWidget1.SetProgram(m_Loops, m_Blocks);
+
+                MarkExecutedInstructions();
             }
             catch( System.Exception ex )
             {
                 MessageBox.Show(ex.Message);
             }
+        }
 
 
+        private void SelectDominatedInstructions( BasicBlock dominator )
+        {
+            foreach( BasicBlock b in m_Blocks )
+                if (dominator.Dominates(b) || dominator == b )
+                    foreach (IInstruction op in b.Instructions)
+                        SelectInstruction(op);
+            
         }
 
         private void cfgWidget1_BlockSelected(object sender, BasicBlock SelectedBlock)
@@ -228,21 +254,35 @@ namespace Pyramid.Scrutinizer.UI
 
             panel1.Refresh();
             
-            txtLoopCount.Visible = false;
+            txtLoopCount.Visible  = false;
             lblIterations.Visible = false;
+            chkTaken.Visible      = false;
+        }
+
+        private void cfgWidget1_BranchTargetSelected(object sender, BasicBlock TargetBlock)
+        {
+            ClearSelectedInstructions();
+            foreach (BasicBlock b in m_Blocks)
+                if (TargetBlock == b || TargetBlock.Dominates(b))
+                    foreach (IInstruction i in b.Instructions)
+                        SelectInstruction(i);
+            panel1.Refresh();
+
+            txtLoopCount.Visible  = false;
+            lblIterations.Visible = false;
+            chkTaken.Visible      = false;
         }
 
         private void cfgWidget1_LoopSelected(object sender, Loop SelectedLoop)
         {
             ClearSelectedInstructions();
-            foreach (BasicBlock b in SelectedLoop.Blocks)
-                foreach (IInstruction i in b.Instructions)
+            foreach (BasicBlock SelectedBlock in SelectedLoop.Blocks)
+                foreach (IInstruction i in SelectedBlock.Instructions)
                     SelectInstruction(i);
 
-            panel1.Refresh();
-            
             lblIterations.Visible = true;
-            txtLoopCount.Visible = true;
+            txtLoopCount.Visible  = true; 
+            chkTaken.Visible      = false;
             txtLoopCount.Text = SelectedLoop.DesiredIterations.ToString();
         }
 
@@ -252,13 +292,45 @@ namespace Pyramid.Scrutinizer.UI
 
             panel1.Refresh(); 
             
-            txtLoopCount.Visible = false;
+            txtLoopCount.Visible  = false;
             lblIterations.Visible = false;
+            chkTaken.Visible      = false;
         }
+
+        private void cfgWidget1_BranchSelected(object sender, BasicBlock BranchBlock, IBranchInstruction branch)
+        {
+            ClearSelectedInstructions();
+            foreach (IInstruction i in BranchBlock.Instructions)
+                SelectInstruction(i);
+             
+            IBranchInstruction br = BranchBlock.LastInstruction as IBranchInstruction;
+            SelectDominatedInstructions(br.IfTarget.Block);
+            SelectDominatedInstructions(br.ElseTarget.Block);
+
+            txtLoopCount.Visible  = false;
+            lblIterations.Visible = false;
+            chkTaken.Visible = true;
+            chkTaken.Checked = m_TakenBranches.Contains(branch);
+        }
+
 
         private void panel1_MouseDown(object sender, MouseEventArgs e)
         {
             panel1.Focus();
+        }
+
+        private void MarkExecutedInstructions()
+        {
+            List<IInstruction> ops = Algorithms.DoTrace(m_Ops, m_Blocks, m_Loops, m_TakenBranches);
+            HashSet<IInstruction> distinctOps = new HashSet<IInstruction>();
+            foreach (IInstruction op in ops)
+                distinctOps.Add(op);
+
+            foreach( InstructionWidget w in m_InstructionWidgets.Values )
+                w.Executed = false;
+
+            foreach (IInstruction op in distinctOps)
+                m_InstructionWidgets[op].Executed = true;
         }
 
         private void txtLoopCount_TextChanged(object sender, EventArgs e)
@@ -268,11 +340,12 @@ namespace Pyramid.Scrutinizer.UI
             {
                 n = Convert.ToInt32(txtLoopCount.Text);
                 cfgWidget1.SelectedLoop.DesiredIterations = n;
+
+                MarkExecutedInstructions();
             }
             catch(System.Exception )
             {
             }
-
         }
 
         private void btnSimulate_Click(object sender, EventArgs e)
@@ -292,7 +365,7 @@ namespace Pyramid.Scrutinizer.UI
                 if (m_FetchShader != null)
                     trace.AddRange(m_FetchShader);
 
-                trace.AddRange(Algorithms.DoTrace(m_Ops, m_Blocks, m_Loops));
+                trace.AddRange(Algorithms.DoTrace(m_Ops, m_Blocks, m_Loops, m_TakenBranches));
 
                 uint nOccupancy = Convert.ToUInt32(txtOccupancy.Text);
                 if (nOccupancy < 0 || nOccupancy > 10)
@@ -348,6 +421,22 @@ namespace Pyramid.Scrutinizer.UI
                 MessageBox.Show(ex.Message);
             }
         }
+
+        private void chkTaken_CheckedChanged(object sender, EventArgs e)
+        {
+            if (m_TakenBranches.Contains(cfgWidget1.SelectedBranch))
+                m_TakenBranches.Remove(cfgWidget1.SelectedBranch);
+            else
+                m_TakenBranches.Add(cfgWidget1.SelectedBranch);
+            MarkExecutedInstructions();
+            panel1.Refresh();
+        }
+
+
+     
+
+     
+        
 
 
     }

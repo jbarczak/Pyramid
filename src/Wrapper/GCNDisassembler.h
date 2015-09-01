@@ -18,7 +18,12 @@ namespace Disassembler{
         virtual void Push( const char* pText ) = 0;
     };
 
-    void Disassemble( IPrinter& printer, const Instruction* pIt );
+    /// Disassemble a single instruction
+    ///   Instruction is assumed to be well formed
+    ///    If pLabelName is non-null it will be used as the name of the target instruction
+    ///     for a branch/jump.
+    ///
+    void Disassemble( IPrinter& printer, const Instruction* pIt, const char* pLabelName );
 
     /// Disassemble a full program, returns false if an instruction is encountered whose encoding
     ///  wasn't recognized

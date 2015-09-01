@@ -196,7 +196,8 @@ namespace GCN
         bool IsControlFlowOp() const;
 
         const uint8* GetBranchTarget() const { return Fields.Scalar.m_pBranchTarget; }
-        
+        int GetBranchOffset() const { return 4*(Fields.Scalar.m_nSIMM16+1); }
+
         uint ReadSIMMBits( uint hi, uint lo ) const { return (Fields.Scalar.m_nSIMM16>>lo)&((1<<(1+hi-lo))-1); }
         int16 GetSIMM16( ) const { return Fields.Scalar.m_nSIMM16; };
         

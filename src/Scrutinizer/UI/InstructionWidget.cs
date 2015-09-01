@@ -15,6 +15,7 @@ namespace Pyramid.Scrutinizer.UI
         private IInstruction m_Op;
         private ComboBox m_FilterBox;
         private ComboBox m_FormatBox;
+        private Font m_ItalicFont;
 
         public delegate void TexelFormatChangedHandler( ITextureInstruction op );
         public delegate void FilterChangedHandler( ISamplingInstruction op );
@@ -72,10 +73,12 @@ namespace Pyramid.Scrutinizer.UI
         public InstructionWidget( IInstruction op )
         {
             InitializeComponent();
-            this.Font   = new Font("Lucida Console", 8.25f);
+            this.Font    = new Font("Lucida Console", 8.25f);
+            m_ItalicFont = new Font(this.Font, FontStyle.Italic);
+
             this.Height = 15;
+            this.Executed = true;
             m_Op = op;
-            this.Brush = Brushes.Black;
             Selected = false;
 
 
@@ -100,8 +103,8 @@ namespace Pyramid.Scrutinizer.UI
         }
 
         public IInstruction Instruction { get { return m_Op; } }
-        public Brush Brush { get; set; }
         public bool Selected { get; set; }
+        public bool Executed { get; set; }
 
         public void RefreshInstruction()
         {
@@ -118,16 +121,22 @@ namespace Pyramid.Scrutinizer.UI
 
             if( Selected )
             {
-                e.Graphics.FillRectangle(Brushes.White, new Rectangle(0, 0, this.Width, this.Height));
+                e.Graphics.FillRectangle(SystemBrushes.HighlightText, new Rectangle(0, 0, this.Width, this.Height));
             }
 
-            e.Graphics.DrawString(m_Op.Disassemble(), this.Font, this.Brush, new PointF(80+96, 0));
+            Brush br = SystemBrushes.ControlText;
+            if (!Executed)
+                br = SystemBrushes.InactiveCaption;
+
+            Font f = this.Font;
+            if (!Executed)
+                f = m_ItalicFont;
+
+            e.Graphics.DrawString(m_Op.Disassemble(), f, br, new PointF(80+96, 0));
 
             if( !String.IsNullOrEmpty(m_Op.SimNotes)  )
-            {
-                e.Graphics.DrawString(m_Op.SimNotes, this.Font, this.Brush, new PointF(this.Width - 100, 0));
-            }
-
+                e.Graphics.DrawString(m_Op.SimNotes, this.Font, SystemBrushes.ControlText, new PointF(this.Width - 100, 0));
+            
            
         }
 

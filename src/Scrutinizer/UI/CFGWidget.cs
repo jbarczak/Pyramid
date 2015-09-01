@@ -24,21 +24,56 @@ namespace Pyramid.Scrutinizer.UI
 
         private class Node
         {
-            public Node( BasicBlock bl )
+            public string NodeType = "node";
+        };
+        
+        private class LoopNode : Node
+        {
+            public LoopNode(Graph sub, Loop loop) 
             {
-                Block = bl;
-            }
-            public Node(Graph sub, Loop loop)
-            {
+                NodeType = "loop";
                 SubGraph = sub;
                 m_Loop = loop;
             }
 
             public Loop m_Loop = null;
             public Graph SubGraph = null;
-            public BasicBlock Block = null;
-        };
         
+        }
+
+        private class LeafNode : Node
+        {
+            public LeafNode( BasicBlock bl )
+            {
+                Block = bl;
+                NodeType = "node";
+            }
+            public BasicBlock Block = null;
+        }
+
+        private class BranchNode : Node
+        {
+            public Graph IfGraph;
+            public Graph ElseGraph;
+            public LeafNode Test;
+            public List<Node> OwnedNodes;
+            public BasicBlock IfTarget;
+            public BasicBlock ElseTarget;
+
+            public BranchNode( LeafNode test )
+            {
+                Test = test;
+                IfGraph = new Graph();
+                ElseGraph = new Graph();
+                OwnedNodes = new List<Node>();
+                OwnedNodes.Add(test);
+                NodeType = "branch";
+
+                List<BasicBlock> succs = new List<BasicBlock>(test.Block.Successors);
+                IfTarget   = succs[0];
+                ElseTarget = succs[1];
+            }
+        }
 
         private class Graph
         {
@@ -49,6 +84,24 @@ namespace Pyramid.Scrutinizer.UI
             {
                 m_OutgoingEdges.Add(n, new List<Node>());
                 m_IncomingEdges.Add(n, new List<Node>());
+            }
+
+            public void AddNodes(IEnumerable<Node> nodes)
+            {
+                foreach (Node n in nodes)
+                {
+                    m_OutgoingEdges.Add(n, new List<Node>());
+                    m_IncomingEdges.Add(n, new List<Node>());
+                }
+            }
+
+            public void RemoveNodes(IEnumerable<Node> nodes)
+            {
+                foreach (Node n in nodes)
+                {
+                    m_OutgoingEdges.Remove(n);
+                    m_IncomingEdges.Remove(n);
+                }
             }
 
             public bool ContainsNode( Node n )
@@ -62,11 +115,28 @@ namespace Pyramid.Scrutinizer.UI
                 m_IncomingEdges[to].Add(from);
             }
 
-            public void CombineNodes( IEnumerable<Node> loopNodes, Loop l )
+            public Dictionary<Node,Node> Dominators( List<Node> nodes )
             {
-                Graph sub      = new Graph();
-                Node superNode = new Node(sub,l);
+                Node[] objs = nodes.ToArray();
+                Node[][] preds = new Node[objs.Length][];
+                for (int i = 0; i < objs.Length; i++)
+                    preds[i] = m_IncomingEdges[objs[i]].ToArray();
 
+                return Algorithms.FindDominators(objs, preds);
+            }
+
+            public void TransferEdgesToSubgraph( Graph g )
+            {
+                foreach( Node n in g.Nodes )
+                {
+                    foreach (Node e in m_OutgoingEdges[n])
+                        if( g.ContainsNode(e))
+                            g.AddEdge(n, e);
+                }
+            }
+
+            public void CombineNodes( IEnumerable<Node> loopNodes, Node superNode, Graph sub )
+            {
                 // transfer nodes to subgraph
                 foreach (Node b in loopNodes)
                     sub.AddNode(b);
@@ -119,9 +189,14 @@ namespace Pyramid.Scrutinizer.UI
                 }
             }
 
+            public IEnumerable<Node> ChildrenOf( Node n )
+            {
+                return m_OutgoingEdges[n];
+            }
+
             public IEnumerable<Node> Nodes { get { return m_OutgoingEdges.Keys;  } }
 
-            public List<Node> Preorder()
+            public List<Node> ReversePostOrder()
             {
                 List<Node> OrderedNodes     = new List<Node>();
                 HashSet<Node> AddedNodes = new HashSet<Node>();
@@ -165,42 +240,131 @@ namespace Pyramid.Scrutinizer.UI
 
                 return OrderedNodes;
             }
-
         };
+
+
+
 
         private void BuildTree( TreeNode parent, Graph g)
         {
-            List<TreeNode> kids = new List<TreeNode>();
-            
-            List<Node> Nodes = g.Preorder();
-            foreach (Node n in Nodes)
+            List<Node> Nodes = g.ReversePostOrder();
+
+            for( int i=0; i<Nodes.Count; i++ )
             {
+                Node n = Nodes[i];
                 TreeNode t = new TreeNode();
                 t.Tag = n;
+                t.Text = n.NodeType;
                 parent.Nodes.Add(t);
 
-                if (n.SubGraph != null)
+                if (n is LoopNode )
                 {
-                    t.Text = "loop";
-                    BuildTree(t, n.SubGraph);
+                    BuildTree(t, (n as LoopNode).SubGraph);
+                }
+                else if( n is BranchNode )
+                {
+                    BranchNode br = n as BranchNode;
+                    TreeNode nIf = new TreeNode();
+                    TreeNode nElse = new TreeNode();
+                    nIf.Text = "IF";
+                    nElse.Text = "ELSE";
+                    nIf.Tag   = br.IfTarget;
+                    nElse.Tag = br.ElseTarget;
+                    t.Nodes.Add(nIf);
+                    t.Nodes.Add(nElse);
+
+                    BuildTree(nIf, br.IfGraph);
+                    BuildTree(nElse, br.ElseGraph);
+                }
+            }
+
+        }
+
+       
+
+        private void BuildBranchNodes(Graph g)
+        {
+            // lay out the dag nodes in order
+            List<Node> Nodes = g.ReversePostOrder();
+
+            // Figure out dominance
+            Dictionary<Node, Node> IDOM = g.Dominators(Nodes);
+           
+            for( int i=0; i<Nodes.Count; i++ )
+            {
+                Node n = Nodes[i];
+                if (n is LoopNode)
+                {
+                    // descend into loop nodes
+                    BuildBranchNodes((n as LoopNode).SubGraph);
                 }
                 else
                 {
-                    if (n.Block.LastInstruction is IBranchInstruction)
+                    LeafNode leaf = n as LeafNode;
+                    BasicBlock bl = leaf.Block;
+
+                    // mark break, branch, and continue nodes as such
+                    if (bl.LastInstruction is IBranchInstruction)
                     {
-                        IBranchInstruction branch = n.Block.LastInstruction as IBranchInstruction;
+                        IBranchInstruction branch = bl.LastInstruction as IBranchInstruction;
                         if (branch.Category == BranchCategory.BREAK_BRANCH)
-                            t.Text = "break";
+                            leaf.NodeType = "break";
                         else
-                            t.Text = "branch";
+                            leaf.NodeType = "branch";
                     }
                     else
                     {
-                        t.Text = "node";
+                        // mark continue nodes as such
+                        if (bl.InnerMostLoop != null && bl.Successors.First() == bl.InnerMostLoop.Header)
+                            n.NodeType = "continue";
                     }
                 }
             }
 
+
+            int k = 0;
+            while( k < Nodes.Count )
+            {
+                if( Nodes[k] is LeafNode && Nodes[k].NodeType.Equals("branch") )
+                {
+                    BranchNode br = new BranchNode((Nodes[k] as LeafNode));
+
+                    List<Node> descendents = new List<Node>(g.ChildrenOf(Nodes[k]));
+                    Graph[] branchGraphs = new Graph[2];
+                    branchGraphs[0] = br.IfGraph;
+                    branchGraphs[1] = br.ElseGraph;
+                   
+                    for (int k0 = k + 1; k0 < Nodes.Count; k0++)
+                    {
+                        Node n = Nodes[k0];
+                        for (int j = 0; j < descendents.Count; j++)
+                        {
+                            if (Algorithms.Dominates(descendents[j], n, IDOM))
+                                branchGraphs[j].AddNode(n);
+                        }
+                    }
+
+                    br.OwnedNodes.AddRange(branchGraphs[0].Nodes);
+                    br.OwnedNodes.AddRange(branchGraphs[1].Nodes);
+
+                    Graph branchGraph = new Graph();
+                    g.CombineNodes(br.OwnedNodes, br, branchGraph);
+                    branchGraph.TransferEdgesToSubgraph(branchGraphs[0]);
+                    branchGraph.TransferEdgesToSubgraph(branchGraphs[1]);
+                    
+                    // do this recursively on the if/else branches
+                    BuildBranchNodes(br.IfGraph);
+                    BuildBranchNodes(br.ElseGraph);
+
+                    // start over
+                    k = 0;
+                    Nodes = g.ReversePostOrder();
+                }
+                else
+                {
+                    k++;
+                }
+            }
         }
 
 
@@ -212,7 +376,7 @@ namespace Pyramid.Scrutinizer.UI
             Dictionary<BasicBlock, Node> NodeMap = new Dictionary<BasicBlock, Node>();
             foreach (BasicBlock b in blocks)
             { 
-                Node n = new Node(b);
+                Node n = new LeafNode(b);
                 g.AddNode(n);
                 NodeMap.Add(b,n);
             }
@@ -232,8 +396,13 @@ namespace Pyramid.Scrutinizer.UI
                 foreach (BasicBlock b in l.Blocks)
                     loopNodes[n++] = NodeMap[b];
 
-                g.CombineNodes(loopNodes,l);
+                LoopNode superNode = new LoopNode(new Graph(), l);
+
+                g.CombineNodes(loopNodes,superNode,superNode.SubGraph );
             }
+
+
+            BuildBranchNodes(g);
 
 
             // now populate the tree view with loops and branches
@@ -244,27 +413,34 @@ namespace Pyramid.Scrutinizer.UI
 
 
 
-        public delegate void BlockSelectionHandler(object sender, BasicBlock SelectedBlock);
-        public delegate void LoopSelectionHandler(object sender, Loop SelectedLoop);
         public delegate void SelectionClearedHandler(object sender);
+        public delegate void BlockSelectedHandler(object sender, BasicBlock bl );
+        public delegate void LoopSelectionHandler(object sender, Loop SelectedLoop);
+        public delegate void BranchSelectedHandler(object sender, BasicBlock BranchBlock, IBranchInstruction branch);
+        public delegate void BranchTargetSelectedHandler(object sender, BasicBlock TargetBlock );
 
-        public event BlockSelectionHandler BlockSelected;
-        public event LoopSelectionHandler LoopSelected;
-        public event SelectionClearedHandler SelectionCleared;
+        public event BlockSelectedHandler           BlockSelected;
+        public event LoopSelectionHandler           LoopSelected;
+        public event BranchSelectedHandler          BranchSelected;
+        public event BranchTargetSelectedHandler    BranchTargetSelected;
+        public event SelectionClearedHandler        SelectionCleared;
 
-
+        public Loop SelectedLoop { get; private set;  }
+        public IBranchInstruction SelectedBranch { get; private set; }
         public BasicBlock SelectedBlock { get; private set; }
-        public Loop SelectedLoop { get; private set; }
 
         private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
         {
+            this.SelectedLoop   = null;
+            this.SelectedBranch = null;
+            this.SelectedBlock  = null;
+
             if (treeView1.SelectedNode == null)
             {
                 if (SelectionCleared != null)
                 {
-                    SelectedLoop  = null;
-                    SelectedBlock = null;
                     SelectionCleared(this);
+                    return;
                 }
             }
 
@@ -273,44 +449,50 @@ namespace Pyramid.Scrutinizer.UI
             {
                 if (SelectionCleared != null)
                 {
-                    SelectedLoop = null;
-                    SelectedBlock = null;
                     SelectionCleared(this);
+                    return;
                 }
             }
-            else
+           
+            Node n = tag as Node;
+            if ( n is LoopNode )
             {
-                Node n = tag as Node;
-                if (n.m_Loop != null)
-                {
-                    if (LoopSelected != null)
-                    {
-                        SelectedLoop = n.m_Loop;
-                        SelectedBlock = null;
-                        LoopSelected(this, n.m_Loop);
-                    }
-                }
-                else
-                {
-                    if (BlockSelected != null)
-                    {
-                        SelectedLoop = null;
-                        SelectedBlock = null;
-                        BlockSelected(this, n.Block);
-                    }
-                }
+                Loop l = (n as LoopNode).m_Loop;
+                SelectedLoop = l;
+                    
+                if (LoopSelected != null)
+                    LoopSelected(this, l);
             }
+            else if( n is BranchNode )
+            {
+                BranchNode br = n as BranchNode;
+                BasicBlock bl = (br.Test as LeafNode).Block;
+                SelectedBranch = bl.LastInstruction as IBranchInstruction;
+                SelectedBlock  = bl;
+
+                if( BranchSelected != null )
+                    BranchSelected(this, bl, SelectedBranch);
+            }
+            else if( n is LeafNode )
+            {
+                SelectedBlock = (n as LeafNode).Block;
+                if( BlockSelected != null )
+                    BlockSelected(this, SelectedBlock);
+            }
+            else if (tag is BasicBlock)
+            {
+                SelectedBlock = tag as BasicBlock;
+                if (BranchTargetSelected != null )
+                    BranchTargetSelected(this, SelectedBlock);
+
+            }
+            
         }
 
         private void treeView1_Leave(object sender, EventArgs e)
         {
             treeView1.SelectedNode = null;
-            if (SelectionCleared != null)
-            {
-                SelectedLoop = null;
-                SelectedBlock = null;
-                SelectionCleared(this);
-            }
+ 
         }
     }
 }
