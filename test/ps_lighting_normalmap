@@ -1,0 +1,52 @@
+
+
+
+
+struct VSOut
+{
+    float3 N      : TEXCOORD0;
+    float3 T      : TEXCOORD1;
+    float3 B      : TEXCOORD2;
+    float3 P      : TEXCOORD3;
+    float2 uv     : TEXCOORD4;
+    float4 vPos   : SV_POSITION;
+};
+
+
+Buffer<float4> g_LightPositions; // w == radius
+Buffer<float3> g_LightColors;
+uint g_nLights;
+float3 g_CamPos;
+Texture2D<float3> tNormalMap;
+Texture2D<float3> tTexture;
+TextureCube<float3> tCube;
+sampler sTexture;
+
+float4 main(  VSOut input ) : SV_TARGET
+{
+    float3 vN     = tNormalMap.Sample( sTexture, input.uv );
+  	float3 N      = ( input.N );
+    float3 T      = ( input.T );
+    float3 B      = ( input.B );
+    N = N*vN.z + T*vN.y + B*vN.x;
+  	
+    float3 vTex   = tTexture.Sample( sTexture, input.uv );
+    float3 diff = tCube.SampleBias( sTexture, N, 15 );
+    
+    float3 R = reflect( N, input.P-g_CamPos);
+    float3 spec = tCube.Sample( sTexture, R );
+    
+    for( int i=0; i<g_nLights; i++ )
+    {
+        float3 Pl     = g_LightPositions[i].xyz;
+        float r       = g_LightPositions[i].w;
+        float falloff = length(Pl-input.P)/r;
+    	float3 L      = normalize( Pl - input.P );
+    	float3 Cl     = g_LightColors[i].xyz*saturate(dot(N,L));
+    	diff += Cl*falloff;
+    }
+    
+    diff *= vTex;
+   
+    return float4(diff+spec,1);
+}

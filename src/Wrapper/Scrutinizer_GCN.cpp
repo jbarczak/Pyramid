@@ -477,7 +477,6 @@ System::String^ Scrutinizer_GCN::AnalyzeExecutionTrace( List<IInstruction^>^ ops
     float fStarveRate = results.nStarveCycles / fClocks;
 
     double fWaveTime = fUnstarvedClocks / settings.nWavesToExecute;
-    double fPeakThroughput =  ((64*4)/fWaveTime)*1000000000.0;
  
     double fThroughput =  ((settings.nWavesToExecute*64.0)/(fClocks))*1000000000.0;
    
@@ -496,13 +495,16 @@ System::String^ Scrutinizer_GCN::AnalyzeExecutionTrace( List<IInstruction^>^ ops
         }
     }
 
-    
+    double fIPC = (results.nSALUIssued + 
+                   results.nSMEMIssued + 
+                   results.nVALUIssued + 
+                   results.nExpIssued +
+                   results.nVMemIssued) / fClocks;
  
     char buffer[4096];
     sprintf( buffer,
             "Clocks:  (%.2f clocks/wave)\n"
-            "Peak Throughput: (%.2f Mthreads/GHz/CU)\n"
-            "Actual Throughput: (%.2f Mthreads/GHz/CU)\n"
+            "Throughput: (%.2f Mthreads/GHz/CU)\n"
             "VALU util:      %.2f%%\n"
             "VMem util:      %.2f%%\n"
             "Exp  util:      %.2f%%\n"
@@ -510,9 +512,9 @@ System::String^ Scrutinizer_GCN::AnalyzeExecutionTrace( List<IInstruction^>^ ops
             "SMem util:      %.2f%%\n"
             "Stall rate:     %.2f%%\n"
             "Starve rate:    %.2f%%\n"
+            "Inst/Clk:       %.2f\n"
             "Peak Occupancy: %u/%u\n",
             fWaveTime,
-            fPeakThroughput/1000000.0,
             fThroughput / 1000000.0,
             100.0f*fVALUUtil,
             100.0f*fVMemUtil,
@@ -521,6 +523,7 @@ System::String^ Scrutinizer_GCN::AnalyzeExecutionTrace( List<IInstruction^>^ ops
             100.0f*fSMemUtil,
             100.0f*fStallRate,
             100.0f*fStarveRate,
+            fIPC,
             results.nPeakOccupancy ,
             settings.nMaxWavesPerSIMD*4 
         );

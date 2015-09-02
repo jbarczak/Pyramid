@@ -738,20 +738,31 @@ namespace Simulator{
 
             if( pScalarWave )
             {
+                if( pOps[pScalarWave->nCurrentOp].pInstruction->GetClass() == IC_SCALAR_MEM )
+                    rResults.nSMEMIssued++;
+                else
+                    rResults.nSALUIssued++;
+
                 pScalarWave->nCurrentOp++;
             }
 
             // VALU waves don't get their IP incremented
             //   until after the op completes.  This is done to ensure that the wave
             //   blocks itself if it's doing a long-latency operation
-            
+            if( pVALUWave )
+            {
+                rResults.nVALUIssued++;
+            }
+
             if( pVMemWave )
             {
                 pVMemWave->nCurrentOp++;
+                rResults.nVMemIssued++;
             }
             if( pExpWave )
             {
                 pExpWave->nCurrentOp++;
+                rResults.nExpIssued++;
             }
 
             // check for clocks where nothing happens and track them

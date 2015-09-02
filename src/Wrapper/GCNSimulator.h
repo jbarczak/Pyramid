@@ -37,6 +37,12 @@ namespace Simulator{
         size_t nExpBusy;
         size_t nSMemBusy;
 
+        size_t nVALUIssued;
+        size_t nSALUIssued;
+        size_t nVMemIssued;
+        size_t nExpIssued;
+        size_t nSMEMIssued;
+
         size_t nPeakOccupancy;
 
         size_t nStallCycles[4];    ///< Number of times each SIMD was stalled

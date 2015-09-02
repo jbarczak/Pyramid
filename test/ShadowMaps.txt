@@ -159,6 +159,47 @@ float PCFBilin(float3 vPosSM, Texture2D<float> t, SamplerComparisonState s, int 
     return v/(ntaps);
 }
 
+float PCFBilin3x3(float3 vPosSM, Texture2D<float> t, SamplerComparisonState s, int n )
+{  
+    float2 uv = vPosSM.xy;
+    float z = saturate(vPosSM.z);
+    float v=0;
+
+    float t0 = t.SampleCmp( s,uv,z,int2(-2,-2) );
+    float t1 = t.SampleCmp( s,uv,z,int2(-2,-1) );
+    float t2 = t.SampleCmp( s,uv,z,int2(-2,-0) );
+    float t3 = t.SampleCmp( s,uv,z,int2(-2,1) );
+    float t4 = t.SampleCmp( s,uv,z,int2(-2,2) );
+    
+    t0 += t.SampleCmp( s,uv,z,int2(-1,-2) );
+    t1 += t.SampleCmp( s,uv,z,int2(-1,-1) );
+    t2 += t.SampleCmp( s,uv,z,int2(-1,-0) );
+    t3 += t.SampleCmp( s,uv,z,int2(-1, 1) );
+    t4 += t.SampleCmp( s,uv,z,int2(-1, 2) );
+    
+    t0 += t.SampleCmp( s,uv,z,int2(0,-2) );
+    t1 += t.SampleCmp( s,uv,z,int2(0,-1) );
+    t2 += t.SampleCmp( s,uv,z,int2(0,-0) );
+    t3 += t.SampleCmp( s,uv,z,int2(0, 1) );
+    t4 += t.SampleCmp( s,uv,z,int2(0, 2) );
+    
+    t0 += t.SampleCmp( s,uv,z,int2(1,-2) );
+    t1 += t.SampleCmp( s,uv,z,int2(1,-1) );
+    t2 += t.SampleCmp( s,uv,z,int2(1,-0) );
+    t3 += t.SampleCmp( s,uv,z,int2(1, 1) );
+    t4 += t.SampleCmp( s,uv,z,int2(1, 2) );
+    
+    t0 += t.SampleCmp( s,uv,z,int2(2,-2) );
+    t1 += t.SampleCmp( s,uv,z,int2(2,-1) );
+    t2 += t.SampleCmp( s,uv,z,int2(2,-0) );
+    t3 += t.SampleCmp( s,uv,z,int2(2, 1) );
+    t4 += t.SampleCmp( s,uv,z,int2(2, 2) );
+    
+   	float v = (t0+t1)+t2+(t3+t4);
+    float ntaps = (2*n+1)*(2*n+1);
+    return v/(ntaps);
+}
+
 
 float4 main(  VSOut input ) : SV_TARGET
 {
