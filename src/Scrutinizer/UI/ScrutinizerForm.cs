@@ -384,16 +384,19 @@ namespace Pyramid.Scrutinizer.UI
                 // one VS wave every M clocks
                 //   round-robined amongst CUs
                 //
-                // Assume that the VGT tests 1 vert/clk against TnL cache
+                //      http://www.icodebot.com/Playstation%204%20GPU
+                //  States that VGT can handle 1 new vert/clk, and tests 3 indices/clk for reuse
+                //
                 //   If A = cache hit rate (verts/tri)
-                //  then we'll collect on average A/3 unshaded verts every clock
-                //    So we get a new wave every M=64*A/3 clocks   
+                //    then we need on average 64/A triangles to produce a full wave
+                //    
+                //  It will take min(64, 64/A) clocks to gather that many 
                 //
                 case HLSLShaderType.VERTEX:
                     {
                         double fVertsPerTri   = Convert.ToDouble( txtACMR.Text );
-                        double fVertsPerClock = fVertsPerTri / 3;
-                        double fClocksPerWave = Math.Ceiling(64.0 / fVertsPerClock);
+                        double fTrisPerWave   = 64.0 / fVertsPerTri;
+                        double fClocksPerWave = Math.Min(64.0, fTrisPerWave);
                         nWaveIssueRate        = (uint) (nCUs*fClocksPerWave);
                     }
                     break;
