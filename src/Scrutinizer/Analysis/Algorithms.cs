@@ -300,12 +300,22 @@ namespace Pyramid.Scrutinizer
         {
             BasicBlock[] nodes = Blocks.ToArray();
             BasicBlock[][] preds = new BasicBlock[nodes.Length][];
+            BasicBlock[][] succs = new BasicBlock[nodes.Length][];
             for (int i = 0; i < nodes.Length; i++)
+            {
                 preds[i] = nodes[i].Predecessors.ToArray();
+                succs[i] = nodes[i].Successors.ToArray();
+            }
 
+            // dominators
             Dictionary<BasicBlock,BasicBlock> IDOM = FindDominators(nodes, preds);
             for( int i=0; i<nodes.Length; i++ )
                 nodes[i].ImmediateDominator = IDOM[nodes[i]];
+
+            // post-dominators
+            Dictionary<BasicBlock,BasicBlock> PDOM = FindDominators( nodes, succs );
+            for (int i = 0; i < nodes.Length; i++)
+                nodes[i].PostDominator = PDOM[nodes[i]];
         }
 
 
@@ -345,14 +355,15 @@ namespace Pyramid.Scrutinizer
                 do
                 {
                     BasicBlock n = S.Pop();
-                    
-                    foreach (BasicBlock p in n.Predecessors)
+                    if (n != header)
                     {
-                        if (!LoopSets[i].Contains(p))
+                        foreach (BasicBlock p in n.Predecessors)
                         {
-                            LoopSets[i].Add(p);
-                            if( p != header )
+                            if (!LoopSets[i].Contains(p))
+                            {
+                                LoopSets[i].Add(p);
                                 S.Push(p);
+                            }
                         }
                     }
                 } while (S.Count > 0);
@@ -498,7 +509,8 @@ namespace Pyramid.Scrutinizer
             //
             //   - Break branch
             //     * At most one target is outside the containing block's loop
-
+            //
+           
             foreach( IInstruction op in ops )
             {
                 if (!(op is IBranchInstruction))
@@ -509,19 +521,54 @@ namespace Pyramid.Scrutinizer
                 Loop elseLoop  = branch.ElseTarget.Block.InnerMostLoop;
                 Loop blockLoop = op.Block.InnerMostLoop;
 
-                if (ifLoop == null && elseLoop == null)
+                if (blockLoop == null)
+                {
                     branch.Category = BranchCategory.FORK_BRANCH;
-                else if (ifLoop == null && elseLoop != null)
-                    branch.Category = BranchCategory.BREAK_BRANCH;
-                else if (ifLoop != null && elseLoop == null)
-                    branch.Category = BranchCategory.BREAK_BRANCH;
-                else if (ifLoop.IsNestedIn(blockLoop) && elseLoop.IsNestedIn(blockLoop))
-                    branch.Category = BranchCategory.FORK_BRANCH;
-                else if (ifLoop.IsNestedIn(blockLoop) || elseLoop.IsNestedIn(blockLoop))
-                    branch.Category = BranchCategory.BREAK_BRANCH;
+                }
                 else
-                    throw new System.Exception("Ooops");
+                {
+                    if (ifLoop == null && elseLoop == null)
+                        branch.Category = BranchCategory.FORK_BRANCH;
+                    else if (ifLoop == null && elseLoop != null)
+                        branch.Category = BranchCategory.BREAK_BRANCH;
+                    else if (ifLoop != null && elseLoop == null)
+                        branch.Category = BranchCategory.BREAK_BRANCH;
+                    else if (ifLoop.IsNestedIn(blockLoop) && elseLoop.IsNestedIn(blockLoop))
+                        branch.Category = BranchCategory.FORK_BRANCH;
+                    else if (ifLoop.IsNestedIn(blockLoop) || elseLoop.IsNestedIn(blockLoop))
+                        branch.Category = BranchCategory.BREAK_BRANCH;
+                    else
+                        throw new System.Exception("Ooops");
+                }
+
+
+                // A "fork branch" can, in turn, be classified as:
+                //     - continue (conditional jump back to header)
+                //     - skip (jumps directly to branch's post-dominator)
+                //     - fork (everything else)
+                if( branch.Category == BranchCategory.FORK_BRANCH )
+                {
+                    if (blockLoop != null && (branch.IfTarget == blockLoop.Header || branch.ElseTarget == blockLoop.Header))
+                    {
+                        branch.Category = BranchCategory.CONTINUE_BRANCH;
+                    }
+
+                    if( branch.IfTarget.Block == branch.Block.PostDominator ||
+                        branch.ElseTarget.Block == branch.Block.PostDominator )
+                    {
+                        branch.Category = BranchCategory.SKIP_BRANCH;
+
+                        // a skip branch that jumps around a loop is yet another special case
+                        if( branch.IfTarget.Block != branch.Block.PostDominator && branch.IfTarget.Block.InnerMostLoop != blockLoop )
+                            branch.Category = BranchCategory.LOOPSKIP_BRANCH;
+                        else if (branch.ElseTarget.Block != branch.Block.PostDominator && branch.ElseTarget.Block.InnerMostLoop != blockLoop)
+                            branch.Category = BranchCategory.LOOPSKIP_BRANCH;
+                        
+                    }
+                }
             }
+
+
         }
 
 
@@ -565,6 +612,7 @@ namespace Pyramid.Scrutinizer
                     IBranchInstruction branch = blockEnd as IBranchInstruction;
                     if( branch.Category == BranchCategory.BREAK_BRANCH )
                     {
+                        // take a break branch as soon as the iteration count reaches zero
                         BasicBlock exit = branch.IfTarget.Block;
                         BasicBlock noexit = branch.ElseTarget.Block;
                         if (exit.InnerMostLoop == b.InnerMostLoop)
@@ -585,9 +633,45 @@ namespace Pyramid.Scrutinizer
                         }
 
                     }
+                    else if( branch.Category == BranchCategory.LOOPSKIP_BRANCH )
+                    {
+                        // don't enter unless the loop's iteration count is non-zero
+                        BasicBlock loop;
+                        BasicBlock noloop;
+                        if (branch.IfTarget.Block.InnerMostLoop != branch.Block.InnerMostLoop)
+                        {
+                            loop   = branch.IfTarget.Block;
+                            noloop = branch.ElseTarget.Block;
+                        }
+                        else
+                        {
+                            loop   = branch.ElseTarget.Block;
+                            noloop = branch.IfTarget.Block;
+                        }
+
+                        if (loop.InnerMostLoop.DesiredIterations > 0)
+                            next = loop;
+                        else
+                            next = noloop;
+                    }
+                    else if( branch.Category == BranchCategory.CONTINUE_BRANCH )
+                    {
+                        // do NOT take a continue branch if the count's up
+                        BasicBlock go = branch.IfTarget.Block;
+                        BasicBlock nogo = branch.ElseTarget.Block;
+                        if (nogo == b.InnerMostLoop.Header)
+                        {
+                            go = branch.ElseTarget.Block;
+                            nogo = branch.IfTarget.Block; // swap if needed
+                        }
+
+                        if (LoopCounts[b.InnerMostLoop] >= b.InnerMostLoop.DesiredIterations)
+                            next = nogo;
+                        else
+                            next = go;
+                    }
                     else
                     {
-                        // for now, always go left...
                         if (takenBranches.Contains(branch))
                             next = branch.IfTarget.Block;
                         else

@@ -4,8 +4,13 @@ namespace Pyramid.Scrutinizer
 {
     public enum BranchCategory
     {
-        FORK_BRANCH,    ///< Branch for which both targets are nested in same loop as current block
-        BREAK_BRANCH    ///< Not a fork branch
+        FORK_BRANCH,        /// Branch for which both targets are nested in same loop as current block
+        CONTINUE_BRANCH,    /// Fork branch where one target is loop's header
+        SKIP_BRANCH,        /// Fork branch where one target is the post-dominator of the loop
+        LOOPSKIP_BRANCH,    /// A skip branch which jumps around a complete loop
+
+        BREAK_BRANCH,       /// Not a fork branch
+         
     };
 
     public class BasicBlock
@@ -15,7 +20,8 @@ namespace Pyramid.Scrutinizer
         public IEnumerable<BasicBlock> Successors { get { return m_Successors; } }
         public int SuccessorCount { get { return m_Successors.Count;  } }
         public IInstruction LastInstruction { get { return m_Instructions[m_Instructions.Count - 1]; } }
-        
+
+        public BasicBlock PostDominator { get; set; }
         public BasicBlock ImmediateDominator { get; set; }
         public Loop InnerMostLoop { get; set; }
         public void AddSuccessor(BasicBlock bl) { m_Successors.Add(bl); }
@@ -28,7 +34,7 @@ namespace Pyramid.Scrutinizer
         public bool Dominates( BasicBlock b )
         {
             if (b == this)
-                return false;
+                return true;
 
             BasicBlock dom = b.ImmediateDominator;
             while( dom != null )

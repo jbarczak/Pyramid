@@ -1,6 +1,7 @@
 
 bool b;
 bool c;
+bool d;
 int n;
 Buffer<float> f;
 
@@ -15,6 +16,10 @@ float4 main() : SV_TARGET
      if( i >= n )
         break;
   } 
+  
+  [branch]
+  if( d )
+     q += 42;
 
   if( b )
   {

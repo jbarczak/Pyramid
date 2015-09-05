@@ -75,6 +75,19 @@ namespace Pyramid.Scrutinizer.UI
             }
         }
 
+        private class SkipNode : Node
+        {
+            public Graph BranchGraph;
+            public LeafNode Test;
+
+            public SkipNode(LeafNode test, Graph gr)
+            {
+                Test = test;
+                BranchGraph = gr;
+                NodeType = "skip";
+            }
+        }
+
         private class Graph
         {
             private Dictionary<Node, List<Node>> m_OutgoingEdges = new Dictionary<Node, List<Node>>();
@@ -121,6 +134,16 @@ namespace Pyramid.Scrutinizer.UI
                 Node[][] preds = new Node[objs.Length][];
                 for (int i = 0; i < objs.Length; i++)
                     preds[i] = m_IncomingEdges[objs[i]].ToArray();
+
+                return Algorithms.FindDominators(objs, preds);
+            }
+
+            public Dictionary<Node, Node> PostDominators(List<Node> nodes)
+            {
+                Node[] objs = nodes.ToArray();
+                Node[][] preds = new Node[objs.Length][];
+                for (int i = 0; i < objs.Length; i++)
+                    preds[i] = m_OutgoingEdges[objs[i]].ToArray();
 
                 return Algorithms.FindDominators(objs, preds);
             }
@@ -261,6 +284,10 @@ namespace Pyramid.Scrutinizer.UI
                 {
                     BuildTree(t, (n as LoopNode).SubGraph);
                 }
+                else if( n is SkipNode )
+                {
+                    BuildTree(t, (n as SkipNode).BranchGraph);
+                }
                 else if( n is BranchNode )
                 {
                     BranchNode br = n as BranchNode;
@@ -309,6 +336,12 @@ namespace Pyramid.Scrutinizer.UI
                         IBranchInstruction branch = bl.LastInstruction as IBranchInstruction;
                         if (branch.Category == BranchCategory.BREAK_BRANCH)
                             leaf.NodeType = "break";
+                        else if (branch.Category == BranchCategory.CONTINUE_BRANCH)
+                            leaf.NodeType = "continue";
+                        else if (branch.Category == BranchCategory.LOOPSKIP_BRANCH)
+                            leaf.NodeType = "node";
+                        else if (branch.Category == BranchCategory.SKIP_BRANCH)
+                            leaf.NodeType = "skip";
                         else
                             leaf.NodeType = "branch";
                     }
@@ -355,6 +388,39 @@ namespace Pyramid.Scrutinizer.UI
                     // do this recursively on the if/else branches
                     BuildBranchNodes(br.IfGraph);
                     BuildBranchNodes(br.ElseGraph);
+
+                    // start over
+                    k = 0;
+                    Nodes = g.ReversePostOrder();
+                }
+                else if (Nodes[k] is LeafNode && Nodes[k].NodeType.Equals("skip"))
+                {
+                    Dictionary<Node, Node> PDOM = g.PostDominators(Nodes);
+                    
+                    // find nodes to put into the sub-graph
+                    // these are all the nodes which are skipped
+                    //  nodes are skipped if they are post-dominated by the convergence node (which post-dominates the test)
+                    Node joinPoint = PDOM[Nodes[k]];
+                    Graph branchGraph = new Graph();
+                    for (int k0 = k + 1; Nodes[k0] != joinPoint; k0++)
+                    {
+                        Node n = Nodes[k0];
+                        if (Algorithms.Dominates(joinPoint, Nodes[k0], PDOM))
+                            branchGraph.AddNode(Nodes[k0]);
+                    }
+
+                    SkipNode sk = new SkipNode((Nodes[k] as LeafNode), branchGraph);
+
+                    // now make a graph containing both test node and all skipped nodes
+                    //  combine these into one skip node
+                    List<Node> ownedNodes = new List<Node>(branchGraph.Nodes);
+                    ownedNodes.Add(Nodes[k]);
+                    Graph tmpGraph = new Graph();
+                    g.CombineNodes(ownedNodes, sk, tmpGraph);
+                    tmpGraph.TransferEdgesToSubgraph(branchGraph);
+
+                    // do this recursively on the skipped nodes
+                    BuildBranchNodes(sk.BranchGraph);
 
                     // start over
                     k = 0;
@@ -471,6 +537,16 @@ namespace Pyramid.Scrutinizer.UI
                 SelectedBlock  = bl;
 
                 if( BranchSelected != null )
+                    BranchSelected(this, bl, SelectedBranch);
+            }
+            else if( n is SkipNode )
+            {
+                SkipNode sk = n as SkipNode;
+                BasicBlock bl = (sk.Test as LeafNode).Block;
+                SelectedBranch = bl.LastInstruction as IBranchInstruction;
+                SelectedBlock = bl;
+
+                if (BranchSelected != null)
                     BranchSelected(this, bl, SelectedBranch);
             }
             else if( n is LeafNode )

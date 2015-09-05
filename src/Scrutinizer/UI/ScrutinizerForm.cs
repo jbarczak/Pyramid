@@ -240,7 +240,7 @@ namespace Pyramid.Scrutinizer.UI
         private void SelectDominatedInstructions( BasicBlock dominator )
         {
             foreach( BasicBlock b in m_Blocks )
-                if (dominator.Dominates(b) || dominator == b )
+                if (dominator.Dominates(b) )
                     foreach (IInstruction op in b.Instructions)
                         SelectInstruction(op);
             
@@ -263,7 +263,7 @@ namespace Pyramid.Scrutinizer.UI
         {
             ClearSelectedInstructions();
             foreach (BasicBlock b in m_Blocks)
-                if (TargetBlock == b || TargetBlock.Dominates(b))
+                if (TargetBlock.Dominates(b))
                     foreach (IInstruction i in b.Instructions)
                         SelectInstruction(i);
             panel1.Refresh();
@@ -304,8 +304,12 @@ namespace Pyramid.Scrutinizer.UI
                 SelectInstruction(i);
              
             IBranchInstruction br = BranchBlock.LastInstruction as IBranchInstruction;
-            SelectDominatedInstructions(br.IfTarget.Block);
-            SelectDominatedInstructions(br.ElseTarget.Block);
+            
+            if( br.IfTarget.Block != br.Block.PostDominator )
+                SelectDominatedInstructions(br.IfTarget.Block);
+            if (br.ElseTarget.Block != br.Block.PostDominator)
+                SelectDominatedInstructions(br.ElseTarget.Block);
+           
 
             txtLoopCount.Visible  = false;
             lblIterations.Visible = false;
