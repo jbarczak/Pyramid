@@ -332,6 +332,17 @@ List<IInstruction^>^ Scrutinizer_GCN::BuildDXFetchShader( Pyramid::IDXShaderRefl
 
     D3D11_SHADER_DESC sd;
     pRefl->GetDesc(&sd);
+
+    if( !sd.InputParameters )
+        return ops;
+
+    // first 'swappc' instruction that called the fetch shader
+    //   The second one, which returns, is the one that's at the beginning of the VS
+    GCN::ScalarInstruction swap;
+    swap.EncodeSwapPC();
+    ops->Add( gcnew GCNInstruction(swap));
+
+
     for( size_t i=0; i<sd.InputParameters; i++ )
     {
         D3D11_SIGNATURE_PARAMETER_DESC param;
@@ -360,10 +371,13 @@ List<IInstruction^>^ Scrutinizer_GCN::BuildDXFetchShader( Pyramid::IDXShaderRefl
         GCNTBufferOp^ op = gcnew GCNTBufferOp( inst );
         ops->Add(op);
     }
-
+    
+    // do a wait if we fetched anything
     GCN::ScalarInstruction wait;
     wait.EncodeWait(0,31,7);
     ops->Add( gcnew GCNInstruction(wait));
+    
+
     return ops;
 }
 

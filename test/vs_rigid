@@ -1,0 +1,27 @@
+
+float4x4 mViewProj;
+float4x4 mWorld;
+
+struct VSOut
+{
+   float4 P : SV_Position;
+   float3 N : n;
+   float2 uv : uv;
+};
+
+VSOut main( float3 P : p,
+            float3 N : n,
+            float2 uv : uv
+            )
+{
+    float3 vP=0;
+    float3 vN=0;
+    vP = mul( float4(P,1), mWorld );
+    vN = mul( float4(N,0), mWorld );
+    
+	VSOut o;
+	o.P   = mul( float4(vP,1), mViewProj );
+	o.N   = normalize(vN);
+	o.uv  = uv;
+	return o;
+}

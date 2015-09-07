@@ -224,6 +224,12 @@ namespace GCN
             Fields.Scalar.m_nSIMM16 = simm;
             Fields.Scalar.m_eOpcode = S_WAITCNT;
         }
+
+        void EncodeSwapPC( )
+        {
+            Fields.Scalar.m_eOpcode = S_SWAPPC_B64;
+            Fields.Scalar.m_nSourceCount = 1;
+        }
     };
 
 
