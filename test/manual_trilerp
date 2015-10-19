@@ -1,0 +1,30 @@
+
+float2 g_fSize;
+Texture2D<float> tx;
+
+float4 bilerp( float2 uv, float lod )
+{
+	float2 coords = (uv)/exp(lod);
+	coords = coords-0.5;
+	float2 weights = frac(coords);
+	
+	int3 icoords = int3(coords,lod);
+	float4 t0 = tx.Load( icoords, uint2(0,0) );
+	float4 t1 = tx.Load( icoords, uint2(1,0) );
+	float4 t2 = tx.Load( icoords, uint2(0,1) );
+	float4 t3 = tx.Load( icoords, uint2(1,1) );
+	
+	return lerp( lerp(t0,t1,weights.x),
+	             lerp(t2,t3,weights.x), weights.y );
+}
+
+float4 main( float2 uv : uv ) : SV_Target
+{
+    uv = uv*g_fSize;
+	float2 sizes = abs(ddx(uv)+ddy(uv));
+	float lod = log2( max(sizes.x,sizes.y) );
+	
+	float4 l0 = bilerp(uv,floor(lod));
+	float4 l1 = bilerp(uv,floor(lod)+1);
+	return lerp(l0,l1,frac(lod));
+}

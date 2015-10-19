@@ -1,0 +1,33 @@
+Texture2D               myTexture : register(t0);
+SamplerState    mySampler : register(s0);
+ 
+float linearToSRGB( float cl )
+{
+        float cs;
+        if( isnan(cl) ) {
+                /* Map IEEE-754 Not-a-number to zero. */
+                cs = 0.0;
+        } else if (cl > 1.0) {
+                cs = 1.0;
+        } else if (cl < 0.0) {
+                cs = 0.0;
+        } else if (cl < 0.0031308) {
+                cs = 12.92 * cl;
+        } else {
+                cs = 1.055 * pow(cl, 0.41666) - 0.055;
+        }
+       
+        return cs;
+}
+ 
+float3 linearToSRGB( float3 cl )
+{
+        return float3( linearToSRGB(cl.x), linearToSRGB(cl.y), linearToSRGB(cl.z) );
+}
+ 
+float4 main( float2 uv : TEXCOORD0 ) : SV_Target
+{
+        uv.y = 1.0f - uv.y;
+        float4 colour = myTexture.Sample( mySampler, uv ).xyzw;
+        return float4( linearToSRGB( colour.xyz ), colour.w );
+}
