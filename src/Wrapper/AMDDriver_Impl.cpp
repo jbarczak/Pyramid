@@ -67,7 +67,7 @@ struct CompileArgs
 };
 struct CompileResult
 {
-    DWORD       Twelve;
+    DWORD       StructSize;
     Elf32_Ehdr* pElf;
     DWORD       nElfSize;
 };
@@ -90,7 +90,7 @@ Pyramid::IAMDShader^  AMDDriver_Impl::CompileDXBlob(Pyramid::IAMDAsic^ asic, arr
     args.zero                   = 0;
 
     CompileResult result;
-    result.Twelve = 12;
+    result.StructSize = sizeof(CompileResult);
     result.pElf = 0;
     result.nElfSize = 0;
     DWORD hResult = m_pCompileFunc( &args, &result );
