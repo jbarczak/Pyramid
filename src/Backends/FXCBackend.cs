@@ -31,18 +31,19 @@ namespace Pyramid
             m_Compiler = comp;
         }
 
-        public IResultSet Compile(string text, ICompileOptions opts)
+        public IResultSet Compile( IShader shader )
         {
-            if (opts.Language != Languages.HLSL)
+            if (!(shader is HLSLShader ) )
                 return null;
 
-            IHLSLOptions hlslOpts = (IHLSLOptions)opts;
+            HLSLShader hlsl       = (HLSLShader)shader;
+            IHLSLOptions hlslOpts = hlsl.CompileOptions;
+            string text = hlsl.Code;
+
+            if (!hlsl.WasCompiled)
+                hlsl.Compile(m_Compiler);
             
-            string error;
-            IDXShaderBlob blob;
-            m_Compiler.Compile(text, hlslOpts, out blob, out error);
-            
-            return new FXCResultSet(error, blob);
+            return new FXCResultSet(hlsl.Messages, hlsl.CompiledBlob);
         }
     }
 

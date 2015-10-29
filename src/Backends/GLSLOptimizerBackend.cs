@@ -82,16 +82,18 @@ namespace Pyramid
                 m_Optimizers.Add( t, wrapper.CreateGLSLOptimizer(t));
         }
 
-        public IResultSet Compile(string shader, ICompileOptions opts)
+        public IResultSet Compile( IShader shader )
         {
-            if (opts.Language != Languages.GLSL)
+            if ( !(shader is GLSLShader ) )
                 return null;
-            IGLSLOptions glOpts = (IGLSLOptions)opts;
+
+            GLSLShader sh = (GLSLShader)shader;
+            IGLSLOptions glOpts = sh.CompileOptions;
             if (glOpts.OptimizerOptions == null)
                 return null;
 
             GLSLOptimizer.IOptimizer optimizer = m_Optimizers[glOpts.OptimizerTarget];
-            return new GLSLOptimizerResultSet( optimizer.Optimize(shader, glOpts.OptimizerOptions) );
+            return new GLSLOptimizerResultSet( optimizer.Optimize(sh.Code, glOpts.OptimizerOptions) );
         }
     }
 }

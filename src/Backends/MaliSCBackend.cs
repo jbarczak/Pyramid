@@ -80,12 +80,15 @@ namespace Pyramid
 
         public string Name { get { return "MaliSC"; } }
         
-        public IResultSet Compile(string shader, ICompileOptions opts)
+        public IResultSet Compile( IShader sh )
         {
-            if (opts.Language != Languages.GLSL)
+            if (sh.Language != Languages.GLSL)
                 return null;
 
-            IGLSLOptions glOpts = opts as IGLSLOptions;
+            GLSLShader glShader = (GLSLShader)sh;
+            IGLSLOptions glOpts = glShader.CompileOptions;
+            string shader = glShader.Code;
+
             string shaderType = "";
             switch( glOpts.ShaderType )
             {

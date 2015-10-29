@@ -12,4 +12,11 @@ namespace Pyramid
     {
         Languages Language { get; }
     }
+
+    public interface IShader
+    {
+        Languages Language { get; }
+        string Code { get; }
+    };
+
 }

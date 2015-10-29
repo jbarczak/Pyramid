@@ -61,6 +61,7 @@ namespace Pyramid
 
     };
 
+    
     public interface IDXShaderBlob
     {
         string Disassemble();
@@ -70,6 +71,37 @@ namespace Pyramid
         IDXShaderBlob GetExecutableBlob();
         IDXShaderReflection Reflect();
     }
+
+    public class HLSLShader : IShader
+    {
+        public HLSLShader(string code, IHLSLOptions opts)
+        {
+            CompileOptions = opts;
+            Code = code;
+            WasCompiled = false;
+        }
+
+        public Languages Language { get { return Languages.HLSL; } }
+        public IHLSLOptions CompileOptions { get; private set; }
+        public string Code { get; private set; }
+        public IDXShaderBlob CompiledBlob { get; private set; }
+        public string Messages { get; private set; }
+
+        public bool Compile( ID3DCompiler compiler )
+        {
+            IDXShaderBlob blob;
+            string msg;
+            HasError    = !compiler.Compile(this.Code, this.CompileOptions, out blob, out msg);
+            WasCompiled = true;
+            Messages = msg;
+            CompiledBlob = blob;
+            return HasError;
+        }
+
+        public bool WasCompiled { get; private set; }
+        public bool HasError { get; private set; }
+        public bool WasCompiledWithErrors { get { return WasCompiled && HasError; } }
+    };
 
     public interface ID3DCompiler
     {

@@ -113,12 +113,25 @@ namespace Pyramid
             IResultSet SelectedResultSet = null;
 
             ICompileOptions opts = m_CompileOptionsPanel.ReadOptions();
+            
+            IShader shader = null;
+            switch (opts.Language)
+            {
+                case Languages.GLSL: 
+                    shader = new GLSLShader(txtCode.Text, opts as IGLSLOptions); break;
+                case Languages.HLSL: 
+                    shader = new HLSLShader(txtCode.Text, opts as IHLSLOptions); break;
+                default:
+                    throw new System.Exception("Unsupported language");
+            }
+
+
             foreach (IBackend b in m_Backends)
             {
                 if (m_Options.IsBackendDisabled(b.Name))
                     continue;
 
-                IResultSet r = b.Compile(txtCode.Text, opts);
+                IResultSet r = b.Compile(shader);
                 if (r != null)
                 {
                     if (r.Name.Equals(m_LastBackend))

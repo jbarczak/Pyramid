@@ -12,9 +12,10 @@ namespace Pyramid
         Control ResultsPanel { get; }
     };
 
+   
     public interface IBackend
     {
         string Name { get; }
-        IResultSet Compile(string shader, ICompileOptions opts);
+        IResultSet Compile( IShader shader );
     }
 }

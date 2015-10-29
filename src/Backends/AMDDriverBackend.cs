@@ -49,18 +49,28 @@ namespace Pyramid
             m_Driver = driver;
         }
 
-        public IResultSet Compile(string shader, ICompileOptions opts)
+        public IResultSet Compile( IShader shaderObj )
         {
-            if (opts.Language != Languages.HLSL)
+            if ( !(shaderObj is HLSLShader ) )
                 return null;
 
-            IHLSLOptions hlslOpts = opts as IHLSLOptions;
+            HLSLShader shaderHLSL = shaderObj as HLSLShader;
+            IHLSLOptions hlslOpts = shaderHLSL.CompileOptions;
+            string shader = shaderObj.Code;
+
+            if (shaderHLSL.WasCompiledWithErrors)
+                return null;
+
             try
             {
-                IDXShaderBlob blob;
-                string messages;
-                if (!m_FXC.Compile(shader, hlslOpts, out blob, out messages))
-                    return null;
+                // compile here if we must.  Recycle existing blob if we can
+                IDXShaderBlob blob = shaderHLSL.CompiledBlob;
+                if ( blob == null )
+                {
+                    if (!shaderHLSL.Compile(m_FXC))
+                        return null;
+                    blob = shaderHLSL.CompiledBlob;
+                }
 
                 IDXShaderReflection reflect = blob.Reflect();
 

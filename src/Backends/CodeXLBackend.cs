@@ -95,12 +95,22 @@ namespace Pyramid
             m_TempPath      = TempPath;
         }
 
-        public IResultSet Compile( string text, ICompileOptions opts )
+        public IResultSet Compile( IShader shader  )
         {
-            if (opts.Language != Languages.HLSL)
+            if ( !(shader is HLSLShader) )
                 return null;
 
-            IHLSLOptions hlslOpts = (IHLSLOptions) opts;
+
+            // TODO: Modify CodeXL backend so that it re-uses blob from
+            //    FXC backend where available.  It'd be nice not to have to 
+            //    have CodeXL recompile it for us
+            HLSLShader shaderHLSL = shader as HLSLShader;
+            IHLSLOptions hlslOpts = shaderHLSL.CompileOptions;
+            string text = shader.Code;
+
+            if (shaderHLSL.WasCompiledWithErrors)
+                return null;
+
             string tmpFile = Path.Combine(m_TempPath, "PYRAMID_amdcodexl");
             try
             {

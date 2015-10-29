@@ -41,17 +41,19 @@ namespace Pyramid
             m_Config = m_Compiler.CreateDefaultConfig();
         }
 
-        public IResultSet Compile(string shader, ICompileOptions opts)
+        public IResultSet Compile( IShader shader )
         {
-            if (opts.Language != Languages.GLSL)
+            if (!(shader is GLSLShader) )
                 return null;
 
-            IGLSLOptions glOpts = (IGLSLOptions)opts;
+            GLSLShader sh = (GLSLShader)shader;
+            IGLSLOptions glOpts = sh.CompileOptions;
+            
 
             GLSlangOptions slangOpts = new GLSlangOptions();
             slangOpts.ShaderType = glOpts.ShaderType;
             slangOpts.Config = m_Config;
-            GLSlang.IShader result = m_Compiler.Compile(shader, slangOpts);
+            GLSlang.IShader result = m_Compiler.Compile(sh.Code, slangOpts);
             return new GLSLangResultSet(result);
         }
     }
