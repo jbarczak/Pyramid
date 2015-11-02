@@ -383,6 +383,7 @@ namespace GCN
         uint GetResourceWidthInDWORDS() const { return Fields.Image.m_bRes256*4 + 4; }
         uint GetResultWidthInDWORDS() const;
         bool IsFilteredFetch() const;
+        bool IsGradientFetch() const;
         bool IsUnfilteredLoadStore() const;
         bool IsGather() const;
 

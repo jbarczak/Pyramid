@@ -20,6 +20,8 @@ namespace Simulator{
             MAX_LCGMCNT             = 31,
             MAX_VMCNT               = 15,
             MAX_EXPCNT              = 7,
+
+            NUM_LDS_QUEUES          = 2
         };
 
         enum WavefrontQueues
@@ -93,6 +95,11 @@ namespace Simulator{
             size_t nClocksLeft;
             WaveState* pWave;
         };
+        struct DSOp
+        {
+            size_t nClocksLeft;
+            WaveState* pWave;
+        };
 
         /// Search for a WaveState structure that isn't in use
         static WaveState* FindAvailableWave( WaveState pWaves[MAX_WAVES_PER_CU] )
@@ -102,6 +109,32 @@ namespace Simulator{
                 if( !pWaves[i].allocated )
                     return &pWaves[i];
             }
+            return 0;
+        }
+
+        static WaveState* FindLDSToIssue( const SimOp* pOps, WaveState** ppWaves, size_t nWaves )
+        {
+            for( size_t i=0; i<nWaves; i++ )
+            {
+                // Throttle instruction issue of there are more scalars in flight
+                //  than we have counter bits for
+                //
+                // CLARIFICATION NEEDED:  Is this what HW does?
+                //
+                if( ppWaves[i]->lkgmcnt == MAX_LCGMCNT )
+                    continue;
+
+                const GCN::Instruction* pOp = pOps[ppWaves[i]->nCurrentOp].pInstruction;
+                if( pOp->GetClass() != GCN::IC_DS )
+                    continue;
+
+                const GCN::DataShareInstruction* pDS = static_cast<const GCN::DataShareInstruction*>(pOp);
+                if( pDS->IsGDS() )
+                    continue;
+
+                return ppWaves[i];
+            }
+
             return 0;
         }
 
@@ -291,9 +324,12 @@ namespace Simulator{
                     const GCN::ImageInstruction* pImg = static_cast<const GCN::ImageInstruction*>(pOp);
                     if( pImg->IsFilteredFetch() )
                     {
+                        
+                        size_t nBaseCost=0;
+
                         // perf depends on format and filter type
                         if( pSimOp->eFilter == FILT_POINT )
-                            return 16; // point sampling is 4 pix/clk for all formats
+                            nBaseCost = 16; // point sampling is 4 pix/clk for all formats
                         else
                         {
                             // baseline for bilinear is 4 pixels/clk
@@ -329,8 +365,26 @@ namespace Simulator{
                                 break;
                             }
 
-                            return nCost;
+                            nBaseCost= nCost;
                         }
+
+                        // APPROXIMATION: Gradient fetches are approximately 2x cost
+                        //
+                        //  It's actually full rate for 4 dwords/thread of input
+                        //     and an extra clock for each additional 4
+                        //
+                        //  This 2x assumes a 2D gradient fetch where derivatives
+                        //     can all go in one extra clock
+                        //  3D is more expensive, 1D possibly less
+                        //  Unfortunately ISA doesn't tell us 
+                        //   what tx type we're dealing with
+                        //
+                        //  Not clear if a thread can overlap extra argument cost
+                        //    with expensive filtering and have these cancel out
+                        //
+                        if( pImg->IsGradientFetch() )
+                            nBaseCost *= 2;
+                        
                     }
                     else if( pImg->IsGather() )
                     {
@@ -339,8 +393,9 @@ namespace Simulator{
                     }
                     else
                     {
-                        // Assuming that image load/store has same throughput as buffer loads
-                        return pImg->GetResultWidthInDWORDS()*4;
+                        // AMD says that Image load/store gets capped at 4 pixels/clk
+                        //   due to more complicated addressing
+                        return 16;
                     }
                 }
                 break;
@@ -504,6 +559,16 @@ namespace Simulator{
         RingQueue<VMemOp,MAX_WAVES_PER_CU*16>   VMemQueue;
         RingQueue<ExportOp,MAX_WAVES_PER_CU*16> EXPQueue;
 
+        // LDS/SIMD interface looks like this:
+        //
+        //   SIMD 0/1          SIMD 2/3
+        //    16 lanes         16 lanes
+        //
+        //  However, each "lane" is two dwords wide (so 32 dwords/wave)
+        //   At peak, two waves can complete over four clocks
+        //
+        RingQueue<DSOp,MAX_WAVES_PER_CU*32>     LDSQueue[NUM_LDS_QUEUES];
+
 
         while(1)
         {
@@ -536,6 +601,26 @@ namespace Simulator{
                     }
                 }
             }
+
+            // Tick the LDS pipe
+            
+            // Count as busy if either of the two Queues are running
+            for( size_t i=0; i<NUM_LDS_QUEUES; i++ )
+            {
+                if( !LDSQueue[i].empty() )
+                {
+                    DSOp& op = LDSQueue[i].front();
+                    op.nClocksLeft--;
+                    if( op.nClocksLeft == 0 )
+                    {
+                        op.pWave->lkgmcnt--;
+                        LDSQueue[i].pop_front();
+                    }
+
+                    rResults.nLDSBusy++;
+                }
+            }
+           
 
             // tick the vmem pipe
             if( !VMemQueue.empty() )
@@ -591,7 +676,7 @@ namespace Simulator{
                 rResults.nExpBusy++;
             }
 
-
+           
             // tick all the VALUs
             for( size_t i=0; i<NUM_SIMDS; i++ )
             {
@@ -610,6 +695,19 @@ namespace Simulator{
             size_t nCurrentSIMD =  nClock % NUM_SIMDS;
             WaveState** pSIMDWaves = pWavesInFlight[nCurrentSIMD];
             size_t nWaves = pWaveCount[nCurrentSIMD];
+
+            // Try and issue an LDS
+            WaveState* pLDSWave = FindLDSToIssue( pOps, pSIMDWaves, nWaves );
+            if( pLDSWave )
+            {
+                // TODO: Assuming best-case latency of 4 clocks.  What abount Bank conflicts?  
+                //  How to model this in a way that's useful?
+                DSOp ds;
+                ds.nClocksLeft = 4;
+                ds.pWave = pLDSWave;
+                LDSQueue[nCurrentSIMD/2].push_back( ds );
+                pLDSWave->lkgmcnt++;
+            }
 
             // Try and issue a scalar
             WaveState* pScalarWave = FindScalarToIssue( pOps, pSIMDWaves, nWaves );
@@ -736,6 +834,12 @@ namespace Simulator{
             if( nOcc == 0 )
                 rResults.nStarveCycles++;
 
+            if( pLDSWave )
+            {
+                rResults.nLDSIssued++;
+                pLDSWave->nCurrentOp++;
+            }
+
             if( pScalarWave )
             {
                 if( pOps[pScalarWave->nCurrentOp].pInstruction->GetClass() == IC_SCALAR_MEM )
@@ -769,7 +873,7 @@ namespace Simulator{
             //  Don't count as a stall if VALU is occupied by a long-latency op
             bool bVALUStarved = !pVALUWave && !pWavesInVALU[nCurrentSIMD];
 
-            if( !pScalarWave && bVALUStarved && !pVMemWave && !pExpWave && !nFreeOps && pWaveCount[nCurrentSIMD] ) 
+            if( !pScalarWave && bVALUStarved && !pVMemWave && !pExpWave && !pLDSWave && !nFreeOps && pWaveCount[nCurrentSIMD] ) 
             {
                 rResults.nStallCycles[nCurrentSIMD]++;
 

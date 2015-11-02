@@ -3065,6 +3065,33 @@ namespace GCN
         }
     }
 
+
+    bool ImageInstruction::IsGradientFetch( ) const
+    {
+        switch( GetOpcode() )
+        {
+        case IMAGE_SAMPLE_D        :   //: sample texture map, with user derivatives.
+        case IMAGE_SAMPLE_D_CL     :   //: sample texture map, with LOD clamp specified in shader, with user derivatives.
+        case IMAGE_SAMPLE_C_D      :   //: SAMPLE_C, with user derivatives.
+        case IMAGE_SAMPLE_C_D_CL   :   //: SAMPLE_C, with LOD clamp specified in shader,with user derivatives.
+        case IMAGE_SAMPLE_D_O      : // : SAMPLE_O, with user derivatives.
+        case IMAGE_SAMPLE_D_CL_O   : //     : SAMPLE_O, with LOD clamp specified in shader,with user derivatives.
+        case IMAGE_SAMPLE_C_D_O    : // : SAMPLE_C_O, with user derivatives.
+        case IMAGE_SAMPLE_C_D_CL_O : // : SAMPLE_C_O, with LOD clamp specified in shader, with user derivatives.
+        case IMAGE_SAMPLE_CD        : // : sample texture map, with user derivatives (LOD per quad)
+        case IMAGE_SAMPLE_CD_CL     : // : sample texture map, with LOD clamp specified in  shader, with user derivatives (LOD per quad).
+        case IMAGE_SAMPLE_C_CD      : // : SAMPLE_C, with user derivatives (LOD per quad).
+        case IMAGE_SAMPLE_C_CD_CL   : // : SAMPLE_C, with LOD clamp specified in shader, with user derivatives (LOD per quad).
+        case IMAGE_SAMPLE_CD_O      : // : SAMPLE_O, with user derivatives (LOD per quad).
+        case IMAGE_SAMPLE_CD_CL_O   : // : SAMPLE_O, with LOD clamp specified in shader, with user derivatives (LOD per quad).
+        case IMAGE_SAMPLE_C_CD_O    : // : SAMPLE_C_O, with user derivatives (LOD per quad).
+        case IMAGE_SAMPLE_C_CD_CL_O : 
+            return true;
+        default:
+            return false;
+        }
+    }
+
     bool ImageInstruction::IsGather() const
     {
         switch( GetOpcode() )

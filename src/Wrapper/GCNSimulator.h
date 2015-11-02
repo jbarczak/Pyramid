@@ -29,19 +29,22 @@ namespace Simulator{
         ///< Each op's counter is Incremented once per stalled clock/stalled wave  
         size_t* pSimOpStallCounts;
 
-        ///< Caller must zero all these fields before simulating
+        ///< Caller must zero all fields below before simulating
+
         size_t nCycles;
         size_t nSALUBusy;
         size_t nVALUBusy[4];
         size_t nVMemBusy;
         size_t nExpBusy;
         size_t nSMemBusy;
-
+        size_t nLDSBusy;    // NOTE: LDS is counted double, once for SIMD0/1, and once for SIMD2/3
+        
         size_t nVALUIssued;
         size_t nSALUIssued;
         size_t nVMemIssued;
         size_t nExpIssued;
         size_t nSMEMIssued;
+        size_t nLDSIssued;
 
         size_t nPeakOccupancy;
 
