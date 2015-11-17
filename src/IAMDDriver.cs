@@ -11,13 +11,14 @@ namespace Pyramid
         string Name { get; }
     };
 
+
     public interface IAMDShader 
     {
         IAMDAsic Asic { get; }
         byte[] ReadISABytes();
         string Disassemble();
         string ListEncodings();
-        string PrintStats();
+        string PrintStats( IDXShaderReflection reflection );
 
         Scrutinizer.IScrutinizer CreateScrutinizer( );
     };

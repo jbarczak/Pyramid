@@ -26,7 +26,7 @@ namespace Pyramid
 
             m_Results.AsicChanged += delegate(IAMDShader sh)
             {
-                m_Analysis.Text = sh.PrintStats();
+                m_Analysis.Text = sh.PrintStats(reflection);
             };
         }
 

@@ -110,6 +110,13 @@ public:
         m_pRef->Release();
     }
 
+    virtual UINT GetThreadsPerGroup()
+    {
+        UINT SizeX, SizeY, SizeZ;
+        m_pRef->GetThreadGroupSize(&SizeX,&SizeY,&SizeZ);
+        return SizeX*SizeY*SizeZ;
+    }
+
     virtual Pyramid::HLSLShaderType GetShaderType()
     {
         D3D11_SHADER_DESC d;

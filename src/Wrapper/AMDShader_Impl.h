@@ -26,7 +26,7 @@ public:
     
     virtual System::String^ ListEncodings();
 
-    virtual System::String^ PrintStats();
+    virtual System::String^ PrintStats( Pyramid::IDXShaderReflection^ reflection );
 
     property Pyramid::IAMDAsic^ Asic
     {

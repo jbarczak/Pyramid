@@ -58,7 +58,7 @@ namespace Pyramid
     public interface IDXShaderReflection
     {
         HLSLShaderType GetShaderType();
-
+        uint GetThreadsPerGroup();
     };
 
     

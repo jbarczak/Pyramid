@@ -109,7 +109,7 @@ System::String^ AMDShader_Impl::ListEncodings()
 }
 
 
-System::String^ AMDShader_Impl::PrintStats()
+System::String^ AMDShader_Impl::PrintStats( Pyramid::IDXShaderReflection^ reflection )
 {
     DWORD nSGPRs        = m_pStats[0];
     DWORD nMaxSGPRs     = m_pStats[1];
@@ -146,15 +146,21 @@ System::String^ AMDShader_Impl::PrintStats()
     if( nUsedLDS )
         nLDSOccupancy = nMaxLDS / nUsedLDS;
 
+    DWORD nWavesPerGroup = (reflection->GetThreadsPerGroup()+63)/64;
+    
+
     char buffer[4096];
     sprintf( buffer,
         "SGPRs:          %3u / %u\n"
         "VGPRs:          %3u / %u\n"
         "LDS bytes/tg %6u / %u\n"
+        "Waves/Group:    %u\n"
         "Occupancy:\n"
-        "   S: %2u waves\n"
-        "   V: %2u waves\n"
-        "   L: %2u groups\n"
+        "   S: %2u waves/SIMD\n"
+        "   V: %2u waves/SIMD\n"
+        "   L: %2u groups/CU\n"
+        "      %2u waves/CU\n"
+        "       %.2f waves/SIMD \n"
         "Ops:\n"
         "   VALU: %u\n"
         "   S:    %u\n"
@@ -162,9 +168,12 @@ System::String^ AMDShader_Impl::PrintStats()
         nSGPRs,nMaxSGPRs,
         nVGPRs,nMaxVGPRs,
         nUsedLDS,nMaxLDS,
+        nWavesPerGroup,
         nSGPROccupancy,
         nVGPROccupancy,
-        nLDSOccupancy,
+        nLDSOccupancy*2,
+        nLDSOccupancy*2*nWavesPerGroup,
+        (nLDSOccupancy*2*nWavesPerGroup)/4.0f,
         nALUOps,
         nScalarOps,
         nMemoryOps
