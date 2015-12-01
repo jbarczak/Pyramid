@@ -124,15 +124,12 @@ namespace Pyramid
                 return null;
             }
 
-            string ilPath = Path.Combine(m_TempPath, "il");
-            string isaPath = Path.Combine(m_TempPath, "isa");
+            string isaPath = Path.Combine(m_TempPath, "pyramid.isa");
             string analysisPath = Path.Combine(m_TempPath, "analysis");
-
             string CommandLine = "-s \"HLSL\"";
             CommandLine = String.Concat( CommandLine, String.Format( " -p {0}",hlslOpts.Target.ToString()) );
             CommandLine = String.Concat( CommandLine, String.Format( " -f {0} ",hlslOpts.EntryPoint ));
             CommandLine = String.Concat( CommandLine, String.Format( " --DXLocation \"{0}\"",m_D3DCompiler ));
-            CommandLine = String.Concat( CommandLine, String.Format( " --il \"{0}\"",ilPath ));
             CommandLine = String.Concat( CommandLine, String.Format( " --isa \"{0}\"",isaPath ));
             CommandLine = String.Concat( CommandLine, String.Format( " -a \"{0}\"",analysisPath ));
             CommandLine = String.Concat( CommandLine, String.Format( " --DXFlags {0} ",hlslOpts.GetD3DCompileFlagBits() ));
@@ -170,15 +167,12 @@ namespace Pyramid
             CodeXLResultSet results  = new CodeXLResultSet();
             foreach (string asic in m_Asics)
             {
-                string ilFile  = String.Format( "{0}-{1}.amdisa", ilPath, asic );
-                string isaFile = String.Format( "{0}-{1}.amdisa", isaPath, asic );
+                string isaFile = Path.Combine(m_TempPath, String.Format("{0}_pyramid.isa", asic));
                 try
                 {
-                    string il = File.ReadAllText(ilFile);
                     string isa = File.ReadAllText(isaFile);
-                    results.AddCompileResult(asic, il, isa);
+                    results.AddCompileResult(asic, "CodeXL doesn't support IL output for HLSL", isa);
 
-                    File.Delete(ilFile);
                     File.Delete(isaFile);
                 }
                 catch (Exception )
