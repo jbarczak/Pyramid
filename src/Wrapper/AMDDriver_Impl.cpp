@@ -44,13 +44,21 @@ AMDDriver_Impl::AMDDriver_Impl( System::String^ path )
     m_pmAsics->Add( gcnew AMDAsic_Impl( "Tahiti",    110, 6 , GCN::IDecoder::GCN1 ) );
 
     // CI chips seen during CodeXL snopping
+    m_pmAsics->Add( gcnew AMDAsic_Impl( "Bonaire",   120, 20, GCN::IDecoder::GCN1  ) );
     m_pmAsics->Add( gcnew AMDAsic_Impl( "Kalindi",   120, 20, GCN::IDecoder::GCN1  ) );
-    m_pmAsics->Add( gcnew AMDAsic_Impl( "Spectre",   120, 1 , GCN::IDecoder::GCN1  ) );
+    m_pmAsics->Add( gcnew AMDAsic_Impl( "Spectre",   120, 65, GCN::IDecoder::GCN1  ) );
     m_pmAsics->Add( gcnew AMDAsic_Impl( "Spooky",    120, 65, GCN::IDecoder::GCN1  ) );
+    m_pmAsics->Add( gcnew AMDAsic_Impl( "Hawaii",    120, 40, GCN::IDecoder::GCN1  ) );
+    m_pmAsics->Add( gcnew AMDAsic_Impl( "Mullins",   120, 20, GCN::IDecoder::GCN1  ) );
+    
+    // VI chips seen during CodeXL snooping
+    m_pmAsics->Add( gcnew AMDAsic_Impl( "Carrizo",   130, 1,  GCN::IDecoder::GCN3 )) ;
+    m_pmAsics->Add( gcnew AMDAsic_Impl( "Fiji",      130, 60, GCN::IDecoder::GCN3 )) ;
+    m_pmAsics->Add( gcnew AMDAsic_Impl( "Iceland",   130, 1,  GCN::IDecoder::GCN3 )) ;
+    m_pmAsics->Add( gcnew AMDAsic_Impl( "Tonga",     130, 20, GCN::IDecoder::GCN3 )) ;
 
     // Other stuff the driver accepted but I haven't identified
     m_pmAsics->Add( gcnew AMDAsic_Impl( "asic-125",  125, 1, GCN::IDecoder::GCN1 )) ;
-    m_pmAsics->Add( gcnew AMDAsic_Impl( "asic-130",  130, 1, GCN::IDecoder::GCN3 )) ;
     m_pmAsics->Add( gcnew AMDAsic_Impl( "asic-135",  135, 1, GCN::IDecoder::GCN3 )) ;
 }
 
