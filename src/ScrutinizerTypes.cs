@@ -194,10 +194,6 @@ namespace Pyramid.Scrutinizer
 
     public interface IScrutinizer
     {
-   //     uint GetDefaultOccupancy( );
-
-    //    uint GetDefaultCUCount( );
-
         List<IInstruction> BuildProgram( );
 
         List<IInstruction> BuildDXFetchShader(IDXShaderReflection refl);
@@ -206,7 +202,6 @@ namespace Pyramid.Scrutinizer
 
         string AnalyzeExecutionTrace(List<IInstruction> ops);
 
-        //string AnalyzeExecutionTrace(List<IInstruction> ops, uint nWaveIssueRate, uint nOccupancy, uint nCUs );
     };
 
 }
