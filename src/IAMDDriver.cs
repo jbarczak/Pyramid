@@ -18,8 +18,7 @@ namespace Pyramid
         byte[] ReadISABytes();
         string Disassemble();
         string ListEncodings();
-        string PrintStats( IDXShaderReflection reflection );
-
+        string PrintStats( );
         Scrutinizer.IScrutinizer CreateScrutinizer( );
     };
 
@@ -32,6 +31,6 @@ namespace Pyramid
         /// </summary>
         /// <param name="blob"></param>
         /// <returns></returns>
-        IAMDShader CompileDXBlob(IAMDAsic asic, byte[] blob);
+        IAMDShader CompileDXBlob(IAMDAsic asic, byte[] blob, IDXShaderReflection reflect );
     }
 }

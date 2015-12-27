@@ -22,7 +22,7 @@ public:
         }
     }
 
-    virtual Pyramid::IAMDShader^  CompileDXBlob(Pyramid::IAMDAsic^ asic, array<byte>^ blob );
+    virtual Pyramid::IAMDShader^  CompileDXBlob(Pyramid::IAMDAsic^ asic, array<byte>^ exe, Pyramid::IDXShaderReflection^ reflection );
 
 internal:
 

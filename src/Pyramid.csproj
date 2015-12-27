@@ -153,6 +153,12 @@
     <Compile Include="Scrutinizer\UI\InstructionWidget.Designer.cs">
       <DependentUpon>InstructionWidget.cs</DependentUpon>
     </Compile>
+    <Compile Include="Scrutinizer\UI\ParameterWidget.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Scrutinizer\UI\ParameterWidget.Designer.cs">
+      <DependentUpon>ParameterWidget.cs</DependentUpon>
+    </Compile>
     <Compile Include="Scrutinizer\UI\ScrutinizerForm.cs">
       <SubType>Form</SubType>
     </Compile>

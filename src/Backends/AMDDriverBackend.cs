@@ -26,7 +26,7 @@ namespace Pyramid
 
             m_Results.AsicChanged += delegate(IAMDShader sh)
             {
-                m_Analysis.Text = sh.PrintStats(reflection);
+                m_Analysis.Text = sh.PrintStats();
             };
         }
 
@@ -80,11 +80,11 @@ namespace Pyramid
 
                 byte[] bytes = exe.ReadBytes();
 
-                AMDDriverResultSet rs = new AMDDriverResultSet(reflect);
+                AMDDriverResultSet rs = new AMDDriverResultSet(reflect );
 
                 foreach (IAMDAsic a in m_Driver.Asics)
                 {
-                    IAMDShader sh = m_Driver.CompileDXBlob(a, bytes);
+                    IAMDShader sh = m_Driver.CompileDXBlob(a, bytes, reflect);
                     rs.Add(sh);
                 }
 

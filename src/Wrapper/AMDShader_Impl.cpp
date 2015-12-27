@@ -7,7 +7,6 @@
 #include "GCNBufferedPrinter.h"
 #pragma managed
 
-
 #include "AMDShader_Impl.h"
 #include "AMDDriver_Impl.h"
 #include "AMDAsic_Impl.h"
@@ -15,7 +14,8 @@
 
 #include "Scrutinizer_GCN.h"
 
-AMDShader_Impl::AMDShader_Impl( AMDDriver_Impl^ pOwner, AMDAsic_Impl^ asic, Elf32_Ehdr* pElf, DWORD nElfSize )
+AMDShader_Impl::AMDShader_Impl( AMDDriver_Impl^ pOwner, AMDAsic_Impl^ asic, Elf32_Ehdr* pElf, DWORD nElfSize,
+                                DWORD nThreadsPerGroup, ShaderType eShaderType )
     : m_pmDriver(pOwner), 
         m_pmAsic(asic), 
         m_pElf(pElf),
@@ -23,7 +23,9 @@ AMDShader_Impl::AMDShader_Impl( AMDDriver_Impl^ pOwner, AMDAsic_Impl^ asic, Elf3
         m_pISA(0),
         m_nISASize(0),
         m_pStats(0),
-        m_nStatsSize(0)
+        m_nStatsSize(0),
+        m_nThreadsPerThreadGroup(nThreadsPerGroup),
+        m_eShaderType(eShaderType)
 {
     // make sure they're using ELF
     if( pElf->e_ident[0] != 0x7f || 
@@ -109,7 +111,7 @@ System::String^ AMDShader_Impl::ListEncodings()
 }
 
 
-System::String^ AMDShader_Impl::PrintStats( Pyramid::IDXShaderReflection^ reflection )
+System::String^ AMDShader_Impl::PrintStats( )
 {
     DWORD nSGPRs        = m_pStats[0];
     DWORD nMaxSGPRs     = m_pStats[1];
@@ -146,7 +148,7 @@ System::String^ AMDShader_Impl::PrintStats( Pyramid::IDXShaderReflection^ reflec
     if( nUsedLDS )
         nLDSOccupancy = nMaxLDS / nUsedLDS;
 
-    DWORD nWavesPerGroup = (reflection->GetThreadsPerGroup()+63)/64;
+    DWORD nWavesPerGroup = (m_nThreadsPerThreadGroup+63)/64;
     
 
     char buffer[4096];
@@ -221,7 +223,15 @@ size_t AMDShader_Impl::GetOccupancy()
 
 Pyramid::Scrutinizer::IScrutinizer^ AMDShader_Impl::CreateScrutinizer()
 {
-    return gcnew Scrutinizer_GCN( m_pmAsic, this );
+    switch( m_eShaderType )
+    {
+    case ShaderType::ST_VERTEX:
+        return gcnew Scrutinizer_GCN_VS( m_pmAsic, this );
+    case ShaderType::ST_PIXEL:
+        return gcnew Scrutinizer_GCN_PS( m_pmAsic, this );
+    default:
+        return nullptr;
+    }
 }
 
 

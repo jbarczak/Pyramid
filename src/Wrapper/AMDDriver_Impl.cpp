@@ -12,7 +12,7 @@
 #include "AMDShader_Impl.h"
 #include "Utilities.h"
 
-
+#undef DOMAIN // seriously Microsoft?!?!?
 
 
 
@@ -82,13 +82,12 @@ struct CompileResult
 #pragma managed
 
 
-Pyramid::IAMDShader^  AMDDriver_Impl::CompileDXBlob(Pyramid::IAMDAsic^ asic, array<byte>^ blob )
+Pyramid::IAMDShader^  AMDDriver_Impl::CompileDXBlob(Pyramid::IAMDAsic^ asic, array<byte>^ blob, Pyramid::IDXShaderReflection^ reflection )
 {
     AMDAsic_Impl^ a = dynamic_cast<AMDAsic_Impl^>(asic);
     
     MarshalledBlob^ bl = gcnew MarshalledBlob(blob);
-    
-    
+
     CompileArgs args;
     args.asic                   = a->m_nArg0;
     args.arg1                   = a->m_nArg1;
@@ -106,5 +105,20 @@ Pyramid::IAMDShader^  AMDDriver_Impl::CompileDXBlob(Pyramid::IAMDAsic^ asic, arr
     if( hResult != 0 )
         throw gcnew System::Exception( "Error returned from AMD driver compile" );
 
-    return gcnew AMDShader_Impl( this, a, result.pElf, result.nElfSize );
+    AMDShader_Impl::ShaderType eType;
+    switch( reflection->GetShaderType() )
+    {
+    case Pyramid::HLSLShaderType::VERTEX:   eType = AMDShader_Impl::ShaderType::ST_VERTEX;   break;
+    case Pyramid::HLSLShaderType::PIXEL:    eType = AMDShader_Impl::ShaderType::ST_PIXEL;    break;
+    case Pyramid::HLSLShaderType::GEOMETRY: eType = AMDShader_Impl::ShaderType::ST_GEOMETRY; break;
+    case Pyramid::HLSLShaderType::DOMAIN:   eType = AMDShader_Impl::ShaderType::ST_DOMAIN;   break;
+    case Pyramid::HLSLShaderType::HULL:     eType = AMDShader_Impl::ShaderType::ST_HULL;     break;
+    case Pyramid::HLSLShaderType::COMPUTE:  eType = AMDShader_Impl::ShaderType::ST_COMPUTE;  break;
+    default:
+        throw gcnew System::Exception( "Bad shader type enum???");
+    }
+
+    DWORD nThreadsPerGroup = reflection->GetThreadsPerGroup();
+
+    return gcnew AMDShader_Impl( this, a, result.pElf, result.nElfSize, nThreadsPerGroup, eType );
 }

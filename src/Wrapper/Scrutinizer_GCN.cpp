@@ -1,7 +1,7 @@
-
-#include "Scrutinizer_GCN.h"
 #include "AMDAsic_Impl.h"
 #include "AMDShader_Impl.h"
+
+#include "Scrutinizer_GCN.h"
 #include "Utilities.h"
 
 #include "D3DCompiler_Impl.h"
@@ -16,7 +16,7 @@
 #include <unordered_map>
 #pragma managed
 
-
+using namespace System;
 using namespace System::Collections::Generic;
 using namespace Pyramid::Scrutinizer;
 
@@ -184,7 +184,7 @@ internal:
    
 
     
-List<IInstruction^>^ Scrutinizer_GCN::BuildProgram(  )
+List<IInstruction^>^ Scrutinizer_GCN_Base::BuildProgram(  )
 {
     
     MarshalledBlob^ bl = gcnew MarshalledBlob(m_pmShader->ReadISABytes());
@@ -323,16 +323,19 @@ List<IInstruction^>^ Scrutinizer_GCN::BuildProgram(  )
     return pmManagedInstructions;
 }
 
-List<IInstruction^>^ Scrutinizer_GCN::BuildDXFetchShader( Pyramid::IDXShaderReflection^ refl )
+List<IInstruction^>^ Scrutinizer_GCN_Base::BuildDXFetchShader( Pyramid::IDXShaderReflection^ refl )
 {
     DXShaderReflection_Impl^ reflImpl = dynamic_cast<DXShaderReflection_Impl^>(refl);
     ID3D11ShaderReflection* pRefl = reflImpl->m_pRef;
 
     List<IInstruction^>^ ops = gcnew List<IInstruction^>();
 
+    if( refl->GetShaderType() != Pyramid::HLSLShaderType::VERTEX )
+        return ops;
+
     D3D11_SHADER_DESC sd;
     pRefl->GetDesc(&sd);
-
+    
     if( !sd.InputParameters )
         return ops;
 
@@ -382,18 +385,8 @@ List<IInstruction^>^ Scrutinizer_GCN::BuildDXFetchShader( Pyramid::IDXShaderRefl
 }
 
 
-unsigned int Scrutinizer_GCN::GetDefaultOccupancy()
-{
-    return m_pmShader->GetOccupancy();
-}
-        
 
-unsigned int Scrutinizer_GCN::GetDefaultCUCount()
-{
-    return 10; // TODO: Get from asic?
-}
-
-System::String^ Scrutinizer_GCN::AnalyzeExecutionTrace( List<IInstruction^>^ ops, unsigned int nWaveIssueRate, unsigned int nOccupancy, unsigned int nCUs )
+System::String^ Scrutinizer_GCN_Base::AnalyzeTrace( List<IInstruction^>^ ops, unsigned int nWaveIssueRate, unsigned int nOccupancy, unsigned int nCUs )
 {
     std::vector<GCN::Simulator::SimOp> pSimOps(ops->Count);
 
@@ -546,3 +539,70 @@ System::String^ Scrutinizer_GCN::AnalyzeExecutionTrace( List<IInstruction^>^ ops
     return str->Replace("\n", System::Environment::NewLine );
 }
 
+
+Scrutinizer_GCN_VS::Scrutinizer_GCN_VS( AMDAsic_Impl^ asic, AMDShader_Impl^ shader )
+    :Scrutinizer_GCN_Base(asic,shader)
+{
+    m_pmOccupancy = gcnew SimulationParameterInt(1,10,shader->GetOccupancy(),"Occupancy");
+    m_pmCUCount   = gcnew SimulationParameterInt(1,10000,10,"CU Count");
+    m_pmACMR      = gcnew SimulationParameterDouble( 0.5,3.0, 0.7, "Verts/Tri");
+    m_pmParams->Add(m_pmOccupancy);
+    m_pmParams->Add(m_pmCUCount);
+    m_pmParams->Add(m_pmACMR);
+}
+
+System::String^ Scrutinizer_GCN_VS::AnalyzeExecutionTrace( List<IInstruction^>^ ops )
+{
+    unsigned int nCUs       = (unsigned int) m_pmCUCount->Value;
+    unsigned int nOccupancy = (unsigned int) m_pmOccupancy->Value;
+
+    // one VS wave every M clocks
+    //   round-robined amongst CUs
+    //
+    //      http://www.icodebot.com/Playstation%204%20GPU
+    //  States that VGT can handle 1 new vert/clk, and tests 3 indices/clk for reuse
+    //
+    //   If A = cache hit rate (verts/tri)
+    //    then we need on average 64/A triangles to produce a full wave
+    //    
+    //  It will take min(64, 64/A) clocks to gather that many 
+    //
+    double fVertsPerTri   = m_pmACMR->Value;
+    double fTrisPerWave   = 64.0 / fVertsPerTri;
+    double fClocksPerWave = ( fTrisPerWave>64.0f) ? 64.0 : fTrisPerWave;
+    unsigned int nWaveIssueRate        = (unsigned int) (nCUs*fClocksPerWave);
+
+    return AnalyzeTrace(ops,nWaveIssueRate,nOccupancy,nCUs);
+}
+
+
+Scrutinizer_GCN_PS::Scrutinizer_GCN_PS( AMDAsic_Impl^ asic, AMDShader_Impl^ shader )
+    :Scrutinizer_GCN_Base(asic,shader)
+{
+    m_pmOccupancy        = gcnew SimulationParameterInt(1,10,shader->GetOccupancy(),"Occupancy");
+    m_pmCUCount          = gcnew SimulationParameterInt(1,10000,10,"CU Count");
+    m_pmPixelsPerTri     = gcnew SimulationParameterDouble( 0, 10000, 16, "Pixels/Tri");
+    m_pmParams->Add(m_pmOccupancy);
+    m_pmParams->Add(m_pmCUCount);
+    m_pmParams->Add(m_pmPixelsPerTri);
+}
+
+System::String^ Scrutinizer_GCN_PS::AnalyzeExecutionTrace(List<IInstruction^>^ ops)
+{
+    unsigned int nCUs       = (unsigned int) m_pmCUCount->Value;
+    unsigned int nOccupancy = (unsigned int) m_pmOccupancy->Value;
+
+    // Assume 16 pix/clk raster rate (4 quads/clk)
+    //    Assuming we can repack quads from multiple tris into a wave,
+    //     we end up with 
+
+    double fQuadsPerTri   = m_pmPixelsPerTri->Value/4.0;
+    double fQuadsPerClock = Math::Min( 4.0, Math::Ceiling(fQuadsPerTri) );
+    fQuadsPerClock        = Math::Max(1.0,fQuadsPerClock);
+    double fClocksPerWave = Math::Ceiling( 16.0 / fQuadsPerClock );
+    unsigned int nWaveIssueRate = (unsigned int) (nCUs*fClocksPerWave);
+           
+    return AnalyzeTrace(ops,nWaveIssueRate,nOccupancy,nCUs);
+}
+
+  

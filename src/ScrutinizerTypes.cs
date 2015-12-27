@@ -151,19 +151,62 @@ namespace Pyramid.Scrutinizer
 
    
 
+    public interface ISimulationParameter
+    {
+        string Name { get; }
+    };
+
+    public class SimulationParameterInt : ISimulationParameter
+    {
+        public SimulationParameterInt( int nMin, int nMax, int nDefault, string sName )
+        {
+            Min = nMin;
+            Max = nMax;
+            Default = nDefault;
+            Value = Default;
+            Name = sName;
+        }
+        public string Name { get; private set; }
+        public int Min     { get; private set; }
+        public int Max     { get; private set; }
+        public int Default { get; private set; }
+        public int Value   { get; set; }
+    };
+
+    public class SimulationParameterDouble : ISimulationParameter
+    {
+        public SimulationParameterDouble(double fMin, double fMax, double fDefault, string sName )
+        {
+            Min     = fMin;
+            Max     = fMax;
+            Default = fDefault;
+            Value   = Default;
+            Name    = sName;
+        }
+        public string Name { get; private set;  }
+        public double Min     { get; private set; }
+        public double Max     { get; private set; }
+        public double Default { get; private set; }
+        public double Value   { get; set; }
+    };
+
+
+
     public interface IScrutinizer
     {
-        uint GetDefaultOccupancy( );
+   //     uint GetDefaultOccupancy( );
 
-        uint GetDefaultCUCount( );
+    //    uint GetDefaultCUCount( );
 
         List<IInstruction> BuildProgram( );
 
         List<IInstruction> BuildDXFetchShader(IDXShaderReflection refl);
 
+        IEnumerable<ISimulationParameter> SimulationParameters { get; }
 
+        string AnalyzeExecutionTrace(List<IInstruction> ops);
 
-        string AnalyzeExecutionTrace(List<IInstruction> ops, uint nWaveIssueRate, uint nOccupancy, uint nCUs );
+        //string AnalyzeExecutionTrace(List<IInstruction> ops, uint nWaveIssueRate, uint nOccupancy, uint nCUs );
     };
 
 }

@@ -13,7 +13,7 @@ namespace Pyramid
     public partial class AMDDriverResultsPanel : UserControl
     {
         private List<IAMDShader> m_Shaders = new List<IAMDShader>();
-
+        
         IDXShaderReflection m_DXReflection;
 
         public delegate void AsicChangedDelegate(IAMDShader shader);
@@ -89,7 +89,12 @@ namespace Pyramid
             if (i >= 0 && i < m_Shaders.Count)
             {
                 IAMDShader sh = m_Shaders[cmbAsic.SelectedIndex];
-                Scrutinizer.UI.ScrutinizerForm f = new Scrutinizer.UI.ScrutinizerForm(sh,m_DXReflection);
+
+                Scrutinizer.IScrutinizer backend     = sh.CreateScrutinizer();
+                List<Scrutinizer.IInstruction> Ops   = backend.BuildProgram();
+                List<Scrutinizer.IInstruction> Fetch = backend.BuildDXFetchShader(m_DXReflection);
+
+                Scrutinizer.UI.ScrutinizerForm f = new Scrutinizer.UI.ScrutinizerForm(Fetch, Ops, backend);
                 f.ShowDialog();
             }
           

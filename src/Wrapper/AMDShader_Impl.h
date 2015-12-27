@@ -13,7 +13,19 @@ private ref class AMDShader_Impl : public Pyramid::IAMDShader
 {
 public:
 
-    AMDShader_Impl( AMDDriver_Impl^ pOwner, AMDAsic_Impl^ asic, Elf32_Ehdr* pElf, DWORD nElfSize );
+    enum class ShaderType
+    {
+        ST_VERTEX,
+        ST_PIXEL,
+        ST_GEOMETRY,
+        ST_HULL,
+        ST_DOMAIN,
+        ST_COMPUTE
+    };
+
+    AMDShader_Impl( AMDDriver_Impl^ pOwner, AMDAsic_Impl^ asic, Elf32_Ehdr* pElf, 
+                    DWORD nElfSize, DWORD nThreadsPerThreadGroup,
+                    ShaderType eShaderType );
       
 
     ~AMDShader_Impl();
@@ -26,7 +38,7 @@ public:
     
     virtual System::String^ ListEncodings();
 
-    virtual System::String^ PrintStats( Pyramid::IDXShaderReflection^ reflection );
+    virtual System::String^ PrintStats( );
 
     property Pyramid::IAMDAsic^ Asic
     {
@@ -49,4 +61,7 @@ internal:
     byte* m_pISA;
     DWORD m_nISASize;
     GCN::IDecoder* m_pDecoder;
+
+    DWORD m_nThreadsPerThreadGroup;
+    ShaderType m_eShaderType;
 };

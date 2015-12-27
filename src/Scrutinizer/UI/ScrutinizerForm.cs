@@ -17,8 +17,7 @@ namespace Pyramid.Scrutinizer.UI
         private List<BasicBlock> m_Blocks;
         private List<Loop> m_Loops;
         private IScrutinizer m_Backend;
-        private IDXShaderReflection m_Reflection;
-
+        
         private HashSet<IInstruction> m_TakenBranches = new HashSet<IInstruction>();
         private HashSet<InstructionWidget> m_SelectedOps = new HashSet<InstructionWidget>();
         private InstructionWidget m_LastClicked = null;
@@ -132,29 +131,17 @@ namespace Pyramid.Scrutinizer.UI
 
 
        
-        public ScrutinizerForm( IAMDShader sh, IDXShaderReflection reflection)
+        public ScrutinizerForm( List<IInstruction> FetchShader, List<IInstruction> Shader, IScrutinizer backend )
         {
             InitializeComponent();
-            m_Reflection = reflection;
-
-            switch( reflection.GetShaderType() )
-            {
-            case HLSLShaderType.VERTEX:
-                txtACMR.Enabled = true;
-                txtPixels.Enabled = false;
-                break;
-            case HLSLShaderType.PIXEL:
-                txtACMR.Enabled = false;
-                txtPixels.Enabled = true;
-                break;
-            }
+            m_Backend     = backend;
+            m_FetchShader = FetchShader;
+            m_Ops = Shader;
 
             try
             {
                 Wrapper w = new Wrapper();
-                m_Backend = sh.CreateScrutinizer();
-
-                txtOccupancy.Text = m_Backend.GetDefaultOccupancy().ToString();
+                
                 List<IInstruction> Ops = m_Backend.BuildProgram();
 
                 m_Ops = Ops;
@@ -173,9 +160,8 @@ namespace Pyramid.Scrutinizer.UI
                 Algorithms.AssignLabels(m_Ops);
 
                 int Y = 0;
-                if( reflection.GetShaderType() == HLSLShaderType.VERTEX )
+                if( m_FetchShader.Count > 0 )
                 {
-                    m_FetchShader = m_Backend.BuildDXFetchShader(reflection);
                     Label l0 = new Label();
                     Label l1 = new Label();
                     l0.AutoSize = true;
@@ -227,6 +213,7 @@ namespace Pyramid.Scrutinizer.UI
                 }
 
                 cfgWidget1.SetProgram(m_Loops, m_Blocks);
+                parameterWidget1.BuildUI(m_Backend.SimulationParameters);
 
                 MarkExecutedInstructions();
             }
@@ -371,56 +358,11 @@ namespace Pyramid.Scrutinizer.UI
 
                 trace.AddRange(Algorithms.DoTrace(m_Ops, m_Blocks, m_Loops, m_TakenBranches));
 
-                uint nOccupancy = Convert.ToUInt32(txtOccupancy.Text);
-                if (nOccupancy < 0 || nOccupancy > 10)
-                    throw new System.Exception("Occupancy must be 1-10");
-
-                uint nCUs = Convert.ToUInt32(txtCUCount.Text);
-
-
-                uint nWaveIssueRate = 0;
-                switch( m_Reflection.GetShaderType() )
-                {
-                // one VS wave every M clocks
-                //   round-robined amongst CUs
-                //
-                //      http://www.icodebot.com/Playstation%204%20GPU
-                //  States that VGT can handle 1 new vert/clk, and tests 3 indices/clk for reuse
-                //
-                //   If A = cache hit rate (verts/tri)
-                //    then we need on average 64/A triangles to produce a full wave
-                //    
-                //  It will take min(64, 64/A) clocks to gather that many 
-                //
-                case HLSLShaderType.VERTEX:
-                    {
-                        double fVertsPerTri   = Convert.ToDouble( txtACMR.Text );
-                        double fTrisPerWave   = 64.0 / fVertsPerTri;
-                        double fClocksPerWave = Math.Min(64.0, fTrisPerWave);
-                        nWaveIssueRate        = (uint) (nCUs*fClocksPerWave);
-                    }
-                    break;
-
-                // Assume 16 pix/clk raster rate (4 quads/clk)
-                //    Assuming we can repack quads from multiple tris into a wave,
-                //     we end up with 
-                case HLSLShaderType.PIXEL:
-                    {
-                        double fQuadsPerTri   = Convert.ToDouble( txtPixels.Text )/4;
-                        double fQuadsPerClock = Math.Min( 4.0, Math.Ceiling(fQuadsPerTri) );
-                        fQuadsPerClock        = Math.Max(1.0,fQuadsPerClock);
-                        double fClocksPerWave = Math.Ceiling( 16.0 / fQuadsPerClock );
-                        nWaveIssueRate        = (uint) (nCUs*fClocksPerWave);
-                    }
-                    break;
-
-                default:
-                    throw new System.Exception("Bad shader type");
-                }
-
             
-                string sim = m_Backend.AnalyzeExecutionTrace(trace, nWaveIssueRate, nOccupancy, nCUs );
+                string sim = m_Backend.AnalyzeExecutionTrace( trace );
+                
                 MessageBox.Show(sim);
+                
                 panel1.Refresh();
             }
             catch( System.Exception ex )
