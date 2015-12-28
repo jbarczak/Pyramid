@@ -45,6 +45,7 @@ namespace Pyramid.Scrutinizer.UI
                 box.Left = LAYOUT_PAD;
 
                 Label l = new Label();
+                l.AutoSize = true;
                 l.Text = p.Name;
                 l.TextAlign = ContentAlignment.MiddleLeft;
                 l.Top  = (box.Height/2) - (l.Height / 2);
@@ -101,6 +102,7 @@ namespace Pyramid.Scrutinizer.UI
                 box.Left = LAYOUT_PAD;
 
                 Label l = new Label();
+                l.AutoSize = true;
                 l.Text = p.Name;
                 l.TextAlign = ContentAlignment.MiddleLeft;
                 l.Top = (box.Height / 2) - (l.Height / 2);

@@ -386,7 +386,10 @@ List<IInstruction^>^ Scrutinizer_GCN_Base::BuildDXFetchShader( Pyramid::IDXShade
 
 
 
-System::String^ Scrutinizer_GCN_Base::AnalyzeTrace( List<IInstruction^>^ ops, unsigned int nWaveIssueRate, unsigned int nOccupancy, unsigned int nCUs )
+System::String^ Scrutinizer_GCN_Base::AnalyzeTrace( List<IInstruction^>^ ops, unsigned int nWaveIssueRate, 
+                                                   unsigned int nWaveOccupancy, 
+                                                   unsigned int nGroupOccupancy,
+                                                   unsigned int nCUs )
 {
     std::vector<GCN::Simulator::SimOp> pSimOps(ops->Count);
 
@@ -457,10 +460,12 @@ System::String^ Scrutinizer_GCN_Base::AnalyzeTrace( List<IInstruction^>^ ops, un
 
     // setup the sim
     GCN::Simulator::Settings settings;
-    settings.nExportCost        = nCUs*4;               
-    settings.nWaveIssueRate     = nWaveIssueRate;   
-    settings.nWavesToExecute    = 500;
-    settings.nMaxWavesPerSIMD   = nOccupancy;
+    settings.nExportCost          = nCUs*4;               
+    settings.nGroupIssueRate      = nWaveIssueRate;   
+    settings.nGroupsToExecute     = 500;
+    settings.nWavesPerThreadGroup = 1;
+    settings.nMaxWavesPerSIMD     = nWaveOccupancy;
+    settings.nMaxGroupsPerCU      = nGroupOccupancy;
 
     GCN::Simulator::Results results;
     memset(&results,0,sizeof(results));
@@ -481,11 +486,12 @@ System::String^ Scrutinizer_GCN_Base::AnalyzeTrace( List<IInstruction^>^ ops, un
     float fExpUtil    = (results.nExpBusy) / fClocks;
     float fScalarUtil = (results.nSALUBusy)/fClocks;
     float fSMemUtil   = (results.nSMemBusy)/fClocks; 
+    float fLDSUtil    = (results.nLDSBusy)/(2*fClocks);
     float fStarveRate = results.nStarveCycles / fClocks;
 
-    double fWaveTime = fUnstarvedClocks / settings.nWavesToExecute;
+    double fWaveTime = fUnstarvedClocks / settings.nGroupsToExecute;
  
-    double fThroughput =  ((settings.nWavesToExecute*64.0)/(fClocks))*1000000000.0;
+    double fThroughput =  ((settings.nGroupsToExecute*64.0)/(fClocks))*1000000000.0;
    
 
     // annotate instructions with stall counts
@@ -505,6 +511,7 @@ System::String^ Scrutinizer_GCN_Base::AnalyzeTrace( List<IInstruction^>^ ops, un
     double fIPC = (results.nSALUIssued + 
                    results.nSMEMIssued + 
                    results.nVALUIssued + 
+                   results.nLDSIssued +
                    results.nExpIssued +
                    results.nVMemIssued) / fClocks;
  
@@ -517,10 +524,12 @@ System::String^ Scrutinizer_GCN_Base::AnalyzeTrace( List<IInstruction^>^ ops, un
             "Exp  util:      %.2f%%\n"
             "SALU util:      %.2f%%\n"
             "SMem util:      %.2f%%\n"
+            "LDS  util:      %.2f%%\n"
             "Stall rate:     %.2f%%\n"
             "Starve rate:    %.2f%%\n"
             "Inst/Clk:       %.2f\n"
-            "Peak Occupancy: %u/%u\n",
+            "Peak Waves:     %u/%u\n"
+            "Peak Groups:    %u/%u\n",
             fWaveTime,
             fThroughput / 1000000.0,
             100.0f*fVALUUtil,
@@ -528,11 +537,14 @@ System::String^ Scrutinizer_GCN_Base::AnalyzeTrace( List<IInstruction^>^ ops, un
             100.0f*fExpUtil,
             100.0f*fScalarUtil,
             100.0f*fSMemUtil,
+            100.0f*fLDSUtil,
             100.0f*fStallRate,
             100.0f*fStarveRate,
             fIPC,
-            results.nPeakOccupancy ,
-            settings.nMaxWavesPerSIMD*4 
+            results.nPeakWaveOccupancy ,
+            settings.nMaxWavesPerSIMD*4 ,
+            results.nPeakGroupOccupancy,
+            settings.nMaxGroupsPerCU
         );
 
     System::String^ str = gcnew System::String(buffer);
@@ -543,7 +555,7 @@ System::String^ Scrutinizer_GCN_Base::AnalyzeTrace( List<IInstruction^>^ ops, un
 Scrutinizer_GCN_VS::Scrutinizer_GCN_VS( AMDAsic_Impl^ asic, AMDShader_Impl^ shader )
     :Scrutinizer_GCN_Base(asic,shader)
 {
-    m_pmOccupancy = gcnew SimulationParameterInt(1,10,shader->GetOccupancy(),"Occupancy");
+    m_pmOccupancy = gcnew SimulationParameterInt(1,10,shader->GetWaveOccupancy(),"Occupancy (Waves/SIMD)");
     m_pmCUCount   = gcnew SimulationParameterInt(1,10000,10,"CU Count");
     m_pmACMR      = gcnew SimulationParameterDouble( 0.5,3.0, 0.7, "Verts/Tri");
     m_pmParams->Add(m_pmOccupancy);
@@ -572,14 +584,14 @@ System::String^ Scrutinizer_GCN_VS::AnalyzeExecutionTrace( List<IInstruction^>^ 
     double fClocksPerWave = ( fTrisPerWave>64.0f) ? 64.0 : fTrisPerWave;
     unsigned int nWaveIssueRate        = (unsigned int) (nCUs*fClocksPerWave);
 
-    return AnalyzeTrace(ops,nWaveIssueRate,nOccupancy,nCUs);
+    return AnalyzeTrace(ops,nWaveIssueRate,nOccupancy,40,nCUs);
 }
 
 
 Scrutinizer_GCN_PS::Scrutinizer_GCN_PS( AMDAsic_Impl^ asic, AMDShader_Impl^ shader )
     :Scrutinizer_GCN_Base(asic,shader)
 {
-    m_pmOccupancy        = gcnew SimulationParameterInt(1,10,shader->GetOccupancy(),"Occupancy");
+    m_pmOccupancy        = gcnew SimulationParameterInt(1,10,shader->GetWaveOccupancy(),"Occupancy (Waves/SIMD)");
     m_pmCUCount          = gcnew SimulationParameterInt(1,10000,10,"CU Count");
     m_pmPixelsPerTri     = gcnew SimulationParameterDouble( 0, 10000, 16, "Pixels/Tri");
     m_pmParams->Add(m_pmOccupancy);
@@ -602,7 +614,36 @@ System::String^ Scrutinizer_GCN_PS::AnalyzeExecutionTrace(List<IInstruction^>^ o
     double fClocksPerWave = Math::Ceiling( 16.0 / fQuadsPerClock );
     unsigned int nWaveIssueRate = (unsigned int) (nCUs*fClocksPerWave);
            
-    return AnalyzeTrace(ops,nWaveIssueRate,nOccupancy,nCUs);
+    return AnalyzeTrace(ops,nWaveIssueRate,nOccupancy,40,nCUs);
+}
+
+  
+Scrutinizer_GCN_CS::Scrutinizer_GCN_CS( AMDAsic_Impl^ asic, AMDShader_Impl^ shader )
+    :Scrutinizer_GCN_Base(asic,shader)
+{
+    m_nWavesPerGroup             = (shader->GetThreadsPerThreadGroup()+63)/64;
+    size_t nMinimumWaveOccupancy = (m_nWavesPerGroup+3)/4;
+    m_pmWaveOccupancy     = gcnew SimulationParameterInt(nMinimumWaveOccupancy,10,shader->GetWaveOccupancy(),"Waves/SIMD");
+    m_pmGroupOccupancy    = gcnew SimulationParameterInt(1,(40/m_nWavesPerGroup),shader->GetGroupOccupancy(),"Groups/CU");
+    m_pmCUCount           = gcnew SimulationParameterInt(1,10000,10,"CU Count");
+    m_pmParams->Add(m_pmWaveOccupancy);
+    m_pmParams->Add(m_pmCUCount);
+    m_pmParams->Add(m_pmGroupOccupancy);
+}
+
+System::String^ Scrutinizer_GCN_CS::AnalyzeExecutionTrace(List<IInstruction^>^ ops)
+{
+    unsigned int nCUs       = (unsigned int) m_pmCUCount->Value;
+    unsigned int nWaveOccupancy = (unsigned int) m_pmWaveOccupancy->Value;
+    unsigned int nGroupOccupancy = (unsigned int) m_pmGroupOccupancy->Value;
+
+    // GCN ACE can create a workgroup OR dispatch a wave every cycle
+    //  Time needed to dispatch a group of N waves is N+1 clocks
+    // Assume that our wave load is round-robined across CUs
+
+    unsigned int nWaveIssueRate = (m_nWavesPerGroup+1)*nCUs;
+
+    return AnalyzeTrace(ops,nWaveIssueRate,nWaveOccupancy,nGroupOccupancy,nCUs);
 }
 
   

@@ -185,7 +185,7 @@ System::String^ AMDShader_Impl::PrintStats( )
     return str->Replace("\n", System::Environment::NewLine );
 }
 
-size_t AMDShader_Impl::GetOccupancy()
+size_t AMDShader_Impl::GetWaveOccupancy()
 {
     DWORD nSGPRs        = m_pStats[0];
     DWORD nMaxSGPRs     = m_pStats[1];
@@ -221,6 +221,17 @@ size_t AMDShader_Impl::GetOccupancy()
     return (nVGPROccupancy < nSGPROccupancy) ? nVGPROccupancy : nSGPROccupancy;
 }
 
+size_t AMDShader_Impl::GetGroupOccupancy()
+{
+    DWORD nUsedLDS      = m_pStats[4];
+    DWORD nMaxLDS       = m_pStats[5];
+    if( !nUsedLDS )
+        return GetWavesPerThreadGroup()/40;
+    
+
+    return (nMaxLDS/nUsedLDS)*2;
+}
+
 Pyramid::Scrutinizer::IScrutinizer^ AMDShader_Impl::CreateScrutinizer()
 {
     switch( m_eShaderType )
@@ -229,6 +240,8 @@ Pyramid::Scrutinizer::IScrutinizer^ AMDShader_Impl::CreateScrutinizer()
         return gcnew Scrutinizer_GCN_VS( m_pmAsic, this );
     case ShaderType::ST_PIXEL:
         return gcnew Scrutinizer_GCN_PS( m_pmAsic, this );
+    case ShaderType::ST_COMPUTE:
+        return gcnew Scrutinizer_GCN_CS( m_pmAsic, this );
     default:
         return nullptr;
     }

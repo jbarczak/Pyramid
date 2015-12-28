@@ -24,7 +24,8 @@ namespace Pyramid
             InitializeComponent();
             m_DXReflection = shader;
             btnScrutinize.Enabled =  (shader.GetShaderType() == HLSLShaderType.VERTEX ||
-                                      shader.GetShaderType() == HLSLShaderType.PIXEL) ;
+                                      shader.GetShaderType() == HLSLShaderType.PIXEL ||
+                                      shader.GetShaderType() == HLSLShaderType.COMPUTE );
         }
 
         public void AddResult(IAMDShader shader)

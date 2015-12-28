@@ -13,39 +13,43 @@ namespace Simulator{
     {
         enum
         {
-            NUM_SIMDS               = 4,
-            MAX_WAVES_PER_SIMD      = 10,
-            MAX_WAVES_PER_CU        = NUM_SIMDS * MAX_WAVES_PER_SIMD,
+            MAX_WAVES_PER_THREADGROUP    = 16,
+            NUM_SIMDS                    = 4,
+            MAX_WAVES_PER_SIMD           = 10,
+            MAX_WAVES_PER_CU             = NUM_SIMDS * MAX_WAVES_PER_SIMD,
 
-            MAX_LCGMCNT             = 31,
-            MAX_VMCNT               = 15,
-            MAX_EXPCNT              = 7,
+            MAX_LCGMCNT                  = 31,
+            MAX_VMCNT                    = 15,
+            MAX_EXPCNT                   = 7,
 
-            NUM_LDS_QUEUES          = 2
+            NUM_LDS_QUEUES               = 2
         };
 
-        enum WavefrontQueues
-        {
-            QUEUE_SMEM,
-            QUEUE_VMEM,
-            QUEUE_GDS,
-            QUEUE_LDS,
-            QUEUE_EXP,
-            QUEUE_COUNT = 8
-        };
+     
+
+        struct ThreadGroupState;
 
         struct WaveState
         {
             size_t nCurrentOp;
             size_t nStartClock;
-
-            uint8  nSIMD;
+            ThreadGroupState* pThreadGroup;
+            
+            uint8 nSIMD;
             uint8 lkgmcnt;
             uint8 vmcnt;
             uint8 expcnt;
-            uint8 allocated;
+
+            uint8 nWaveIDInGroup; ///< Index of this wave in its thread group
         };
 
+        struct ThreadGroupState
+        {
+            uint16 nWaitMask;       ///< Bit-mask of waves presently waiting at a barrier
+            uint8 nWaves;           ///< Number of waves not yet launched
+            uint8 nLaunchedWaves;   ///< Number of running waves
+            uint8 nRetiredWaves;    ///< Number of waves that have run to completion
+        };
 
 
         template< class T, int MAX >
@@ -101,12 +105,41 @@ namespace Simulator{
             WaveState* pWave;
         };
 
+        // If your compiler lacks 'PopCount' then you can do something about it here
+        static unsigned int PopCount( unsigned int n )
+        {
+            return __popcnt((unsigned int)n);
+        }
+
+        static bool IsBarrier( const Instruction* pOp )
+        {
+            if( pOp->GetClass() == IC_SCALAR )
+            {
+                const ScalarInstruction* pScalar = static_cast<const ScalarInstruction*>(pOp);
+                if( pScalar->GetOpcode() == S_BARRIER )
+                    return true;
+            }
+            return false;
+        }
+
+        
+        /// Search for a threadgroup structure that isn't in use
+        static ThreadGroupState* FindAvailableThreadGroup( ThreadGroupState pGroups[MAX_WAVES_PER_CU], size_t nOccupancyLimit )
+        {
+            for( size_t i=0; i<nOccupancyLimit; i++ )
+            {
+                if( !pGroups[i].nWaves )
+                    return &pGroups[i];
+            }
+            return 0;
+        }
+
         /// Search for a WaveState structure that isn't in use
         static WaveState* FindAvailableWave( WaveState pWaves[MAX_WAVES_PER_CU] )
         {
             for( size_t i=0; i<MAX_WAVES_PER_CU; i++ )
             {
-                if( !pWaves[i].allocated )
+                if( !pWaves[i].pThreadGroup )
                     return &pWaves[i];
             }
             return 0;
@@ -385,6 +418,7 @@ namespace Simulator{
                         if( pImg->IsGradientFetch() )
                             nBaseCost *= 2;
                         
+                        return nBaseCost;
                     }
                     else if( pImg->IsGather() )
                     {
@@ -507,11 +541,23 @@ namespace Simulator{
             switch( pScalar->GetOpcode() )
             {
             case S_NOP           :         
-            case S_BARRIER       :        
             case S_SETHALT       :        
             case S_SLEEP         :        
             case S_SETPRIO       :
                 return true;
+
+                // don't move past a barrier until the wave's corresponding bit in the wait mask
+                //  has been cleared.  This happens during the barrier processing phase, which 
+                //  comes before this point in the sim cycle
+            case S_BARRIER:
+                {
+                    size_t nWaveBit = 1 << pWave->nWaveIDInGroup;
+                    if( pWave->pThreadGroup->nWaitMask & nWaveBit )
+                        return false;
+                    
+                    return true;
+                }
+                break;
 
                 // don't issue endpgm until all the counters drop to zero
             case S_ENDPGM        :        
@@ -546,12 +592,15 @@ namespace Simulator{
         size_t nClock        = 0;
         size_t nRetiredWaves = 0;
         size_t nIssuedWaves  = 0;
+        size_t nGroupsInFlight = 0;
+        size_t nWavesToExecute = rSettings.nWavesPerThreadGroup*rSettings.nGroupsToExecute;
 
+        ThreadGroupState pThreadGroups[MAX_WAVES_PER_CU] = {0};
         WaveState pWaveFronts[MAX_WAVES_PER_CU] = {0};
         WaveState* pWavesInFlight[NUM_SIMDS][MAX_WAVES_PER_SIMD] = {0};
         uint8 pWaveCount[NUM_SIMDS] = {0};
 
-
+        ThreadGroupState* pIssuingThreadGroup=0;
         WaveState* pWavesInVALU[NUM_SIMDS] = {0}; ///< Wave currently occupying each VALU
         size_t pVALUCycles[NUM_SIMDS] = {0};      ///< Number of cycles remaining on each VALU op
     
@@ -565,7 +614,7 @@ namespace Simulator{
         //    16 lanes         16 lanes
         //
         //  However, each "lane" is two dwords wide (so 32 dwords/wave)
-        //   At peak, two waves can complete over four clocks
+        //   At peak, two waves can read two DWORDS/thread over four clocks
         //
         RingQueue<DSOp,MAX_WAVES_PER_CU*32>     LDSQueue[NUM_LDS_QUEUES];
 
@@ -573,9 +622,29 @@ namespace Simulator{
         while(1)
         {
             // Issue new wavefront if its time
-            if( nIssuedWaves < rSettings.nWavesToExecute )
+            if( nIssuedWaves < nWavesToExecute )
             {
-                if( (nClock % rSettings.nWaveIssueRate) == 0 )
+                if( !pIssuingThreadGroup && (nClock % rSettings.nGroupIssueRate) == 0 )
+                {
+                    // start issuing a new thread group after the specified time interval has elapsed
+                    //  This is to model the effect of fixed-function units (ACE, VGT, Rasterizer, etc)
+                    //   round-robining waves across available CUs
+                    
+                    pIssuingThreadGroup = FindAvailableThreadGroup(pThreadGroups,rSettings.nMaxGroupsPerCU);
+                    if( pIssuingThreadGroup )
+                    {
+                        pIssuingThreadGroup->nWaves = rSettings.nWavesPerThreadGroup;
+                        pIssuingThreadGroup->nLaunchedWaves = 0;
+                        pIssuingThreadGroup->nRetiredWaves = 0;
+                        pIssuingThreadGroup->nWaitMask = 0;
+                        nGroupsInFlight++;
+                    }
+                }
+                
+                // If we have a thread group to issue waves from, then issue from it each and every cycle
+                //   Layla slides state that the ACE's an issue one wave per clock to the CUs.  We'll assume
+                //   that the scheduler shoots a wave to the current CU every clock until its done, then moves on ot the next one
+                if( pIssuingThreadGroup )
                 {
                     WaveState* pWave = FindAvailableWave( pWaveFronts );
                     if( !pWave )
@@ -592,11 +661,17 @@ namespace Simulator{
                         if( pWaveCount[nSIMD] < rSettings.nMaxWavesPerSIMD )
                         {
                             pWavesInFlight[nSIMD][pWaveCount[nSIMD]++] = pWave;
-                            pWave->allocated   = 1;
                             pWave->nSIMD       = nSIMD;
                             pWave->nStartClock = nClock;
                             pWave->nCurrentOp  = 0;
+                            pWave->pThreadGroup = pIssuingThreadGroup;
+                            pWave->nWaveIDInGroup = pIssuingThreadGroup->nLaunchedWaves;
                             nIssuedWaves++;
+
+                            pIssuingThreadGroup->nLaunchedWaves++;
+                            if( pIssuingThreadGroup->nLaunchedWaves == pIssuingThreadGroup->nWaves )
+                                pIssuingThreadGroup = NULL;
+                            
                         }
                     }
                 }
@@ -778,7 +853,39 @@ namespace Simulator{
                 EXPQueue.push_back(op);
             }
 
+            // Barrier pre-processing
+            //    - Mark all waves on this SIMD which have reached a barrier instruction
+            //       When all threads reach the barrier, their IPs will be advanced
+            //         during the "Free Scalar" phase which follows
+            //
+            //     This scheme is safe, because a released thread on one SIMD will execute
+            //        at most one other instruction before all the remaining threads have been released
+            //
+            //      In the case of two S_BARRIER's back to back, the
+            //         use of bit-masks should ensure that we do the right thing
+            //         because each thread will advance only if ITs mask is cleared
+            //
+            for( size_t i=0; i<nWaves; i++ )
+            {
+                WaveState* pWave = pSIMDWaves[i];
+                ThreadGroupState* pGroup = pWave->pThreadGroup;
+                
+                const SimOp* pOp = &pOps[pWave->nCurrentOp];
+                if( IsBarrier(pOp->pInstruction) )
+                {
+                    // add this wave to the list of waiting waves
+                    size_t nWaitMask = pGroup->nWaitMask;
+                    nWaitMask |= (1<<pWave->nWaveIDInGroup);
 
+                    // release waiting waves once all waves' bits have been added to the mask
+                    size_t nGroupWaves = (pWave->pThreadGroup->nWaves - pWave->pThreadGroup->nRetiredWaves);
+                    if( PopCount(nWaitMask) == nGroupWaves )
+                        pGroup->nWaitMask=0;
+                    else
+                        pGroup->nWaitMask = (uint16)nWaitMask;
+                }
+            }
+            
             // Issue "helper" instructions for all waves that can issue them
             //    nop, sleep, wait, barrier, setprio, s_endpgm
             size_t nFreeOps=0;
@@ -795,14 +902,22 @@ namespace Simulator{
             }
 
 
+
             // retire any waves that have finished their trace
-            //  and whose exp counts are zero
             for( size_t i=0; i<MAX_WAVES_PER_CU; i++ )
             {
-                if( pWaveFronts[i].allocated &&
+                if( pWaveFronts[i].pThreadGroup &&
                     pWaveFronts[i].nCurrentOp == nOps )
                 {
-                    pWaveFronts[i].allocated = 0;
+                    pWaveFronts[i].pThreadGroup->nRetiredWaves++;
+                    if( pWaveFronts[i].pThreadGroup->nRetiredWaves == pWaveFronts[i].pThreadGroup->nWaves )
+                    {
+                        // retire thread groups for which all waves are done
+                        memset(pWaveFronts[i].pThreadGroup, 0, sizeof(*(pWaveFronts[i].pThreadGroup)));
+                        nGroupsInFlight--;
+                    }
+
+                    pWaveFronts[i].pThreadGroup = 0;
                     nRetiredWaves++;
                 }
             }
@@ -813,7 +928,7 @@ namespace Simulator{
                 size_t nLive=0;
                 size_t nWaves=pWaveCount[i];
                 for( size_t w=0; w<nWaves; w++ )
-                    if( pWavesInFlight[i][w]->allocated )
+                    if( pWavesInFlight[i][w]->pThreadGroup )
                         pWavesInFlight[i][nLive++] = pWavesInFlight[i][w];
 
                 pWaveCount[i] = nLive;
@@ -821,19 +936,22 @@ namespace Simulator{
 
             nClock++;
 
-            if( nRetiredWaves == rSettings.nWavesToExecute )
+            if( nRetiredWaves == nWavesToExecute )
                 break;
 
             // track peak occupancy
-            size_t nOcc=0;
+            size_t nWaveOcc=0;
             for( size_t i=0; i<NUM_SIMDS; i++ )
-                nOcc += pWaveCount[i];
-            if(nOcc > rResults.nPeakOccupancy)
-                rResults.nPeakOccupancy = nOcc;
-
-            if( nOcc == 0 )
+                nWaveOcc += pWaveCount[i];
+            if(nWaveOcc > rResults.nPeakWaveOccupancy)
+                rResults.nPeakWaveOccupancy = nWaveOcc;
+            if( nWaveOcc == 0 )
                 rResults.nStarveCycles++;
 
+            if( nGroupsInFlight > rResults.nPeakGroupOccupancy )
+                rResults.nPeakGroupOccupancy = nGroupsInFlight;
+
+            
             if( pLDSWave )
             {
                 rResults.nLDSIssued++;

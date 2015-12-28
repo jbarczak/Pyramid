@@ -33,7 +33,11 @@ public:
 
 protected:
 
-    System::String^ AnalyzeTrace( List<IInstruction^>^ ops, unsigned int nWaveIssueRate, unsigned int nOccupancy, unsigned int nCUCount );
+    System::String^ AnalyzeTrace( List<IInstruction^>^ ops, 
+                                  unsigned int nWaveIssueRate, 
+                                  unsigned int nWaveOccupancy,
+                                  unsigned int nGroupOccupancy,
+                                  unsigned int nCUCount );
 
     AMDAsic_Impl^ m_pmAsic;
     AMDShader_Impl^ m_pmShader;
@@ -73,4 +77,20 @@ private:
     SimulationParameterInt^ m_pmCUCount;
     SimulationParameterDouble^ m_pmPixelsPerTri;
 
+};
+
+ref class Scrutinizer_GCN_CS : public Scrutinizer_GCN_Base
+{
+public:
+
+    Scrutinizer_GCN_CS( AMDAsic_Impl^ asic, AMDShader_Impl^ shader );
+
+    virtual System::String^ AnalyzeExecutionTrace( List<IInstruction^>^ ops ) override;
+
+private:
+    
+    SimulationParameterInt^ m_pmWaveOccupancy;
+    SimulationParameterInt^ m_pmGroupOccupancy;
+    SimulationParameterInt^ m_pmCUCount;
+    unsigned int m_nWavesPerGroup;
 };

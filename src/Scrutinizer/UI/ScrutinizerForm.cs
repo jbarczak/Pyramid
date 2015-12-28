@@ -352,18 +352,20 @@ namespace Pyramid.Scrutinizer.UI
 
             try
             {
-                List<IInstruction> trace = new List<IInstruction>();
-                if (m_FetchShader != null)
-                    trace.AddRange(m_FetchShader);
+                if (parameterWidget1.UpdateParameters())
+                {
+                    List<IInstruction> trace = new List<IInstruction>();
+                    if (m_FetchShader != null)
+                        trace.AddRange(m_FetchShader);
 
-                trace.AddRange(Algorithms.DoTrace(m_Ops, m_Blocks, m_Loops, m_TakenBranches));
+                    trace.AddRange(Algorithms.DoTrace(m_Ops, m_Blocks, m_Loops, m_TakenBranches));
 
-            
-                string sim = m_Backend.AnalyzeExecutionTrace( trace );
-                
-                MessageBox.Show(sim);
-                
-                panel1.Refresh();
+
+                    string sim = m_Backend.AnalyzeExecutionTrace(trace);
+
+                    MessageBox.Show(sim);
+                    panel1.Refresh();
+                }
             }
             catch( System.Exception ex )
             {

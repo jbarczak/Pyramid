@@ -45,8 +45,11 @@ public:
         virtual Pyramid::IAMDAsic^ get();
     }
 
-    size_t GetOccupancy();
-    
+    size_t GetWaveOccupancy();
+    size_t GetGroupOccupancy();
+    size_t GetThreadsPerThreadGroup()  { return m_nThreadsPerThreadGroup; }
+    size_t GetWavesPerThreadGroup() { return (m_nThreadsPerThreadGroup+63)/64;}
+
     virtual Pyramid::Scrutinizer::IScrutinizer^ CreateScrutinizer();
 
 internal:

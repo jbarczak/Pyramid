@@ -9,11 +9,13 @@ namespace Simulator{
 
     struct Settings
     {
-        size_t nWaveIssueRate;      ///< Issue one wave every N clocks
-        size_t nWavesToExecute;     ///< Execute this many waves before stopping
-        size_t nMaxWavesPerSIMD;    ///< Occupancy limit per SIMD
-        size_t nExportCost;         ///< How long an export should take
-                                    ///<  This is presumed to be a function of the number of CUs to a slice
+        size_t nWavesPerThreadGroup;    ///< This many wavefronts per thread group
+        size_t nGroupIssueRate;         ///< Issue one thread group every N clocks
+        size_t nGroupsToExecute;        ///< Execute this many groups before stopping
+        size_t nMaxWavesPerSIMD;        ///< Wave occupancy limit per SIMD
+        size_t nMaxGroupsPerCU;         ///< Group occupancy limit per CU
+        size_t nExportCost;             ///< How long an export should take
+                                        ///<  This is presumed to be a function of the number of CUs to a slice
 
     };
 
@@ -46,7 +48,8 @@ namespace Simulator{
         size_t nSMEMIssued;
         size_t nLDSIssued;
 
-        size_t nPeakOccupancy;
+        size_t nPeakWaveOccupancy;
+        size_t nPeakGroupOccupancy;
 
         size_t nStallCycles[4];    ///< Number of times each SIMD was stalled
         size_t nStarveCycles; ///< Number of clocks during which CU is completely empty
