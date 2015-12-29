@@ -23,7 +23,6 @@ namespace Pyramid
         GLSLOptimizer.IOptions OptimizerOptions { get; }
     }
 
-
     public class GLSLShader : IShader
     {
         public GLSLShader(string code, IGLSLOptions opts)
@@ -35,6 +34,5 @@ namespace Pyramid
         public Languages Language { get { return Languages.GLSL; } }
         public IGLSLOptions CompileOptions { get; private set; }
         public string Code { get; private set; }
-
     };
 }

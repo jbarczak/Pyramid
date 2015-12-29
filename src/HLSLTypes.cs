@@ -61,7 +61,6 @@ namespace Pyramid
         uint GetThreadsPerGroup();
     };
 
-    
     public interface IDXShaderBlob
     {
         string Disassemble();
@@ -91,11 +90,11 @@ namespace Pyramid
         {
             IDXShaderBlob blob;
             string msg;
-            HasError    = !compiler.Compile(this.Code, this.CompileOptions, out blob, out msg);
+            HasError = !compiler.Compile(this.Code, this.CompileOptions, out blob, out msg);
             WasCompiled = true;
             Messages = msg;
             CompiledBlob = blob;
-            return HasError;
+            return !HasError;
         }
 
         public bool WasCompiled { get; private set; }

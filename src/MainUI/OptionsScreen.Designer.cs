@@ -46,13 +46,17 @@
             this.btnDefaults = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.label5 = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
             this.txtDXX = new System.Windows.Forms.TextBox();
             this.btnDXX = new System.Windows.Forms.Button();
             this.lstBackends = new System.Windows.Forms.CheckedListBox();
             this.label6 = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
             this.btnMali = new System.Windows.Forms.Button();
             this.txtMali = new System.Windows.Forms.TextBox();
+            this.lstAMDAsics = new System.Windows.Forms.CheckedListBox();
+            this.label8 = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
+            this.lstCodeXLAsics = new System.Windows.Forms.CheckedListBox();
             this.SuspendLayout();
             // 
             // txtCodeXL
@@ -60,9 +64,9 @@
             this.txtCodeXL.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtCodeXL.Enabled = false;
-            this.txtCodeXL.Location = new System.Drawing.Point(86, 183);
+            this.txtCodeXL.Location = new System.Drawing.Point(86, 203);
             this.txtCodeXL.Name = "txtCodeXL";
-            this.txtCodeXL.Size = new System.Drawing.Size(459, 20);
+            this.txtCodeXL.Size = new System.Drawing.Size(406, 20);
             this.txtCodeXL.TabIndex = 1;
             // 
             // txtD3DCompiler
@@ -70,9 +74,9 @@
             this.txtD3DCompiler.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtD3DCompiler.Enabled = false;
-            this.txtD3DCompiler.Location = new System.Drawing.Point(86, 209);
+            this.txtD3DCompiler.Location = new System.Drawing.Point(86, 229);
             this.txtD3DCompiler.Name = "txtD3DCompiler";
-            this.txtD3DCompiler.Size = new System.Drawing.Size(459, 20);
+            this.txtD3DCompiler.Size = new System.Drawing.Size(406, 20);
             this.txtD3DCompiler.TabIndex = 2;
             // 
             // txtTemp
@@ -80,15 +84,15 @@
             this.txtTemp.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtTemp.Enabled = false;
-            this.txtTemp.Location = new System.Drawing.Point(86, 154);
+            this.txtTemp.Location = new System.Drawing.Point(86, 177);
             this.txtTemp.Name = "txtTemp";
-            this.txtTemp.Size = new System.Drawing.Size(459, 20);
+            this.txtTemp.Size = new System.Drawing.Size(406, 20);
             this.txtTemp.TabIndex = 3;
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(23, 186);
+            this.label2.Location = new System.Drawing.Point(35, 206);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(45, 13);
             this.label2.TabIndex = 5;
@@ -98,7 +102,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(14, 212);
+            this.label3.Location = new System.Drawing.Point(14, 232);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(69, 13);
             this.label3.TabIndex = 6;
@@ -108,7 +112,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(24, 154);
+            this.label4.Location = new System.Drawing.Point(30, 181);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(50, 13);
             this.label4.TabIndex = 7;
@@ -119,7 +123,7 @@
             // btnTemp
             // 
             this.btnTemp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnTemp.Location = new System.Drawing.Point(546, 154);
+            this.btnTemp.Location = new System.Drawing.Point(498, 177);
             this.btnTemp.Name = "btnTemp";
             this.btnTemp.Size = new System.Drawing.Size(32, 20);
             this.btnTemp.TabIndex = 8;
@@ -130,7 +134,7 @@
             // btnCodeXL
             // 
             this.btnCodeXL.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnCodeXL.Location = new System.Drawing.Point(545, 182);
+            this.btnCodeXL.Location = new System.Drawing.Point(498, 202);
             this.btnCodeXL.Name = "btnCodeXL";
             this.btnCodeXL.Size = new System.Drawing.Size(32, 20);
             this.btnCodeXL.TabIndex = 10;
@@ -141,7 +145,7 @@
             // btnD3DCompiler
             // 
             this.btnD3DCompiler.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnD3DCompiler.Location = new System.Drawing.Point(545, 208);
+            this.btnD3DCompiler.Location = new System.Drawing.Point(498, 228);
             this.btnD3DCompiler.Name = "btnD3DCompiler";
             this.btnD3DCompiler.Size = new System.Drawing.Size(32, 20);
             this.btnD3DCompiler.TabIndex = 11;
@@ -152,7 +156,7 @@
             // btnOk
             // 
             this.btnOk.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnOk.Location = new System.Drawing.Point(439, 343);
+            this.btnOk.Location = new System.Drawing.Point(376, 344);
             this.btnOk.Name = "btnOk";
             this.btnOk.Size = new System.Drawing.Size(69, 25);
             this.btnOk.TabIndex = 12;
@@ -162,7 +166,7 @@
             // btnCancel
             // 
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(515, 343);
+            this.btnCancel.Location = new System.Drawing.Point(460, 343);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(69, 25);
             this.btnCancel.TabIndex = 13;
@@ -172,7 +176,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 239);
+            this.label1.Location = new System.Drawing.Point(12, 259);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(68, 13);
             this.label1.TabIndex = 14;
@@ -185,15 +189,15 @@
             this.txtPowerVR.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtPowerVR.Enabled = false;
-            this.txtPowerVR.Location = new System.Drawing.Point(86, 234);
+            this.txtPowerVR.Location = new System.Drawing.Point(86, 254);
             this.txtPowerVR.Name = "txtPowerVR";
-            this.txtPowerVR.Size = new System.Drawing.Size(459, 20);
+            this.txtPowerVR.Size = new System.Drawing.Size(406, 20);
             this.txtPowerVR.TabIndex = 15;
             // 
             // btnPowerVR
             // 
             this.btnPowerVR.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnPowerVR.Location = new System.Drawing.Point(545, 233);
+            this.btnPowerVR.Location = new System.Drawing.Point(498, 253);
             this.btnPowerVR.Name = "btnPowerVR";
             this.btnPowerVR.Size = new System.Drawing.Size(32, 19);
             this.btnPowerVR.TabIndex = 16;
@@ -218,7 +222,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(24, 263);
+            this.label5.Location = new System.Drawing.Point(24, 283);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(56, 13);
             this.label5.TabIndex = 20;
@@ -226,20 +230,31 @@
             this.toolTip1.SetToolTip(this.label5, "Directory where atidxx32.dll can be found.  Default will be relative to working d" +
         "irectory.");
             // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(38, 309);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(42, 13);
+            this.label7.TabIndex = 26;
+            this.label7.Text = "Mali Dir";
+            this.toolTip1.SetToolTip(this.label7, "Directory where the mali shader compiler can be found.  Default will be relative " +
+        "to working directory.");
+            // 
             // txtDXX
             // 
             this.txtDXX.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtDXX.Enabled = false;
-            this.txtDXX.Location = new System.Drawing.Point(86, 260);
+            this.txtDXX.Location = new System.Drawing.Point(86, 280);
             this.txtDXX.Name = "txtDXX";
-            this.txtDXX.Size = new System.Drawing.Size(459, 20);
+            this.txtDXX.Size = new System.Drawing.Size(406, 20);
             this.txtDXX.TabIndex = 18;
             // 
             // btnDXX
             // 
             this.btnDXX.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnDXX.Location = new System.Drawing.Point(545, 261);
+            this.btnDXX.Location = new System.Drawing.Point(498, 281);
             this.btnDXX.Name = "btnDXX";
             this.btnDXX.Size = new System.Drawing.Size(32, 19);
             this.btnDXX.TabIndex = 19;
@@ -250,7 +265,7 @@
             // lstBackends
             // 
             this.lstBackends.FormattingEnabled = true;
-            this.lstBackends.Location = new System.Drawing.Point(86, 27);
+            this.lstBackends.Location = new System.Drawing.Point(33, 46);
             this.lstBackends.Name = "lstBackends";
             this.lstBackends.ScrollAlwaysVisible = true;
             this.lstBackends.Size = new System.Drawing.Size(153, 109);
@@ -259,27 +274,16 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(19, 31);
+            this.label6.Location = new System.Drawing.Point(30, 18);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(55, 13);
             this.label6.TabIndex = 23;
             this.label6.Text = "Backends";
             // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(24, 289);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(42, 13);
-            this.label7.TabIndex = 26;
-            this.label7.Text = "Mali Dir";
-            this.toolTip1.SetToolTip(this.label7, "Directory where the mali shader compiler can be found.  Default will be relative " +
-        "to working directory.");
-            // 
             // btnMali
             // 
             this.btnMali.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnMali.Location = new System.Drawing.Point(545, 287);
+            this.btnMali.Location = new System.Drawing.Point(498, 307);
             this.btnMali.Name = "btnMali";
             this.btnMali.Size = new System.Drawing.Size(32, 19);
             this.btnMali.TabIndex = 25;
@@ -292,16 +296,56 @@
             this.txtMali.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtMali.Enabled = false;
-            this.txtMali.Location = new System.Drawing.Point(86, 286);
+            this.txtMali.Location = new System.Drawing.Point(86, 306);
             this.txtMali.Name = "txtMali";
-            this.txtMali.Size = new System.Drawing.Size(459, 20);
+            this.txtMali.Size = new System.Drawing.Size(406, 20);
             this.txtMali.TabIndex = 24;
+            // 
+            // lstAMDAsics
+            // 
+            this.lstAMDAsics.FormattingEnabled = true;
+            this.lstAMDAsics.Location = new System.Drawing.Point(205, 46);
+            this.lstAMDAsics.Name = "lstAMDAsics";
+            this.lstAMDAsics.ScrollAlwaysVisible = true;
+            this.lstAMDAsics.Size = new System.Drawing.Size(153, 109);
+            this.lstAMDAsics.TabIndex = 27;
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(202, 18);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(59, 13);
+            this.label8.TabIndex = 28;
+            this.label8.Text = "AMD Asics";
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(373, 18);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(73, 13);
+            this.label9.TabIndex = 30;
+            this.label9.Text = "CodeXL Asics";
+            // 
+            // lstCodeXLAsics
+            // 
+            this.lstCodeXLAsics.FormattingEnabled = true;
+            this.lstCodeXLAsics.Location = new System.Drawing.Point(376, 46);
+            this.lstCodeXLAsics.Name = "lstCodeXLAsics";
+            this.lstCodeXLAsics.ScrollAlwaysVisible = true;
+            this.lstCodeXLAsics.Size = new System.Drawing.Size(153, 109);
+            this.lstCodeXLAsics.TabIndex = 29;
             // 
             // OptionsScreen
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(596, 399);
+            this.ClientSize = new System.Drawing.Size(549, 391);
+            this.Controls.Add(this.label9);
+            this.Controls.Add(this.lstCodeXLAsics);
+            this.Controls.Add(this.label8);
+            this.Controls.Add(this.lstAMDAsics);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.btnMali);
             this.Controls.Add(this.txtMali);
@@ -359,5 +403,9 @@
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Button btnMali;
         private System.Windows.Forms.TextBox txtMali;
+        private System.Windows.Forms.CheckedListBox lstAMDAsics;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.CheckedListBox lstCodeXLAsics;
     }
 }

@@ -20,7 +20,6 @@ namespace Pyramid
         private string m_LastBackend = "";
 
         public Options Options { get { return m_Options; } }
-
       
         private void CreateBackends( Options opts )
         {
@@ -32,12 +31,12 @@ namespace Pyramid
                 backends.Add(new D3DCompilerBackend(fxc));
                 try
                 {
-                    IAMDDriver driver = m_Wrapper.CreateAMDDriver( opts.DXXDriverPath );
-                    backends.Add( new AMDDriverBackend( driver, fxc ));
+                    IAMDDriver driver = m_Wrapper.CreateAMDDriver(opts.DXXDriverPath);
+                    backends.Add(new AMDDriverBackend(driver, fxc));
                 }
                 catch( System.Exception ex )
                 {
-                    MessageBox.Show( ex.Message );
+                    MessageBox.Show(ex.Message);
                 }
             }
             catch( System.Exception ex )
@@ -125,13 +124,43 @@ namespace Pyramid
                     throw new System.Exception("Unsupported language");
             }
 
-
-            foreach (IBackend b in m_Backends)
+            foreach (IBackend backend in m_Backends)
             {
-                if (m_Options.IsBackendDisabled(b.Name))
+                if (m_Options.IsBackendDisabled(backend.Name))
                     continue;
 
-                IResultSet r = b.Compile(shader);
+                IBackendOptions options = null;
+
+                if (backend is AMDDriverBackend)
+                {
+                    AMDDriverBackend amdBackend = backend as AMDDriverBackend;
+                    List<string> requestedAsics = new List<string>();
+                    foreach (string asic in amdBackend.Asics)
+                    {
+                        if (!m_Options.IsAMDAsicDisabled(asic))
+                        {
+                            requestedAsics.Add(asic);
+                        }
+                    }
+                    AMDDriverBackendOptions backendOptions = new AMDDriverBackendOptions(requestedAsics);
+                    options = backendOptions;
+                }
+                else if (backend is CodeXLBackend)
+                {
+                    CodeXLBackend codeXLBackend = backend as CodeXLBackend;
+                    List<string> requestedAsics = new List<string>();
+                    foreach (string asic in codeXLBackend.Asics)
+                    {
+                        if (!m_Options.IsCodeXLAsicDisabled(asic))
+                        {
+                            requestedAsics.Add(asic);
+                        }
+                    }
+                    CodeXLBackendOptions backendOptions = new CodeXLBackendOptions(requestedAsics);
+                    options = backendOptions;
+                }
+
+                IResultSet r = backend.Compile(shader, options);
                 if (r != null)
                 {
                     if (r.Name.Equals(m_LastBackend))
@@ -205,7 +234,7 @@ namespace Pyramid
 
         private void optionsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            OptionsScreen opts = new OptionsScreen( m_Options, m_Backends );
+            OptionsScreen opts = new OptionsScreen(m_Options, m_Backends);
             if (opts.ShowDialog() != DialogResult.Cancel)
             {
                 m_Options = opts.SelectedOptions;

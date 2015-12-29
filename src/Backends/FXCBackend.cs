@@ -31,7 +31,7 @@ namespace Pyramid
             m_Compiler = comp;
         }
 
-        public IResultSet Compile( IShader shader )
+        public IResultSet Compile(IShader shader, IBackendOptions options)
         {
             if (!(shader is HLSLShader ) )
                 return null;

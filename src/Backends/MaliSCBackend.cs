@@ -79,8 +79,8 @@ namespace Pyramid
         }
 
         public string Name { get { return "MaliSC"; } }
-        
-        public IResultSet Compile( IShader sh )
+
+        public IResultSet Compile(IShader sh, IBackendOptions options)
         {
             if (sh.Language != Languages.GLSL)
                 return null;

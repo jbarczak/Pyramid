@@ -8,15 +8,14 @@ using System.Windows.Forms;
 namespace Pyramid
 {
 
-
     public partial class HLSLOptionsPanel : UserControl, ICompileOptionsPanel
     {
         private class HLSLOptions : IHLSLOptions
         {
             public Languages Language { get { return Languages.HLSL; } }
-            public HLSLTarget Target { get; set;  }
+            public HLSLTarget Target { get; set; }
             public HLSLOptimizationLevel OptimizationLevel { get; set; }
-            public string EntryPoint { get; set;  }
+            public string EntryPoint { get; set; }
             public bool Compatibility { get; set; }
 
             public uint GetD3DCompileFlagBits()
@@ -88,7 +87,7 @@ namespace Pyramid
             cmbOpt.SelectedIndex = cmbOpt.Items.IndexOf("LEVEL3");
         }
 
-        public Control Panel { get { return this; }}
+        public Control Panel { get { return this; } }
 
         public ICompileOptions ReadOptions()
         {

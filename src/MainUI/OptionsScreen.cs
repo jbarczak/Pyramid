@@ -20,11 +20,37 @@ namespace Pyramid
             m_InitialOpts       = opts;
             PopulateGUIFromOptions(opts);
 
-            foreach (IBackend b in backends)
-                lstBackends.Items.Add(b.Name);
+            foreach (IBackend backend in backends)
+            {
+                int index = lstBackends.Items.Add(backend.Name);
+                lstBackends.SetItemChecked(index,!opts.IsBackendDisabled(backend.Name));
+            }
 
-            for (int i = 0; i < lstBackends.Items.Count; i++)
-                lstBackends.SetItemChecked(i, !opts.IsBackendDisabled(backends[i].Name));
+            // #mivance refactor
+            IBackend amdBackend = backends.Find(backend => backend.Name == "AMDDXX");
+
+            if (amdBackend is AMDDriverBackend)
+            {
+                AMDDriverBackend driver = amdBackend as AMDDriverBackend;
+
+                foreach (string asic in driver.Asics)
+                {
+                    int index = lstAMDAsics.Items.Add(asic);
+                    lstAMDAsics.SetItemChecked(index, !opts.IsAMDAsicDisabled(asic));
+                }
+            }
+
+            IBackend codeXLBackend = backends.Find(backend => backend.Name == "CodeXL");
+
+            if (codeXLBackend is CodeXLBackend)
+            {
+                CodeXLBackend driver = codeXLBackend as CodeXLBackend;
+                foreach (string asic in driver.Asics)
+                {
+                    int index = lstCodeXLAsics.Items.Add(asic);
+                    lstCodeXLAsics.SetItemChecked(index, !opts.IsCodeXLAsicDisabled(asic));
+                }
+            }
         }
 
         private void PopulateGUIFromOptions(Options opts)
@@ -67,8 +93,6 @@ namespace Pyramid
             txtCodeXL.Text = BrowseFile(txtCodeXL.Text);
         }
 
-    
-
         private void btnTemp_Click(object sender, EventArgs e)
         {
             txtTemp.Text = BrowseFolder(txtTemp.Text);
@@ -89,9 +113,28 @@ namespace Pyramid
                 SelectedOptions.PowerVRCompilerPath = txtPowerVR.Text;
                 SelectedOptions.DXXDriverPath = txtDXX.Text;
                 SelectedOptions.MaliSCRoot = txtMali.Text ;
-                for (int i = 0; i < lstBackends.Items.Count; i++)
-                    if (!lstBackends.GetItemChecked(i))
-                        SelectedOptions.DisableBackend(lstBackends.Items[i].ToString());
+
+                for (int backendIndex = 0; backendIndex < lstBackends.Items.Count; backendIndex++)
+                {
+                    if (!lstBackends.GetItemChecked(backendIndex))
+                        SelectedOptions.DisableBackend(lstBackends.Items[backendIndex].ToString());
+                }
+
+                for (int amdAsicIndex = 0; amdAsicIndex < lstAMDAsics.Items.Count; amdAsicIndex++)
+                {
+                    if (!lstAMDAsics.GetItemChecked(amdAsicIndex))
+                    {
+                        SelectedOptions.DisableAMDAsic(lstAMDAsics.Items[amdAsicIndex].ToString());
+                    }
+                }
+
+                for (int codeXLAsicIndex = 0; codeXLAsicIndex < lstCodeXLAsics.Items.Count; codeXLAsicIndex++)
+                {
+                    if (!lstCodeXLAsics.GetItemChecked(codeXLAsicIndex))
+                    {
+                        SelectedOptions.DisableCodeXLAsic(lstCodeXLAsics.Items[codeXLAsicIndex].ToString());
+                    }
+                }
             }
         }
 

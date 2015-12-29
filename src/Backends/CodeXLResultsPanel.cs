@@ -31,19 +31,19 @@ namespace Pyramid
                 cmbAsic.SelectedIndex = 0;
         }
 
-        public void SetAsic( string name )
+        public void SetAsic(string name)
         {
-            cmbAsic.SelectedIndex = cmbAsic.Items.IndexOf(name);
-            if( cmbAsic.SelectedIndex != -1 )
-            {
-                txtIL.Text = m_IL[cmbAsic.SelectedIndex];
-                txtISA.Text = m_ISA[cmbAsic.SelectedIndex];
-            }
-            else
+            int index = cmbAsic.Items.IndexOf(name);
+
+            if (index == -1)
             {
                 txtIL.Text = "";
                 txtISA.Text = "";
+                return;
             }
+
+            // invokes handler below indirectly
+            cmbAsic.SelectedIndex = index;
         }
 
         private void cmbAsic_SelectedIndexChanged(object sender, EventArgs e)

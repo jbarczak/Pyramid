@@ -82,7 +82,7 @@ namespace Pyramid
                 m_Optimizers.Add( t, wrapper.CreateGLSLOptimizer(t));
         }
 
-        public IResultSet Compile( IShader shader )
+        public IResultSet Compile(IShader shader, IBackendOptions options)
         {
             if ( !(shader is GLSLShader ) )
                 return null;

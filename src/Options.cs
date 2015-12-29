@@ -8,6 +8,8 @@ namespace Pyramid
     public class Options
     {
         private List<string> m_DisabledBackends = new List<string>();
+        private List<string> m_DisabledAMDAsics = new List<string>();
+        private List<string> m_DisabledCodeXLAsics = new List<string>();
 
         public string D3DCompilerPath { get; set; }
         public string CodeXLPath { get; set; }
@@ -16,6 +18,8 @@ namespace Pyramid
         public string DXXDriverPath { get; set; }
         public string MaliSCRoot { get; set; }
         public IEnumerable<string> DisabledBackends { get { return m_DisabledBackends; } }
+        public IEnumerable<string> DisabledAMDAsics { get { return m_DisabledAMDAsics; } }
+        public IEnumerable<string> DisabledCodeXLAsics { get { return m_DisabledCodeXLAsics; } }
 
         public void DisableBackend(string name)
         {
@@ -24,6 +28,24 @@ namespace Pyramid
         public bool IsBackendDisabled(string name)
         {
             return m_DisabledBackends.Contains(name);
+        }
+
+        public void DisableAMDAsic(string name)
+        {
+            m_DisabledAMDAsics.Add(name);
+        }
+        public bool IsAMDAsicDisabled(string name)
+        {
+            return m_DisabledAMDAsics.Contains(name);
+        }
+
+        public void DisableCodeXLAsic(string name)
+        {
+            m_DisabledCodeXLAsics.Add(name);
+        }
+        public bool IsCodeXLAsicDisabled(string name)
+        {
+            return m_DisabledCodeXLAsics.Contains(name);
         }
 
         public static Options GetDefaults()
@@ -63,7 +85,6 @@ namespace Pyramid
                     string value = keyval[1];
                     map.Add(key, value);
                 }
-
                 
                 string d3dCompiler;
                 if (!map.TryGetValue("D3DCompiler", out d3dCompiler))
@@ -92,6 +113,14 @@ namespace Pyramid
                 string disabledBackends;
                 if( map.TryGetValue("DisabledBackends", out disabledBackends))
                     opts.m_DisabledBackends.AddRange(disabledBackends.Split(','));
+
+                string disabledAMDAsics;
+                if (map.TryGetValue("DisabledAMDAsics", out disabledAMDAsics))
+                    opts.m_DisabledAMDAsics.AddRange(disabledAMDAsics.Split(','));
+
+                string disabledCodeXLAsics;
+                if (map.TryGetValue("DisabledCodeXLAsics", out disabledCodeXLAsics))
+                    opts.m_DisabledCodeXLAsics.AddRange(disabledCodeXLAsics.Split(','));
                 
                 opts.D3DCompilerPath = d3dCompiler;
                 opts.CodeXLPath = codeXL;
@@ -101,7 +130,7 @@ namespace Pyramid
                 opts.MaliSCRoot = mali;
                 return opts;
             }
-            catch( Exception e)
+            catch (Exception e)
             {
                 // not found
                 MessageBox.Show(e.Message, "uh-oh, couldn't read options file", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -118,15 +147,19 @@ namespace Pyramid
             try
             {
                 string DisabledBackends = String.Join(",",m_DisabledBackends.ToArray());
+                string DisabledAMDAsics = String.Join(",",m_DisabledAMDAsics.ToArray());
+                string DisabledCodeXLAsics = String.Join(",", m_DisabledCodeXLAsics.ToArray());
 
                 File.WriteAllText(OptionsFile,
-                                   String.Format("D3DCompiler={0}\nCodeXL={1}\ntemp={2}\nPowerVR={3}\nMali={4}\nDisabledBackends={5}\n",
+                                   String.Format("D3DCompiler={0}\nCodeXL={1}\ntemp={2}\nPowerVR={3}\nMali={4}\nDisabledBackends={5}\nDisabledAMDAsics={6}\nDisabledCodeXLAsics={7}\n",
                                                              D3DCompilerPath,
                                                              CodeXLPath,
                                                              TempPath,
                                                              PowerVRCompilerPath,
                                                              MaliSCRoot,
-                                                             DisabledBackends));
+                                                             DisabledBackends,
+                                                             DisabledAMDAsics,
+                                                             DisabledCodeXLAsics));
             }
             catch(Exception e)
             {
