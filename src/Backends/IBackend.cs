@@ -4,18 +4,21 @@ using System.Windows.Forms;
 
 namespace Pyramid
 {
-
     public interface IResultSet
     {
         string Name { get; }
         Control AnalysisPanel { get; }
         Control ResultsPanel { get; }
-    };
+    }
 
-   
+    public interface IBackendOptions
+    {
+
+    }
+
     public interface IBackend
     {
         string Name { get; }
-        IResultSet Compile( IShader shader );
+        IResultSet Compile(IShader shader, IBackendOptions options);
     }
 }

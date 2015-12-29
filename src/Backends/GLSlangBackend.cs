@@ -41,7 +41,7 @@ namespace Pyramid
             m_Config = m_Compiler.CreateDefaultConfig();
         }
 
-        public IResultSet Compile( IShader shader )
+        public IResultSet Compile(IShader shader, IBackendOptions options)
         {
             if (!(shader is GLSLShader) )
                 return null;
@@ -49,7 +49,6 @@ namespace Pyramid
             GLSLShader sh = (GLSLShader)shader;
             IGLSLOptions glOpts = sh.CompileOptions;
             
-
             GLSlangOptions slangOpts = new GLSlangOptions();
             slangOpts.ShaderType = glOpts.ShaderType;
             slangOpts.Config = m_Config;

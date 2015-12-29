@@ -1,6 +1,4 @@
-﻿
-
-namespace Pyramid
+﻿namespace Pyramid
 {
     public enum Languages
     {
@@ -18,5 +16,4 @@ namespace Pyramid
         Languages Language { get; }
         string Code { get; }
     };
-
 }

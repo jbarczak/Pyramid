@@ -34,28 +34,59 @@ namespace Pyramid
         {
             m_Results.AddResult(sh);
         }
-    };
+    }
+
+    class AMDDriverBackendOptions : IBackendOptions
+    {
+        private List<string> m_RequestedAsics;
+
+        public AMDDriverBackendOptions(List<string> requestedAsics)
+        {
+            m_RequestedAsics = (requestedAsics != null) ? requestedAsics : new List<string>();
+        }
+
+        public List<string> Asics { get { return m_RequestedAsics; } }
+    }
 
     class AMDDriverBackend : IBackend
     {
-        private ID3DCompiler m_FXC  = null;
+        private List<string> m_SupportedAsics = new List<string>();
+        private ID3DCompiler m_FXC = null;
         private IAMDDriver m_Driver = null;
 
         public string Name { get { return "AMDDXX"; } }
+        public IEnumerable<string> Asics { get { return m_SupportedAsics; } }
 
         public AMDDriverBackend( IAMDDriver driver, ID3DCompiler fxc  )
         {
             m_FXC = fxc;
             m_Driver = driver;
+
+            if (m_Driver != null)
+            {
+                foreach (IAMDAsic asic in m_Driver.Asics)
+                {
+                    m_SupportedAsics.Add(asic.Name);
+                }
+            }
         }
 
-        public IResultSet Compile( IShader shaderObj )
+        private bool CompileForAsic(List<string> asics, string asic)
+        {
+            if (asics == null || asics.Count == 0)
+                return true;
+
+            return asics.Contains(asic);
+        }
+
+        public IResultSet Compile(IShader shaderObj, IBackendOptions options)
         {
             if ( !(shaderObj is HLSLShader ) )
                 return null;
 
             HLSLShader shaderHLSL = shaderObj as HLSLShader;
             IHLSLOptions hlslOpts = shaderHLSL.CompileOptions;
+            AMDDriverBackendOptions backendOptions = options as AMDDriverBackendOptions;
             string shader = shaderObj.Code;
 
             if (shaderHLSL.WasCompiledWithErrors)
@@ -84,8 +115,11 @@ namespace Pyramid
 
                 foreach (IAMDAsic a in m_Driver.Asics)
                 {
-                    IAMDShader sh = m_Driver.CompileDXBlob(a, bytes);
-                    rs.Add(sh);
+                    if (CompileForAsic(backendOptions.Asics, a.Name))
+                    {
+                        IAMDShader sh = m_Driver.CompileDXBlob(a, bytes);
+                        rs.Add(sh);
+                    }
                 }
 
                 return rs;

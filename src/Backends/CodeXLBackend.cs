@@ -38,6 +38,7 @@ namespace Pyramid
         {
             m_AnalysisPanel.AddResult(asic, vals);
         }
+
         public void DisplayAsic(string asic)
         {
             m_AnalysisPanel.SetAsic(asic);
@@ -45,14 +46,27 @@ namespace Pyramid
         }
     }
 
+    class CodeXLBackendOptions : IBackendOptions
+    {
+        private List<string> m_RequestedAsics;
+
+        public CodeXLBackendOptions(List<string> requestedAsics)
+        {
+            m_RequestedAsics = (requestedAsics != null) ? requestedAsics : new List<string>();
+        }
+
+        public List<string> Asics { get { return m_RequestedAsics; } }
+    }
+
     class CodeXLBackend : IBackend
     {
-        private List<string> m_Asics = new List<string>();
+        private List<string> m_SupportedAsics = new List<string>();
         private string m_CodeXL = "";
         private string m_D3DCompiler = "";
         private string m_TempPath = "";
 
         public string Name { get { return "CodeXL"; } }
+        public IEnumerable<string> Asics { get { return m_SupportedAsics; } }
 
         public CodeXLBackend( string CodeXLPath, string D3DCompilerPath, string TempPath )
         {
@@ -77,13 +91,13 @@ namespace Pyramid
                 while (!p.StandardOutput.EndOfStream)
                 {
                     string s = p.StandardOutput.ReadLine();
-                    m_Asics.Add(s.TrimEnd().TrimStart());
+                    m_SupportedAsics.Add(s.TrimEnd().TrimStart());
                 }
 
                 // skip whatever text they're emitting, up to 'Devices:'
-                while (!m_Asics[0].Equals("Devices:"))
-                    m_Asics.RemoveAt(0);
-                m_Asics.RemoveAt(0); // remove 'Devices'
+                while (!m_SupportedAsics[0].Equals("Devices:"))
+                    m_SupportedAsics.RemoveAt(0);
+                m_SupportedAsics.RemoveAt(0); // remove 'Devices'
             }
             catch (Exception e)
             {
@@ -95,17 +109,25 @@ namespace Pyramid
             m_TempPath      = TempPath;
         }
 
-        public IResultSet Compile( IShader shader  )
+        private bool CompileForAsic( List<string> asics, string asic )
         {
-            if ( !(shader is HLSLShader) )
-                return null;
+            if (asics == null || asics.Count == 0)
+                return true;
 
+            return asics.Contains(asic);
+        }
+
+        public IResultSet Compile(IShader shader, IBackendOptions options)
+        {
+            if ( !(shader is HLSLShader) || !(options is CodeXLBackendOptions) )
+                return null;
 
             // TODO: Modify CodeXL backend so that it re-uses blob from
             //    FXC backend where available.  It'd be nice not to have to 
             //    have CodeXL recompile it for us
             HLSLShader shaderHLSL = shader as HLSLShader;
             IHLSLOptions hlslOpts = shaderHLSL.CompileOptions;
+            CodeXLBackendOptions backendOptions = options as CodeXLBackendOptions;
             string text = shader.Code;
 
             if (shaderHLSL.WasCompiledWithErrors)
@@ -139,8 +161,13 @@ namespace Pyramid
 
             CommandLine = String.Concat(CommandLine, tmpFile);
 
-            foreach (string asic in m_Asics)
-                CommandLine = String.Concat(CommandLine, " -c ", asic, " ");
+            foreach (string asic in m_SupportedAsics)
+            {
+                if (CompileForAsic(backendOptions.Asics, asic))
+                {
+                    CommandLine = String.Concat(CommandLine, " -c ", asic, " ");
+                }
+            }
             
             ProcessStartInfo pi = new ProcessStartInfo();
             pi.RedirectStandardOutput = true;
@@ -167,9 +194,20 @@ namespace Pyramid
             }
 
             // Compile results are emitted in one set of files per asic
+            string defaultAsic = "";
             CodeXLResultSet results  = new CodeXLResultSet();
-            foreach (string asic in m_Asics)
+            foreach (string asic in m_SupportedAsics)
             {
+                if (!CompileForAsic(backendOptions.Asics, asic))
+                {
+                    continue;
+                }
+
+                if (defaultAsic == "")
+                {
+                    defaultAsic = asic;
+                }
+
                 string ilFile  = String.Format( "{0}-{1}.amdisa", ilPath, asic );
                 string isaFile = String.Format( "{0}-{1}.amdisa", isaPath, asic );
                 try
@@ -226,7 +264,7 @@ namespace Pyramid
 
             if (results.ResultCount > 0)
             {
-                results.DisplayAsic(m_Asics[0]);
+                results.DisplayAsic(defaultAsic);
                 return results;
             }
             else
