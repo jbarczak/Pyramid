@@ -6,6 +6,9 @@
       <Extensions>
       </Extensions>
     </Filter>
+    <Filter Include="Source Files\CodeXL">
+      <UniqueIdentifier>{5412010c-a603-425f-827e-0233c9164358}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="D3DCompiler_Impl.cpp">
@@ -56,6 +59,9 @@
     <ClCompile Include="Scrutinizer_GCN.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="amd-codexl-analyzer\Common\Src\DeviceInfo\DeviceInfoUtils.cpp">
+      <Filter>Source Files\CodeXL</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Utilities.h">
@@ -105,6 +111,45 @@
     </ClInclude>
     <ClInclude Include="Scrutinizer_GCN.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="amd-codexl-analyzer\Common\Src\DeviceInfo\DeviceInfo.h">
+      <Filter>Source Files\CodeXL</Filter>
+    </ClInclude>
+    <ClInclude Include="amd-codexl-analyzer\Common\Src\DeviceInfo\DeviceInfoUtils.h">
+      <Filter>Source Files\CodeXL</Filter>
+    </ClInclude>
+    <ClInclude Include="amd-codexl-analyzer\CommonProjects\AMDTBackend\Include\Common\AmdDxGsaCompile.h">
+      <Filter>Source Files\CodeXL</Filter>
+    </ClInclude>
+    <ClInclude Include="amd-codexl-analyzer\CommonProjects\AMDTBackend\Include\Common\asic_reg\atiid.h">
+      <Filter>Source Files\CodeXL</Filter>
+    </ClInclude>
+    <ClInclude Include="amd-codexl-analyzer\CommonProjects\AMDTBackend\Include\Common\asic_reg\ci_id.h">
+      <Filter>Source Files\CodeXL</Filter>
+    </ClInclude>
+    <ClInclude Include="amd-codexl-analyzer\CommonProjects\AMDTBackend\Include\Common\asic_reg\cz_id.h">
+      <Filter>Source Files\CodeXL</Filter>
+    </ClInclude>
+    <ClInclude Include="amd-codexl-analyzer\CommonProjects\AMDTBackend\Include\Common\asic_reg\evergreen_id.h">
+      <Filter>Source Files\CodeXL</Filter>
+    </ClInclude>
+    <ClInclude Include="amd-codexl-analyzer\CommonProjects\AMDTBackend\Include\Common\asic_reg\kv_id.h">
+      <Filter>Source Files\CodeXL</Filter>
+    </ClInclude>
+    <ClInclude Include="amd-codexl-analyzer\CommonProjects\AMDTBackend\Include\Common\asic_reg\northernisland_id.h">
+      <Filter>Source Files\CodeXL</Filter>
+    </ClInclude>
+    <ClInclude Include="amd-codexl-analyzer\CommonProjects\AMDTBackend\Include\Common\asic_reg\si_id.h">
+      <Filter>Source Files\CodeXL</Filter>
+    </ClInclude>
+    <ClInclude Include="amd-codexl-analyzer\CommonProjects\AMDTBackend\Include\Common\asic_reg\sumo_id.h">
+      <Filter>Source Files\CodeXL</Filter>
+    </ClInclude>
+    <ClInclude Include="amd-codexl-analyzer\CommonProjects\AMDTBackend\Include\Common\asic_reg\tn_id.h">
+      <Filter>Source Files\CodeXL</Filter>
+    </ClInclude>
+    <ClInclude Include="amd-codexl-analyzer\CommonProjects\AMDTBackend\Include\Common\asic_reg\vi_id.h">
+      <Filter>Source Files\CodeXL</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

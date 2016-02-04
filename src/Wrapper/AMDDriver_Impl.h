@@ -1,11 +1,8 @@
-
-
-struct CompileResult;
-struct CompileArgs;
-
-typedef unsigned long (__cdecl *COMPILE_SHADER)( CompileArgs*, CompileResult* );
-typedef void  (__cdecl *FREE_SHADER)   (void*);
-
+#pragma unmanaged
+#include "AMDTBackend/Include/Common/AmdDxGsaCompile.h"
+typedef PfnAmdDxGsaCompileShader COMPILE_SHADER;
+typedef PfnAmdDxGsaFreeCompiledShader FREE_SHADER;
+#pragma managed
 
 private ref class AMDDriver_Impl : public Pyramid::IAMDDriver
 {
@@ -26,8 +23,8 @@ public:
 
 internal:
 
-    COMPILE_SHADER m_pCompileFunc;
-    FREE_SHADER    m_pFreeFunc;
+    COMPILE_SHADER  m_pCompileFunc;
+    FREE_SHADER     m_pFreeFunc;
     
 private:
 

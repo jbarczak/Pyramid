@@ -1,6 +1,7 @@
 
 #pragma unmanaged
 #include <windows.h>
+#include <algorithm>
 #include "elf.h"
 #include "GCNDisassembler.h"
 #include "GCNDecoder.h"
@@ -13,6 +14,34 @@
 #include "Utilities.h"
 
 #undef DOMAIN // seriously Microsoft?!?!?
+
+#include "amd-codexl-analyzer/Common/Src/DeviceInfo/DeviceInfoUtils.h"
+
+
+static bool GfxCardInfoSortPredicate(const GDT_GfxCardInfo& a, const GDT_GfxCardInfo& b)
+{
+	// Generation is the primary key.
+	if (a.m_generation < b.m_generation) { return true; }
+
+	if (a.m_generation > b.m_generation) { return false; }
+
+	// CAL name is next.
+	int ret = ::strcmp(a.m_szCALName, b.m_szCALName);
+
+	if (ret < 0) { return true; }
+
+	if (ret > 0) { return false; }
+
+	// Marketing name next.
+	ret = ::strcmp(a.m_szMarketingName, b.m_szMarketingName);
+
+	if (ret < 0) { return true; }
+
+	if (ret > 0) { return false; }
+
+	// DeviceID last.
+	return a.m_deviceID < b.m_deviceID;
+}
 
 
 
@@ -36,50 +65,44 @@ AMDDriver_Impl::AMDDriver_Impl( System::String^ path )
 
     m_pmAsics = gcnew System::Collections::Generic::List<Pyramid::IAMDAsic^>();
 
-    // SI chips seen during CodeXL snooping
-    m_pmAsics->Add( gcnew AMDAsic_Impl( "Capeverde", 110, 41, GCN::IDecoder::GCN1 ) );
-    m_pmAsics->Add( gcnew AMDAsic_Impl( "Hainan",    110, 70, GCN::IDecoder::GCN1 ) );
-    m_pmAsics->Add( gcnew AMDAsic_Impl( "Oland",     110, 60, GCN::IDecoder::GCN1 ) );
-    m_pmAsics->Add( gcnew AMDAsic_Impl( "Pitcairn",  110, 21, GCN::IDecoder::GCN1 ) );
-    m_pmAsics->Add( gcnew AMDAsic_Impl( "Tahiti",    110, 6 , GCN::IDecoder::GCN1 ) );
+    // Populate the sorted device (card) info table.
+    std::vector<GDT_GfxCardInfo> cardList;
+    std::vector<GDT_GfxCardInfo> DXDeviceTable;
 
-    // CI chips seen during CodeXL snopping
-    m_pmAsics->Add( gcnew AMDAsic_Impl( "Bonaire",   120, 20, GCN::IDecoder::GCN1  ) );
-    m_pmAsics->Add( gcnew AMDAsic_Impl( "Kalindi",   120, 20, GCN::IDecoder::GCN1  ) );
-    m_pmAsics->Add( gcnew AMDAsic_Impl( "Spectre",   120, 65, GCN::IDecoder::GCN1  ) );
-    m_pmAsics->Add( gcnew AMDAsic_Impl( "Spooky",    120, 65, GCN::IDecoder::GCN1  ) );
-    m_pmAsics->Add( gcnew AMDAsic_Impl( "Hawaii",    120, 40, GCN::IDecoder::GCN1  ) );
-    m_pmAsics->Add( gcnew AMDAsic_Impl( "Mullins",   120, 20, GCN::IDecoder::GCN1  ) );
+    // DX support now only SI, CI and VI
+    if (AMDTDeviceInfoUtils::Instance()->GetAllCardsInHardwareGeneration(GDT_HW_GENERATION_SOUTHERNISLAND, cardList))
+    {
+        DXDeviceTable.insert(DXDeviceTable.end(), cardList.begin(), cardList.end());
+    }
+
+    if (AMDTDeviceInfoUtils::Instance()->GetAllCardsInHardwareGeneration(GDT_HW_GENERATION_SEAISLAND, cardList))
+    {
+        DXDeviceTable.insert(DXDeviceTable.end(), cardList.begin(), cardList.end());
+    }
+
+    if (AMDTDeviceInfoUtils::Instance()->GetAllCardsInHardwareGeneration(GDT_HW_GENERATION_VOLCANICISLAND, cardList))
+    {
+        DXDeviceTable.insert(DXDeviceTable.end(), cardList.begin(), cardList.end());
+    }
+
+    std::sort(DXDeviceTable.begin(), DXDeviceTable.end(), GfxCardInfoSortPredicate);
     
-    // VI chips seen during CodeXL snooping
-    m_pmAsics->Add( gcnew AMDAsic_Impl( "Carrizo",   130, 1,  GCN::IDecoder::GCN3 )) ;
-    m_pmAsics->Add( gcnew AMDAsic_Impl( "Fiji",      130, 60, GCN::IDecoder::GCN3 )) ;
-    m_pmAsics->Add( gcnew AMDAsic_Impl( "Iceland",   130, 1,  GCN::IDecoder::GCN3 )) ;
-    m_pmAsics->Add( gcnew AMDAsic_Impl( "Tonga",     130, 20, GCN::IDecoder::GCN3 )) ;
+    // de-duplicate cards based on cal name
+    //  Some of these things are pre-release or otherwise unsupported by the driver (at least the current one)
+    //  there are also a few hundred entries in the device table, but only about a dozen or so "cal names"
+    size_t i=0;
+    while( i < DXDeviceTable.size() )
+    {
+        m_pmAsics->Add( gcnew AMDAsic_Impl(DXDeviceTable[i] ) );
 
-    // Other stuff the driver accepted but I haven't identified
-    m_pmAsics->Add( gcnew AMDAsic_Impl( "asic-125",  125, 1, GCN::IDecoder::GCN1 )) ;
-    m_pmAsics->Add( gcnew AMDAsic_Impl( "asic-135",  135, 1, GCN::IDecoder::GCN3 )) ;
+        const char* pName = DXDeviceTable[i].m_szCALName;
+        do
+        {
+            i++;
+        } while( i < DXDeviceTable.size() && strcmp( pName, DXDeviceTable[i].m_szCALName ) == 0 );
+    }
+
 }
-
-
-#pragma unmanaged
-struct CompileArgs
-{
-    DWORD asic;             /// Identifies the asic family
-    DWORD arg1;
-    void* pByteCode;
-    DWORD nBytecodeSize;
-    void* pGarbage;
-    DWORD zero;
-};
-struct CompileResult
-{
-    DWORD       StructSize;
-    Elf32_Ehdr* pElf;
-    DWORD       nElfSize;
-};
-#pragma managed
 
 
 Pyramid::IAMDShader^  AMDDriver_Impl::CompileDXBlob(Pyramid::IAMDAsic^ asic, array<byte>^ blob, Pyramid::IDXShaderReflection^ reflection )
@@ -88,18 +111,19 @@ Pyramid::IAMDShader^  AMDDriver_Impl::CompileDXBlob(Pyramid::IAMDAsic^ asic, arr
     
     MarshalledBlob^ bl = gcnew MarshalledBlob(blob);
 
-    CompileArgs args;
-    args.asic                   = a->m_nArg0;
-    args.arg1                   = a->m_nArg1;
-    args.pByteCode              = bl->GetBlob();
-    args.nBytecodeSize          = bl->GetLength();
-    args.pGarbage               = 0;
-    args.zero                   = 0;
+    AmdDxGsaCompileShaderInput args;
+    args.byteCodeLength = bl->GetLength();
+    args.pShaderByteCode = bl->GetBlob();
+    args.pCompileOptions = 0;
+    args.numCompileOptions = 0;
+    args.chipRevision   = a->m_nChipRevision;
+    args.chipFamily     = a->m_nChipFamily;
+    memset( args.reserved, 0, sizeof(args.reserved) );
 
-    CompileResult result;
-    result.StructSize = sizeof(CompileResult);
-    result.pElf = 0;
-    result.nElfSize = 0;
+    AmdDxGsaCompileShaderOutput result;
+    result.size = sizeof(result);
+    result.pShaderBinary = 0;
+    result.shaderBinarySize = 0;
     DWORD hResult = m_pCompileFunc( &args, &result );
 
     if( hResult != 0 )
@@ -120,5 +144,5 @@ Pyramid::IAMDShader^  AMDDriver_Impl::CompileDXBlob(Pyramid::IAMDAsic^ asic, arr
 
     DWORD nThreadsPerGroup = reflection->GetThreadsPerGroup();
 
-    return gcnew AMDShader_Impl( this, a, result.pElf, result.nElfSize, nThreadsPerGroup, eType );
+    return gcnew AMDShader_Impl( this, a, (Elf32_Ehdr*)result.pShaderBinary, result.shaderBinarySize, nThreadsPerGroup, eType );
 }

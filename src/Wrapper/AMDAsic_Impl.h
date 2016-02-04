@@ -2,10 +2,12 @@
 #include "GCNDecoder.h"
 #pragma managed
 
+struct GDT_GfxCardInfo;
+
 private ref class AMDAsic_Impl : Pyramid::IAMDAsic
 {
 public:
-    AMDAsic_Impl( const char* pName, unsigned int arg0, unsigned int arg1, GCN::IDecoder::GCNVersions eGCNVersion );
+    AMDAsic_Impl( const GDT_GfxCardInfo& rCardInfo );
     
     ~AMDAsic_Impl();
 
@@ -17,6 +19,6 @@ public:
 internal:
     System::String^ m_pmName;
     GCN::IDecoder* m_pDecoder;
-    unsigned int m_nArg0;
-    unsigned int m_nArg1;
+    unsigned int m_nChipFamily;
+    unsigned int m_nChipRevision;
 };

@@ -55,6 +55,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <AdditionalIncludeDirectories>.\amd-codexl-analyzer\Common\Src\DeviceInfo;.\amd-codexl-analyzer\CommonProjects\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -69,6 +70,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.\amd-codexl-analyzer\Common\Src\DeviceInfo;.\amd-codexl-analyzer\CommonProjects\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -80,6 +82,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="amd-codexl-analyzer\Common\Src\DeviceInfo\DeviceInfoUtils.cpp" />
     <ClCompile Include="AMDAsic_Impl.cpp" />
     <ClCompile Include="AMDDriver_Impl.cpp" />
     <ClCompile Include="AMDShader_Impl.cpp" />
@@ -100,6 +103,19 @@
     <ClCompile Include="Wrapper.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="amd-codexl-analyzer\CommonProjects\AMDTBackend\Include\Common\AmdDxGsaCompile.h" />
+    <ClInclude Include="amd-codexl-analyzer\CommonProjects\AMDTBackend\Include\Common\asic_reg\atiid.h" />
+    <ClInclude Include="amd-codexl-analyzer\CommonProjects\AMDTBackend\Include\Common\asic_reg\ci_id.h" />
+    <ClInclude Include="amd-codexl-analyzer\CommonProjects\AMDTBackend\Include\Common\asic_reg\cz_id.h" />
+    <ClInclude Include="amd-codexl-analyzer\CommonProjects\AMDTBackend\Include\Common\asic_reg\evergreen_id.h" />
+    <ClInclude Include="amd-codexl-analyzer\CommonProjects\AMDTBackend\Include\Common\asic_reg\kv_id.h" />
+    <ClInclude Include="amd-codexl-analyzer\CommonProjects\AMDTBackend\Include\Common\asic_reg\northernisland_id.h" />
+    <ClInclude Include="amd-codexl-analyzer\CommonProjects\AMDTBackend\Include\Common\asic_reg\si_id.h" />
+    <ClInclude Include="amd-codexl-analyzer\CommonProjects\AMDTBackend\Include\Common\asic_reg\sumo_id.h" />
+    <ClInclude Include="amd-codexl-analyzer\CommonProjects\AMDTBackend\Include\Common\asic_reg\tn_id.h" />
+    <ClInclude Include="amd-codexl-analyzer\CommonProjects\AMDTBackend\Include\Common\asic_reg\vi_id.h" />
+    <ClInclude Include="amd-codexl-analyzer\Common\Src\DeviceInfo\DeviceInfo.h" />
+    <ClInclude Include="amd-codexl-analyzer\Common\Src\DeviceInfo\DeviceInfoUtils.h" />
     <ClInclude Include="AMDAsic_Impl.h" />
     <ClInclude Include="AMDDriver_Impl.h" />
     <ClInclude Include="AMDShader_Impl.h" />
