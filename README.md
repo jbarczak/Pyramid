@@ -1,13 +1,18 @@
+# Pyramid
 
-Pyramid is a free, open GUI tool for offline shader validation and analysis.
+Pyramid is a free, open GUI tool for offline shader validation and analysis. The UI takes HLSL or GLSL as input, and runs them through various shader
+compilers and static analyzers.
 
-Pyramid is intended to eventually support arbitrary languages and glue together tools and disassemblers from all over the graphics world.
+![AMD GCN from HLSL](doc/ui-hlsl-amddxx.png)
+![PowerVR disassembly from GLSL](doc/ui-glsl-powervr.png)
+
+Pyramid is intended to eventually support arbitrary languages and glue together tools and disassemblers from all over
+the graphics world.
  
 IHVs:  You want developers scrutinizing the ISA for your GPUs.  You know you do :) I will work with you to incorporate your disassemblers into this tool.  I am willing to jump through hoops to make this happen, just tell me what I need to do.
 
 
-Obtaining Pyramid
-------------------
+## Obtaining Pyramid
 
 The best way to obtain a copy is to ask github to download a zip of the repository.  The 'bin' directory will be updated periodically with an up to date binary.  
 
@@ -33,8 +38,7 @@ You may send constructive feedback to:  jbarcz1@gmail.com
 
 
 
-Building it Yourself
----------------------
+## Building it Yourself
 
 Due to my use of submodules, downloading a zip will not get you the full source.
 
