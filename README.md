@@ -3,8 +3,8 @@
 Pyramid is a free, open GUI tool for offline shader validation and analysis. The UI takes HLSL or GLSL as input, and runs them through various shader
 compilers and static analyzers.
 
-![AMD GCN from HLSL](doc/ui-hlsl-amddxx.png)
-![PowerVR disassembly from GLSL](doc/ui-glsl-powervr.png)
+[![AMD GCN from HLSL](doc/ui-hlsl-amddxx-thumb.png)](doc/ui-hlsl-amddxx.png)
+[![PowerVR disassembly from GLSL](doc/ui-glsl-powervr-thumb.png)](doc/ui-glsl-powervr.png)
 
 Pyramid is intended to eventually support arbitrary languages and glue together tools and disassemblers from all over
 the graphics world.
