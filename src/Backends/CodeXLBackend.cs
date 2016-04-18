@@ -98,6 +98,8 @@ namespace Pyramid
                 while (!m_SupportedAsics[0].Equals("Devices:"))
                     m_SupportedAsics.RemoveAt(0);
                 m_SupportedAsics.RemoveAt(0); // remove 'Devices'
+
+                p.Close();
             }
             catch (Exception e)
             {
@@ -178,10 +180,18 @@ namespace Pyramid
             string error, output;
             try
             {
+                int TimeOut = 15000; // TODO: Put in options
                 Process p = Process.Start(pi);
-                p.WaitForExit();
-                error = p.StandardError.ReadToEnd();
-                output = p.StandardOutput.ReadToEnd();
+                if (p.WaitForExit(TimeOut))
+                {
+                    error = p.StandardError.ReadToEnd();
+                    output = p.StandardOutput.ReadToEnd();
+                }
+                else
+                {
+                    MessageBox.Show("CodeXL took more than 15 seconds");
+                }
+                p.Close();
                 File.Delete(tmpFile);
             }
             catch( Exception e )

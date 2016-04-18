@@ -464,9 +464,9 @@ namespace Pyramid.Scrutinizer
                     {
                         x = x.Parent;
                         if (x == null)
-                            return -1;
-                        else if (x == y)
                             return 1;
+                        else if (x == y)
+                            return -1;
                     }
                 }
             );

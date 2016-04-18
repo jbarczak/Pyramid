@@ -457,14 +457,17 @@ namespace Pyramid.Scrutinizer.UI
             //  for each loop, replace its contents with a single "super-node"
             foreach( Loop l in loops )
             {
-                Node[] loopNodes = new Node[l.BlockCount];
-                int n = 0;
-                foreach (BasicBlock b in l.Blocks)
-                    loopNodes[n++] = NodeMap[b];
+                HashSet<Node> loopNodes = new HashSet<Node>();
+                foreach (BasicBlock b in l.Blocks )
+                    loopNodes.Add(NodeMap[b]);
 
                 LoopNode superNode = new LoopNode(new Graph(), l);
 
                 g.CombineNodes(loopNodes,superNode,superNode.SubGraph );
+
+                // all blocks in the loop should now be represented by the super-node
+                foreach (BasicBlock b in l.Blocks)
+                    NodeMap[b] = superNode;
             }
 
 
