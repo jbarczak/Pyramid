@@ -1228,7 +1228,17 @@ namespace _GCN1Decoder_INTERNAL
         }
 
         VectorInstructions GetOpcode() const { return Translate_VOP1Opcodes( ReadBits(16,9) ); }
-        Dests GetVDst()           const { return Translate_VDest( ReadBits(24,17) ); }
+        Dests GetDst() const 
+		{
+			if(GetOpcode() == V_READFIRSTLANE_B32)
+			{
+				return Translate_SDest(ReadBits(24, 17));
+			}
+			else
+			{
+				return Translate_VDest(ReadBits(24, 17));
+			}
+		}
         Sources GetSrc0()         const { return Translate_SSrc(ReadBits(8,0)); }
         
         uint GetResultWidthInDWORDS() const;
@@ -1695,7 +1705,7 @@ namespace GCN
                 Fields.m_nSrcCount  = 1;
                 Fields.m_nDestCount = 1;
                 Fields.m_Sources[0] = pIt->GetSrc0();
-                Fields.m_Dests[0] = pIt->GetVDst();
+                Fields.m_Dests[0] = pIt->GetDst();
                 if( pIt->HasLiteral() )
                     Fields.m_Literal.UInt = pIt->ReadTrailingLiteral();
             }
