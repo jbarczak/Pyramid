@@ -73,6 +73,13 @@
     <Compile Include="Backends\MaliSCResultsPanel.Designer.cs">
       <DependentUpon>MaliSCResultsPanel.cs</DependentUpon>
     </Compile>
+    <Compile Include="Backends\MysteryToolBackend.cs" />
+    <Compile Include="Backends\MysteryToolResultsPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Backends\MysteryToolResultsPanel.Designer.cs">
+      <DependentUpon>MysteryToolResultsPanel.cs</DependentUpon>
+    </Compile>
     <Compile Include="Languages\ILanguage.cs" />
     <Compile Include="MainUI\AboutBox.cs">
       <SubType>Form</SubType>
@@ -170,6 +177,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Backends\MaliSCResultsPanel.resx">
       <DependentUpon>MaliSCResultsPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Backends\MysteryToolResultsPanel.resx">
+      <DependentUpon>MysteryToolResultsPanel.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainUI\AboutBox.resx">
       <DependentUpon>AboutBox.cs</DependentUpon>

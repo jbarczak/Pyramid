@@ -57,6 +57,9 @@
             this.label8 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.lstCodeXLAsics = new System.Windows.Forms.CheckedListBox();
+            this.txtMystery = new System.Windows.Forms.TextBox();
+            this.btnMystery = new System.Windows.Forms.Button();
+            this.label10 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // txtCodeXL
@@ -156,7 +159,7 @@
             // btnOk
             // 
             this.btnOk.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnOk.Location = new System.Drawing.Point(376, 344);
+            this.btnOk.Location = new System.Drawing.Point(376, 380);
             this.btnOk.Name = "btnOk";
             this.btnOk.Size = new System.Drawing.Size(69, 25);
             this.btnOk.TabIndex = 12;
@@ -166,7 +169,7 @@
             // btnCancel
             // 
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(460, 343);
+            this.btnCancel.Location = new System.Drawing.Point(460, 379);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(69, 25);
             this.btnCancel.TabIndex = 13;
@@ -207,7 +210,7 @@
             // 
             // btnDefaults
             // 
-            this.btnDefaults.Location = new System.Drawing.Point(33, 344);
+            this.btnDefaults.Location = new System.Drawing.Point(33, 380);
             this.btnDefaults.Name = "btnDefaults";
             this.btnDefaults.Size = new System.Drawing.Size(65, 24);
             this.btnDefaults.TabIndex = 17;
@@ -337,11 +340,46 @@
             this.lstCodeXLAsics.Size = new System.Drawing.Size(153, 109);
             this.lstCodeXLAsics.TabIndex = 29;
             // 
+            // txtMystery
+            // 
+            this.txtMystery.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtMystery.Enabled = false;
+            this.txtMystery.Location = new System.Drawing.Point(86, 332);
+            this.txtMystery.Name = "txtMystery";
+            this.txtMystery.Size = new System.Drawing.Size(406, 20);
+            this.txtMystery.TabIndex = 31;
+            // 
+            // btnMystery
+            // 
+            this.btnMystery.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnMystery.Location = new System.Drawing.Point(497, 332);
+            this.btnMystery.Name = "btnMystery";
+            this.btnMystery.Size = new System.Drawing.Size(32, 19);
+            this.btnMystery.TabIndex = 32;
+            this.btnMystery.Text = "...";
+            this.btnMystery.UseVisualStyleBackColor = true;
+            this.btnMystery.Click += new System.EventHandler(this.btnMystery_Click);
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(14, 335);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(67, 13);
+            this.label10.TabIndex = 33;
+            this.label10.Text = "Mystery Tool";
+            this.toolTip1.SetToolTip(this.label10, "Directory where the mali shader compiler can be found.  Default will be relative " +
+        "to working directory.");
+            // 
             // OptionsScreen
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(549, 391);
+            this.ClientSize = new System.Drawing.Size(549, 421);
+            this.Controls.Add(this.label10);
+            this.Controls.Add(this.btnMystery);
+            this.Controls.Add(this.txtMystery);
             this.Controls.Add(this.label9);
             this.Controls.Add(this.lstCodeXLAsics);
             this.Controls.Add(this.label8);
@@ -407,5 +445,8 @@
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.CheckedListBox lstCodeXLAsics;
+        private System.Windows.Forms.TextBox txtMystery;
+        private System.Windows.Forms.Button btnMystery;
+        private System.Windows.Forms.Label label10;
     }
 }

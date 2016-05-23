@@ -61,6 +61,7 @@ namespace Pyramid
             txtPowerVR.Text = opts.PowerVRCompilerPath;
             txtDXX.Text = opts.DXXDriverPath;
             txtMali.Text = opts.MaliSCRoot;
+            txtMystery.Text = opts.MysteryToolPath;
         }
 
         private string BrowseFile( string initial )
@@ -113,6 +114,7 @@ namespace Pyramid
                 SelectedOptions.PowerVRCompilerPath = txtPowerVR.Text;
                 SelectedOptions.DXXDriverPath = txtDXX.Text;
                 SelectedOptions.MaliSCRoot = txtMali.Text ;
+                SelectedOptions.MysteryToolPath = txtMystery.Text;
 
                 for (int backendIndex = 0; backendIndex < lstBackends.Items.Count; backendIndex++)
                 {
@@ -160,6 +162,11 @@ namespace Pyramid
         private void btnMali_Click(object sender, EventArgs e)
         {
             txtMali.Text = BrowseFolder(txtMali.Text);
+        }
+
+        private void btnMystery_Click(object sender, EventArgs e)
+        {
+            txtMystery.Text = BrowseFile(txtMystery.Text);
         }
     }
 }
