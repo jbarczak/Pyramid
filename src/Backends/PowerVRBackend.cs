@@ -126,12 +126,13 @@ namespace Pyramid
                 try
                 {
                     Process p= Process.Start(pi);
-                    p.WaitForExit();
-
+                    
                     string asm = "No Output";
                     string output = p.StandardError.ReadToEnd();
                     string compiler = Path.GetFileNameWithoutExtension(s);
-                    
+
+                    p.WaitForExit();
+
                     if (File.Exists(disasmFile))
                     {
                         asm = File.ReadAllText(disasmFile);

@@ -129,9 +129,9 @@ namespace Pyramid
                     pi.UseShellExecute = false;
 
                     Process p = Process.Start(pi);
+                    string output = p.StandardOutput.ReadToEnd();
                     p.WaitForExit();
 
-                    string output = p.StandardOutput.ReadToEnd();
                     rs.Add(asic, output);
                 }
             }

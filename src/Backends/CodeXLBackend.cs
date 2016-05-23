@@ -177,17 +177,13 @@ namespace Pyramid
             pi.FileName = m_CodeXL;
             pi.UseShellExecute = false;
 
-            string error, output;
+            string output;
             try
             {
                 int TimeOut = 15000; // TODO: Put in options
                 Process p = Process.Start(pi);
+                output = p.StandardOutput.ReadToEnd();
                 if (p.WaitForExit(TimeOut))
-                {
-                    error = p.StandardError.ReadToEnd();
-                    output = p.StandardOutput.ReadToEnd();
-                }
-                else
                 {
                     MessageBox.Show("CodeXL took more than 15 seconds");
                 }
