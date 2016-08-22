@@ -126,6 +126,8 @@ D3DCompiler_Impl::D3DCompiler_Impl( System::String^ DLLPath )
     if( !hDLL )
         throw gcnew System::Exception(System::String::Format( "LoadLibrary failed for {0}", DLLPath ));
     
+    void* pCompile2Func = GetProcAddress( hDLL, "D3DCompile2" );
+    
     void* pCompileFunc = GetProcAddress( hDLL, "D3DCompile" );
     if( !pCompileFunc )
         throw gcnew System::Exception(System::String::Format( "GetProcAddress failed for 'D3DCompile'"));
@@ -150,6 +152,8 @@ D3DCompiler_Impl::D3DCompiler_Impl( System::String^ DLLPath )
     if( !pReflectFunc )
         throw gcnew System::Exception(System::String::Format("GetProcAddress failed for 'D3DReflect'"));
 
+
+    m_pCompile2    = (D3DCOMPILE2_FUNC) pCompile2Func;
     m_pCompile     = (D3DCOMPILE_FUNC) pCompileFunc;
     m_pDisassemble = (D3DDISASSEMBLE_FUNC) pDisassembleFunc;
     m_pStrip       = (D3DSTRIP_FUNC)pStripFunc;
@@ -170,12 +174,27 @@ bool D3DCompiler_Impl::Compile( System::String^ Shader,
     ID3DBlob* pCode=0;
     ID3DBlob* pMessages=0;
     ID3DBlob* pAsm=0;
-    HRESULT hr = m_pCompile( hlsl.GetString(), 
-                             hlsl.Length()+1, 
-                             "", 
-                             0,
-                             0,
-                             entry, profile, opts->GetD3DCompileFlagBits(), 0, &pCode, &pMessages );
+    HRESULT hr;
+    if( m_pCompile2 )
+    {
+        hr = m_pCompile2( hlsl.GetString(), 
+                    hlsl.Length()+1, 
+                    "", 
+                    0,
+                    0,
+                    entry, profile, opts->GetD3DCompileFlagBits(), 0, 
+                    0,0,0,
+                    &pCode, &pMessages );
+    }
+    else
+    {
+        hr = m_pCompile( hlsl.GetString(), 
+                    hlsl.Length()+1, 
+                    "", 
+                    0,
+                    0,
+                    entry, profile, opts->GetD3DCompileFlagBits(), 0, &pCode, &pMessages );
+    }
 
     Messages = nullptr;
     if( pMessages )

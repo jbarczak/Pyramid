@@ -19,6 +19,24 @@ typedef HRESULT (WINAPI *D3DCOMPILE_FUNC)(
                      ID3DBlob **ppCode,
                      ID3DBlob **ppErrorMsgs);
 
+
+typedef HRESULT (WINAPI *D3DCOMPILE2_FUNC)(
+  LPCVOID pSrcData,
+  SIZE_T SrcDataSize,
+  LPCSTR pSourceName,
+  const D3D_SHADER_MACRO* pDefines,
+  ID3DInclude* pInclude,
+  LPCSTR pEntrypoint,
+  LPCSTR pTarget,
+  UINT Flags1,
+  UINT Flags2,
+  UINT SecondaryDataFlags,
+  LPCVOID pSecondaryData,
+  SIZE_T SecondaryDataSize,
+  ID3DBlob** ppCode,
+  ID3DBlob** ppErrorMsgs
+);
+
 typedef HRESULT (WINAPI *D3DDISASSEMBLE_FUNC)(
     LPCVOID pSrcData,
     SIZE_T SrcDataSize,
@@ -89,6 +107,7 @@ public:
 internal:
     
     D3DCOMPILE_FUNC m_pCompile;
+    D3DCOMPILE2_FUNC m_pCompile2;
     D3DDISASSEMBLE_FUNC m_pDisassemble;
     D3DSTRIP_FUNC m_pStrip;
     D3DGETBLOBPART_FUNC m_pGetBlob;

@@ -5,15 +5,16 @@ float4x4 mSkin[30];
 struct VSOut
 {
    float4 P : SV_Position;
-   float3 N : n;
+   float4 N : n;
    float2 uv : uv;
 };
 
-VSOut main( float3 P : p,
-            float3 N : n,
-            float2 uv : uv,
-            float4 w : weights,
-            uint4 idx : indices )
+VSOut main( float3 P   : p,
+            float3 N   : n,
+            float2 uv  : uv,
+            float4 w   : weights,
+            uint4 idx  : indices,
+            float3 foo : foo)
 {
     float3 vP=0;
     float3 vN=0;
@@ -27,7 +28,7 @@ VSOut main( float3 P : p,
     
 	VSOut o;
 	o.P   = mul( float4(vP,1), mViewProj );
-	o.N   = vN;
-	o.uv  = uv;
+	o.N   = float4(vN.xyz,1);
+	o.uv  = uv.xy;
 	return o;
 }
