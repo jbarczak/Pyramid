@@ -29,6 +29,7 @@ namespace Pyramid
             IConfig CreateConfig(string text);
             IConfig CreateDefaultConfig();
             IShader Compile(string text, IOptions opts);
+            IShader CompileHLSL(string text, IOptions opts, string entryPoint );
         }
     }
 }

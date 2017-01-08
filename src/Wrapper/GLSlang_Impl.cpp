@@ -487,6 +487,43 @@ namespace GLSlang{
         }
 
         return gcnew ShaderImpl(shader, rInfoLog, rInfoDebugLog );
+    }
+
+    IShader^ Compiler_Impl::CompileHLSL( System::String^ text, IOptions^ opts, System::String^ entrypoint )
+    {
+        EShLanguage eShaderType; 
+        switch( opts->ShaderType )
+        {
+        case GLSLShaderType::VERTEX:            eShaderType = EShLangVertex; break;
+        case GLSLShaderType::FRAGMENT:          eShaderType = EShLangFragment; break;
+        case GLSLShaderType::GEOMETRY:          eShaderType = EShLangGeometry; break;
+        case GLSLShaderType::TESS_CONTROL:      eShaderType = EShLangTessControl; break;
+        case GLSLShaderType::TESS_EVALUATION:   eShaderType = EShLangTessEvaluation; break;
+        case GLSLShaderType::COMPUTE:           eShaderType = EShLangCompute; break;
+        default: return nullptr;
+        }
+
+        ConfigImpl^ cfg = (ConfigImpl^)opts->Config;
+
+        MarshalledString marshalledText(text);
+        MarshalledString marshalledEntryPoint(entrypoint);
+        const char* p = marshalledText.GetString();
+
+        StubShader* shader = new StubShader(eShaderType);
+        shader->setStrings( &p, 1 );
+        shader->setEntryPoint( marshalledEntryPoint.GetString() );
+
+        bool bResult = shader->parse( cfg->m_Config, 100, false, (EShMessages)(EShMsgDefault|EShMsgReadHlsl|EShMsgVulkanRules|EShMsgSpvRules) );
+
+        System::String^ rInfoLog = MakeString( shader->getInfoLog() );
+        System::String^ rInfoDebugLog = MakeString( shader->getInfoDebugLog() );
+        if( !bResult )
+        {
+            delete shader;
+            shader = nullptr;
+        }
+
+        return gcnew ShaderImpl(shader, rInfoLog, rInfoDebugLog );
        
     }
 
