@@ -1,0 +1,9 @@
+#version 300 es
+precision highp float;
+
+in vec4 Pos;
+out vec4 Pos_x;
+void main( )
+{
+	Pos_x = Pos;
+}

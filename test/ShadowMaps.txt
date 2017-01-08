@@ -17,58 +17,7 @@ struct VSOut
 };
 
 
-
-float PCFGather5x5( float3 vPosSM, float2 Size, Texture2D<float> t, SamplerComparisonState s )
-{
-    float2 uv = (vPosSM.xy*Size);
-    float z   = saturate(vPosSM.z);
-    float2 vWeights = frac(uv.xy); // grab bilinear weights
-    
-    // snap UV to texel center
-    //  If we don't do this, our texels won't agree with the sampler's texels
-    uv = (floor(uv)+0.5)/Size; 
-
-    float4 v0 = t.GatherCmp( s, uv, z, int2(-2, -2) );
-    float4 v1 = t.GatherCmp( s, uv, z, int2( 0, -2) );
-    float4 v2 = t.GatherCmp( s, uv, z, int2( 2, -2) );
-    float4 v3 = t.GatherCmp( s, uv, z, int2(-2,  0) );
-    float4 v4 = t.GatherCmp( s, uv, z, int2( 0,  0) );
-    float4 v5 = t.GatherCmp( s, uv, z, int2( 2,  0) );
-    float4 v6 = t.GatherCmp( s, uv, z, int2(-2,  2) );
-    float4 v7 = t.GatherCmp( s, uv, z, int2( 0,  2) );
-    float4 v8 = t.GatherCmp( s, uv, z, int2( 2,  2) );
-
-    // tap locations
-    //    .    .   .   .   .   .  
-    //      0        1       2
-    //    .    .   .   .   .   .   
-    //          
-    //    .    .   .   .   .   .   
-    //      3        4       5
-    //    .    .   .   .   .   .  
-    //      
-    //    .    .   .   .   .   .   
-    //      6        7       8
-    //    .    .   .   .   .   .  
-    //
-        
-    // gather4 texel ordering:
-    //  w  z
-    //  x  y
-    //       
-     
-    float u = vWeights.x;
-    float v = vWeights.y;
-    float r0 = ( v0.z  + v1.z  + v1.w  + v2.w ) + u*v2.z  + (1-u)*v0.w;
-    float r1 = ( v0.y  + v1.y  + v1.x  + v2.x ) + u*v2.y  + (1-u)*v0.x;
-    float r2 = ( v3.z  + v4.z  + v4.w  + v5.w ) + u*v5.z  + (1-u)*v3.w;
-    float r3 = ( v3.y  + v4.y  + v4.x  + v5.x ) + u*v5.y  + (1-u)*v3.x;
-    float r4 = ( v6.z  + v7.z  + v7.w  + v8.w ) + u*v8.z  + (1-u)*v6.w;
-    float r5 = ( v6.y  + v7.y  + v7.x  + v8.x ) + u*v8.y  + (1-u)*v6.x;
-    float blend = r0*(1-v) + r1 + r2 + r3 + r4 + r5*v;
-    return blend/25;
-}
-
+ 
 
 
 float PCFGather7x7( float3 vPosSM, float2 Size, Texture2D<float> t, SamplerComparisonState s )

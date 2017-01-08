@@ -143,7 +143,7 @@
     <ProjectReference Include="glsl-optimizer\projects\vs2013\glsl_optimizer_lib_2013.vcxproj">
       <Project>{b475a403-9d9b-410d-8a93-ba49fc4dd811}</Project>
     </ProjectReference>
-    <ProjectReference Include="GLSlang\glslang_vs2013.vcxproj">
+    <ProjectReference Include="GLSlang\glslang_Pyramid.vcxproj">
       <Project>{3b146cc5-b2b8-4573-9d46-6139e2edfea3}</Project>
     </ProjectReference>
   </ItemGroup>
