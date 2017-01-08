@@ -43,6 +43,7 @@
     <Compile Include="IWrapper.cs" />
     <Compile Include="LanguageTypes.cs" />
     <Compile Include="ScrutinizerTypes.cs" />
+    <Compile Include="SPIRV.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

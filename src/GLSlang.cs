@@ -17,6 +17,7 @@ namespace Pyramid
             bool HasErrors { get; }
             string InfoLog { get; }
             string InfoDebugLog { get; }
+            SPIRV.IProgram CompileSPIRV();
         }
 
         public interface IConfig

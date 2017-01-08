@@ -4,6 +4,9 @@
 #pragma unmanaged
 #include "GLSlang/glslang/Public/ShaderLang.h"
 #include "GLSlang/glslang/Include/ResourceLimits.h"
+#include "GLSlang/SPIRV/GlslangToSpv.h"
+#include "GLSlang/SPIRV/disassemble.h"
+#include <sstream>
 #pragma managed
 
 #include "Utilities.h"
@@ -307,8 +310,23 @@ void ProcessConfigFile( TBuiltInResource& Resources,  char* config )
 }
 
 
+
 namespace Pyramid{
 namespace GLSlang{
+
+    // The authors of glslang have not seen fit to make
+    //  the TIntermediate of a TShader directly accessible
+    //  But we need it if we're going to generate SPIRV from it
+    //  Lucky for us, they made it public
+    #pragma unmanaged
+    class StubShader : public glslang::TShader
+    {
+    public:
+        StubShader( EShLanguage eType ) : TShader(eType){}
+        glslang::TIntermediate* GetIntermediate() { return this->intermediate; }
+    };
+
+    #pragma managed
 
     ref class ConfigImpl : IConfig
     {
@@ -329,24 +347,73 @@ namespace GLSlang{
         TBuiltInResource* m_Config;
     };
 
+
+
+    struct SPIRVBlob_Unmanaged
+    {
+        std::vector<unsigned int> m_SPIRV;
+    };
+
+    ref class SPIRVBlob : Pyramid::SPIRV::IProgram
+    {
+    public:
+
+        SPIRVBlob( SPIRVBlob_Unmanaged* pBlob ) : m_pBlob(pBlob)
+        {
+        }
+        ~SPIRVBlob()
+        {
+            delete m_pBlob;
+        }
+        
+        virtual System::String^ Disassemble()
+        {
+            std::stringstream stream;
+            spv::Disassemble( stream, m_pBlob->m_SPIRV );
+
+            System::String^ str = MakeString( stream.str().c_str() );
+            return str->Replace( "\n", System::Environment::NewLine );
+        }
+
+        SPIRVBlob_Unmanaged* m_pBlob; 
+    };
+
     ref class ShaderImpl : IShader
     {
     public:
-        ShaderImpl( bool bError, const char* pInfoLog, const char* pInfoDebugLog )
-            : m_bError(bError),
-              m_InfoLog( MakeString(pInfoLog) ),
-              m_InfoDebugLog( MakeString(pInfoDebugLog) )
+        ShaderImpl( StubShader* pShader, System::String^ Info, System::String^ InfoDebug )
+            : m_pShader(pShader),
+              m_InfoLog( Info ),
+              m_InfoDebugLog( InfoDebug )
 
         {
         }
+        ~ShaderImpl()
+        {
+            if(m_pShader)
+                delete m_pShader;
+            m_pShader=nullptr;
+        }
 
-        virtual property bool HasErrors { bool get() { return m_bError; } };
+        virtual property bool HasErrors { bool get() { return m_pShader != nullptr; } };
         virtual property System::String^ InfoLog { System::String^ get() { return m_InfoLog; } }
         virtual property System::String^ InfoDebugLog { System::String^ get() { return m_InfoDebugLog; } }
+
+        virtual Pyramid::SPIRV::IProgram^ CompileSPIRV()
+        {
+            if( !m_pShader )
+                return nullptr;
+
+            SPIRVBlob_Unmanaged* pBlob = new SPIRVBlob_Unmanaged();
+            glslang::GlslangToSpv( *m_pShader->GetIntermediate(), pBlob->m_SPIRV );
+
+            return gcnew SPIRVBlob(pBlob);
+        }
+
     private:
         System::String^ m_InfoLog;
         System::String^ m_InfoDebugLog;
-        bool m_bError;
+        StubShader* m_pShader;
     };
 
 
@@ -407,11 +474,20 @@ namespace GLSlang{
         MarshalledString marshalledText(text);
         const char* p = marshalledText.GetString();
 
-        glslang::TShader shader(eShaderType);
-        shader.setStrings( &p, 1 );
+        StubShader* shader = new StubShader(eShaderType);
+        shader->setStrings( &p, 1 );
+        bool bResult = shader->parse( cfg->m_Config, 100, false, EShMsgDefault );
 
-        bool bResult = shader.parse( cfg->m_Config, 100, false, EShMsgDefault );
-        return gcnew ShaderImpl(bResult, shader.getInfoLog(), shader.getInfoDebugLog() );
+        System::String^ rInfoLog = MakeString( shader->getInfoLog() );
+        System::String^ rInfoDebugLog = MakeString( shader->getInfoDebugLog() );
+        if( !bResult )
+        {
+            delete shader;
+            shader = nullptr;
+        }
+
+        return gcnew ShaderImpl(shader, rInfoLog, rInfoDebugLog );
+       
     }
 
 }}

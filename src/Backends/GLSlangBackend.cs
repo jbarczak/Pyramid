@@ -29,7 +29,12 @@ namespace Pyramid
                 m_Results.Multiline = true;
                 m_Results.ScrollBars = ScrollBars.Both;
                 m_Results.WordWrap = false;
-                m_Results.Text = shader.InfoLog.Replace("\n", Environment.NewLine);
+
+                SPIRV.IProgram spirv = shader.CompileSPIRV();
+                if (spirv != null)
+                    m_Results.Text = spirv.Disassemble();
+                else
+                    m_Results.Text = shader.InfoLog.Replace("\n", Environment.NewLine);
             }
         }
         
