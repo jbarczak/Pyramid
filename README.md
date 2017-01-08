@@ -14,8 +14,9 @@ Currently, Pyramid supports these tools:
 	* Microsoft D3D compiler *(d3dcompiler_47)*: for showing D3D assembly.
 	* AMD DXX driver *(Catalyst 14.9)*, used for GCN disassembly and [shader execution simulation](http://www.joshbarczak.com/blog/?p=823).
 	* AMD [CodeXL analyzer](http://developer.amd.com/tools-and-sdks/opencl-zone/codexl/) *(version 1.5)*.
+    * glslang HLSL front end (2017 January build)
 * GLSL:
-	* Khronos reference [glslang](https://github.com/KhronosGroup/glslang) validator *(2015 December build)*.
+	* Khronos reference [glslang](https://github.com/KhronosGroup/glslang) validator *(2017 January build)*.
 	* Imagination [PowerVR Rogue compiler](https://community.imgtec.com/developers/powervr/tools/pvrshadereditor/) *(version 3.4)*.
 	* ARM [Mali offline compiler](http://malideveloper.arm.com/resources/tools/mali-offline-compiler/) *(version 4.6)*.
 	* [glsl-optimizer](https://github.com/aras-p/glsl-optimizer) *(2015 November build)*.
