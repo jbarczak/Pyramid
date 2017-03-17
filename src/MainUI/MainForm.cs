@@ -24,7 +24,7 @@ namespace Pyramid
         private void CreateBackends( Options opts )
         {
             List<IBackend> backends = new List<IBackend>();
-
+            
             try
             {
                 ID3DCompiler fxc = m_Wrapper.CreateD3DCompiler(opts.D3DCompilerPath);

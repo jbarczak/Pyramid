@@ -62,6 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GlobalAssemblyInfo.cs" />
+    <Compile Include="Src\Actions\FindReplaceAction.cs" />
     <Compile Include="Src\Document\DefaultDocument.cs" />
     <Compile Include="Src\Document\DocumentEventArgs.cs" />
     <Compile Include="Src\Document\DocumentFactory.cs" />
@@ -98,6 +99,12 @@
     <Compile Include="Src\Document\TextBufferStrategy\GapTextBufferStrategy.cs" />
     <Compile Include="Src\Document\TextBufferStrategy\ITextBufferStrategy.cs" />
     <Compile Include="Src\Document\TextBufferStrategy\StringTextBufferStrategy.cs" />
+    <Compile Include="Src\Gui\FindReplaceForm\FindAndReplaceForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Src\Gui\FindReplaceForm\FindAndReplaceForm.Designer.cs">
+      <DependentUpon>FindAndReplaceForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Src\Util\AugmentableRedBlackTree.cs" />
     <Compile Include="Src\Util\CheckedList.cs" />
     <Compile Include="Src\Util\LoggingService.cs" />
@@ -198,6 +205,9 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Resources\HLSL-Mode.xshd" />
+    <EmbeddedResource Include="Src\Gui\FindReplaceForm\FindAndReplaceForm.resx">
+      <DependentUpon>FindAndReplaceForm.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="Resources\ICSharpCode.TextEditor.snk" />
     <EmbeddedResource Include="Resources\TextEditorControl.bmp" />
     <EmbeddedResource Include="Resources\Mode.xsd">

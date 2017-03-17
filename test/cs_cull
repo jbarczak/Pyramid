@@ -1,0 +1,299 @@
+ 
+
+#define THREADGROUP_WIDTH 1024 
+
+cbuffer globals
+{
+    row_major float4x4 mViewProj;
+    float2 g_vResolution; 
+};
+cbuffer drawcall
+{
+    row_major float4x4 mWorld;
+};
+
+struct TriGroup
+{
+	uint nFirstIndex;
+	uint nFirstVertex;
+	uint nTriangles;
+	uint nVerts;
+};
+
+StructuredBuffer<TriGroup> g_Groups;
+
+// Public service announcement.  Raw buffers are SIGNIFICANTLY more efficient than TBuffers
+//  Buffer<xxx> and friends.   Because of stupid DX constraint that R32G32B32 views cannot be used on VB/IB
+//   it is necessary to load single elements from these.  
+//  Using ByteAddressBuffer instead gives me a sizable boost because we can load multiple dwords at once
+
+ByteAddressBuffer g_VertexBuffer;
+ByteAddressBuffer g_IndexBuffer; 
+
+struct IndexStruct
+{
+	uint3 Indices;
+};
+AppendStructuredBuffer<IndexStruct> g_OutIndices;
+
+groupshared float3 g_Verts[THREADGROUP_WIDTH];
+
+[numthreads(THREADGROUP_WIDTH,1,1)]
+void main( uint3 ThreadID      : SV_DispatchThreadID,
+            uint3 GroupID       : SV_GroupID,
+            uint3 GroupThreadID : SV_GroupThreadID )
+{ 
+    uint tid        = ThreadID.x;
+	uint gid		= GroupThreadID.x;
+
+	// initialize stuff
+	uint3 Indices = 0;
+	bool bKeepTri = false;
+	
+	// fetch tri-group information
+	TriGroup kGroup = g_Groups[GroupID.x];
+	
+	// load this thread's triangle indices
+    Indices = g_IndexBuffer.Load3( 12*gid + kGroup.nFirstIndex );
+    
+	// fetch and transform this thread's vertex
+	[branch]
+	if( gid < kGroup.nVerts )
+	{
+		float3 P0 = asfloat( g_VertexBuffer.Load3( 12*(gid+kGroup.nFirstVertex) ) );
+		float3 P0w = mul( float4(P0,1),  mWorld ).xyz;
+		float4 P0p = mul( float4(P0w,1), mViewProj );
+        g_Verts[gid] = P0p.xyw;
+	}
+	
+	// sync up
+	GroupMemoryBarrierWithGroupSync();
+	
+	// perform triangle backface tests
+	[branch]
+	if( gid < kGroup.nTriangles )
+    {
+        float3 P0p = g_Verts[Indices.x];
+        float3 P1p = g_Verts[Indices.y];
+        float3 P2p = g_Verts[Indices.z];
+       
+        // Culling in homogenous coordinates
+	    // Read: "Triangle Scan Conversion using 2D Homogeneous Coordinates"
+	    //       by Marc Olano, Trey Greer
+	    //       http://www.cs.unc.edu/~olano/papers/2dh-tri/2dh-tri.pdf
+	    float3x3 m =
+	    {
+	        P0p.xyz, P1p.xyz, P2p.xyz
+	    };
+	    
+		if( determinant(m)>0 )
+	  	{
+	  		IndexStruct id;
+	  		id.Indices = Indices + kGroup.nFirstVertex;
+	  		g_OutIndices.Append(id);
+	  	}
+    }
+}
+
+groupshared uint g_Prefix[THREADGROUP_WIDTH];
+groupshared uint OutputBaseAddress;
+	
+RWByteAddressBuffer g_DrawIndirectBuffer;
+RWByteAddressBuffer g_OutputIB;
+
+[numthreads(THREADGROUP_WIDTH,1,1)]
+void main_prefix( uint3 ThreadID      : SV_DispatchThreadID,
+            	  uint3 GroupID       : SV_GroupID,
+            	  uint3 GroupThreadID : SV_GroupThreadID )
+{ 
+    uint tid        = ThreadID.x;
+	uint gid		= GroupThreadID.x;
+
+	// initialize stuff
+	uint3 Indices = 0;
+	bool bKeepTri = false;
+	g_Prefix[gid] = 0;
+	
+	// fetch tri-group information
+	TriGroup kGroup = g_Groups[GroupID.x];
+	
+	// load this thread's triangle indices
+    Indices = g_IndexBuffer.Load3( 12*gid + kGroup.nFirstIndex );
+    
+	// fetch and transform this thread's vertex
+	[branch]
+	if( gid < kGroup.nVerts )
+	{
+		float3 P0 = asfloat( g_VertexBuffer.Load3( 12*(gid+kGroup.nFirstVertex) ) );
+		float3 P0w = mul( float4(P0,1),  mWorld ).xyz;
+		float4 P0p = mul( float4(P0w,1), mViewProj );
+        g_Verts[gid] = P0p.xyw;
+	}
+	
+	// sync up
+	GroupMemoryBarrierWithGroupSync();
+	
+	// perform triangle backface tests
+	[branch]
+	if( gid < kGroup.nTriangles )
+    {
+        float3 P0p = g_Verts[Indices.x];
+        float3 P1p = g_Verts[Indices.y];
+        float3 P2p = g_Verts[Indices.z];
+       
+        // Culling in homogenous coordinates
+	    // Read: "Triangle Scan Conversion using 2D Homogeneous Coordinates"
+	    //       by Marc Olano, Trey Greer
+	    //       http://www.cs.unc.edu/~olano/papers/2dh-tri/2dh-tri.pdf
+	    float3x3 m =
+	    {
+	        P0p.xyz, P1p.xyz, P2p.xyz
+	    };
+	    
+	 	g_Prefix[gid] = (determinant(m)>0) ? 1 : 0;
+    }
+
+	// prefix-sum on cull results
+	GroupMemoryBarrierWithGroupSync();
+	
+	[unroll]
+	for(int t=1; t<THREADGROUP_WIDTH; t=t<<1)
+	{
+		if (gid >= t)
+			g_Prefix[gid] += g_Prefix[gid-t];
+		GroupMemoryBarrier();
+	
+	}
+	
+	// one thread does one single atomic inc to offset into output IB
+	if( gid == kGroup.nTriangles-1 )
+	{
+		uint nIndices = 3*g_Prefix[gid];
+		g_DrawIndirectBuffer.InterlockedAdd(0,nIndices, OutputBaseAddress);
+	}
+	
+	GroupMemoryBarrierWithGroupSync();
+	
+	if( gid < kGroup.nTriangles )
+	{
+		uint nLoc = 4*(OutputBaseAddress + 3*g_Prefix[gid]);
+		g_OutputIB.Store3(nLoc, Indices);
+	}
+}
+
+
+
+/*
+[numthreads(THREADGROUP_WIDTH,1,1)]
+void main( uint3 ThreadID      : SV_DispatchThreadID,
+            uint3 GroupID       : SV_GroupID,
+            uint3 GroupThreadID : SV_GroupThreadID )
+{ 
+    uint tid        = ThreadID.x;
+
+    [branch]
+    if( tid < g_nTriangles )
+    {
+        // fetch verts
+        //   NOTE: No Vertex re-use.   Possible to add some?
+        uint3 Indices = g_Indices.Load3( 12*tid );
+        float3 P0 = asfloat( g_Verts.Load3( 12*Indices.x ) );
+        float3 P1 = asfloat( g_Verts.Load3( 12*Indices.y ) );
+        float3 P2 = asfloat( g_Verts.Load3( 12*Indices.z ) );
+		
+        // transform verts
+        float3 P0w = mul( float4(P0,1),  mWorld ).xyz;
+        float3 P1w = mul( float4(P1,1),  mWorld ).xyz;
+        float3 P2w = mul( float4(P2,1),  mWorld ).xyz;
+        float4 P0p = mul( float4(P0w,1), mViewProj );
+        float4 P1p = mul( float4(P1w,1), mViewProj );
+        float4 P2p = mul( float4(P2w,1), mViewProj );
+        P0p.w   = rcp(P0p.w); 
+        P1p.w   = rcp(P1p.w);
+        P2p.w   = rcp(P2p.w);
+        P0p.xyz *= P0p.w; 
+        P1p.xyz *= P1p.w;
+        P2p.xyz *= P2p.w;
+
+        // clip-space to viewport transform
+        P0p.xy = g_vResolution*(float2(0.5,-0.5)*P0p.xy + float2(0.5,0.5));
+        P1p.xy = g_vResolution*(float2(0.5,-0.5)*P1p.xy + float2(0.5,0.5));
+        P2p.xy = g_vResolution*(float2(0.5,-0.5)*P2p.xy + float2(0.5,0.5));
+
+        // compute AABB
+        float2 vBBMin = min(P0p.xy,min(P1p.xy,P2p.xy));
+        float2 vBBMax = max(P0p.xy,max(P1p.xy,P2p.xy));
+        
+        // clip AABB to screen
+        vBBMin = max(vBBMin.xy,0);
+        vBBMax = min(vBBMax.xy,g_vResolution);
+
+        // reject out-of-bounds triangles
+        [branch]
+        if( all(vBBMin < vBBMax) )
+        {
+            // back-face test
+            float2 v01 = P1p.xy-P0p.xy;
+            float2 v20 = P0p.xy-P2p.xy;
+            [branch]
+            if( (v01.x*v20.y - v20.x*v01.y) < 0 )
+            {
+                // Setup Edge functions
+                float2 N01 = float2(-v01.y,v01.x);
+                float2 N20 = float2(-v20.y,v20.x);
+                float3 E01 = float3(N01.xy,-dot(N01,P0p.xy));
+                float3 E20 = float3(N20.xy,-dot(N20,P0p.xy));
+                E01 *= rcp(dot(E01,float3(P2p.xy,1)));
+                E20 *= rcp(dot(E20,float3(P1p.xy,1)));
+
+                // Setup interpolation functions for Z and 1/w
+                float3 ZPlane = float3(P0p.z, P2p.z-P0p.z, P1p.z-P0p.z);
+                float3 WPlane = float3(P0p.w, P2p.w-P0p.w, P1p.w-P0p.w);
+
+                // Round AABB to pixels
+                float2 TriMin = floor(vBBMin);
+                float2 TriMax = ceil(vBBMax);
+
+                // offset to pixel center
+                TriMin += 0.5f;
+                TriMax += 0.5f;
+
+                // iterate pixels
+                
+                float2 vPos;
+                for( vPos.y=TriMin.y; vPos.y < TriMax.y; vPos.y++ )
+                {
+                    for( vPos.x=TriMin.x; vPos.x < TriMax.x; vPos.x++ )
+                    {
+                        // TODO: Incremental?
+                        float u = dot( float3(vPos,1), E01 );
+                        float v = dot( float3(vPos,1), E20 );
+                        [branch]
+                        if( u>=0 && v>=0 && (u+v)<=1 )
+                        {
+                            // Interpolate depth
+                            float z = dot( float3(1,u,v),ZPlane );
+                            float w = dot( float3(1,u,v),WPlane );
+                            float depth = z/w;
+
+                            // Surprisingly, reading the Z-buffer first
+                            //    and then skipping redundant Interlocked ops
+                            //     results in a massive boost
+                            //
+                            //  I'm not so sure whether this is due to depth complexity or
+                            //   if we're somehow speeding up the atomics by ensuring
+                            //   that the pixels are in cache first
+                            //
+                            uint zb = g_ZBuffer[uint2(vPos.xy)];
+
+                            [branch]
+                            if( zb > asuint(depth) )
+                                InterlockedMin(g_ZBuffer[uint2(vPos.xy)], asuint(depth) );
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+*/
