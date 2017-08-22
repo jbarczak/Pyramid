@@ -7,6 +7,8 @@ namespace Pyramid
         public interface IProgram
         {
             string Disassemble();
+            uint[] GetTokens();
+            byte[] GetBytes();
         }
 
 

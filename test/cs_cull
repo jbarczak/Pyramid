@@ -44,7 +44,7 @@ void main( uint3 ThreadID      : SV_DispatchThreadID,
             uint3 GroupThreadID : SV_GroupThreadID )
 { 
     uint tid        = ThreadID.x;
-	uint gid		= GroupThreadID.x;
+	uint tid_local	= GroupThreadID.x;
 
 	// initialize stuff
 	uint3 Indices = 0;
@@ -54,7 +54,8 @@ void main( uint3 ThreadID      : SV_DispatchThreadID,
 	TriGroup kGroup = g_Groups[GroupID.x];
 	
 	// load this thread's triangle indices
-    Indices = g_IndexBuffer.Load3( 12*gid + kGroup.nFirstIndex );
+	uint IndexLocation = 12*tid_local + kGroup.nFirstIndex;
+    Indices = g_IndexBuffer.Load3( IndexLocation );
     
 	// fetch and transform this thread's vertex
 	[branch]

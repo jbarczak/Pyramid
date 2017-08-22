@@ -17,24 +17,15 @@ namespace Pyramid
 
         private class GLSLangResultSet : IResultSet
         {
-            private TextBox m_Results = new TextBox();
+            private GLSlangResultsPanel m_Results = null;
 
             public string Name { get { return "GLSlang"; } }
             public Control AnalysisPanel { get { return null; } }
             public Control ResultsPanel { get { return m_Results;  } }
             public GLSLangResultSet(GLSlang.IShader shader)
             {
-                m_Results.ReadOnly = true;
-                m_Results.Dock = DockStyle.Fill;
-                m_Results.Multiline = true;
-                m_Results.ScrollBars = ScrollBars.Both;
-                m_Results.WordWrap = false;
+                m_Results = new GLSlangResultsPanel(shader, shader.CompileSPIRV());
 
-                SPIRV.IProgram spirv = shader.CompileSPIRV();
-                if (spirv != null)
-                    m_Results.Text = spirv.Disassemble();
-                else
-                    m_Results.Text = shader.InfoLog.Replace("\n", Environment.NewLine);
             }
         }
         

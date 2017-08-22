@@ -375,6 +375,22 @@ namespace GLSlang{
             return str->Replace( "\n", System::Environment::NewLine );
         }
 
+        virtual array<unsigned int>^ GetTokens()
+        {
+            array<unsigned int>^ pmArray = gcnew array<unsigned int>(m_pBlob->m_SPIRV.size());
+            for( size_t i=0; i<m_pBlob->m_SPIRV.size(); i++ )
+                pmArray[i] = m_pBlob->m_SPIRV[i];
+            return pmArray;
+        }
+        
+        virtual array<unsigned char>^ GetBytes()
+        {
+            size_t nSize = m_pBlob->m_SPIRV.size()*sizeof(unsigned int);
+            array<unsigned char>^ pmArray = gcnew array<unsigned char>(nSize);
+            Marshal::Copy( System::IntPtr((void*)m_pBlob->m_SPIRV.data()), pmArray, 0, nSize );
+            return pmArray;
+        }
+
         SPIRVBlob_Unmanaged* m_pBlob; 
     };
 

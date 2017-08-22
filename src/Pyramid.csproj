@@ -66,6 +66,12 @@
     <Compile Include="Backends\AMDDriverResultsPanel.Designer.cs">
       <DependentUpon>AMDDriverResultsPanel.cs</DependentUpon>
     </Compile>
+    <Compile Include="Backends\GLSlangResultsPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Backends\GLSlangResultsPanel.Designer.cs">
+      <DependentUpon>GLSlangResultsPanel.cs</DependentUpon>
+    </Compile>
     <Compile Include="Backends\MaliSCBackend.cs" />
     <Compile Include="Backends\MaliSCResultsPanel.cs">
       <SubType>UserControl</SubType>
@@ -174,6 +180,9 @@
     </Compile>
     <EmbeddedResource Include="Backends\AMDDriverResultsPanel.resx">
       <DependentUpon>AMDDriverResultsPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Backends\GLSlangResultsPanel.resx">
+      <DependentUpon>GLSlangResultsPanel.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Backends\MaliSCResultsPanel.resx">
       <DependentUpon>MaliSCResultsPanel.cs</DependentUpon>
