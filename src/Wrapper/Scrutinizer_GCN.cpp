@@ -389,7 +389,8 @@ List<IInstruction^>^ Scrutinizer_GCN_Base::BuildDXFetchShader( Pyramid::IDXShade
 System::String^ Scrutinizer_GCN_Base::AnalyzeTrace( List<IInstruction^>^ ops, unsigned int nWaveIssueRate, 
                                                    unsigned int nWaveOccupancy, 
                                                    unsigned int nGroupOccupancy,
-                                                   unsigned int nCUs )
+                                                   unsigned int nCUs,
+                                                   unsigned int nWavesPerGroup )
 {
     std::vector<GCN::Simulator::SimOp> pSimOps(ops->Count);
 
@@ -463,7 +464,7 @@ System::String^ Scrutinizer_GCN_Base::AnalyzeTrace( List<IInstruction^>^ ops, un
     settings.nExportCost          = nCUs*4;               
     settings.nGroupIssueRate      = nWaveIssueRate;   
     settings.nGroupsToExecute     = 500;
-    settings.nWavesPerThreadGroup = 1;
+    settings.nWavesPerThreadGroup = nWavesPerGroup;
     settings.nMaxWavesPerSIMD     = nWaveOccupancy;
     settings.nMaxGroupsPerCU      = nGroupOccupancy;
 
@@ -584,7 +585,7 @@ System::String^ Scrutinizer_GCN_VS::AnalyzeExecutionTrace( List<IInstruction^>^ 
     double fClocksPerWave = ( fTrisPerWave>64.0f) ? 64.0 : fTrisPerWave;
     unsigned int nWaveIssueRate        = (unsigned int) (nCUs*fClocksPerWave);
 
-    return AnalyzeTrace(ops,nWaveIssueRate,nOccupancy,40,nCUs);
+    return AnalyzeTrace(ops,nWaveIssueRate,nOccupancy,40,nCUs,1);
 }
 
 
@@ -614,7 +615,7 @@ System::String^ Scrutinizer_GCN_PS::AnalyzeExecutionTrace(List<IInstruction^>^ o
     double fClocksPerWave = Math::Ceiling( 16.0 / fQuadsPerClock );
     unsigned int nWaveIssueRate = (unsigned int) (nCUs*fClocksPerWave);
            
-    return AnalyzeTrace(ops,nWaveIssueRate,nOccupancy,40,nCUs);
+    return AnalyzeTrace(ops,nWaveIssueRate,nOccupancy,40,nCUs,1);
 }
 
   
@@ -644,9 +645,9 @@ System::String^ Scrutinizer_GCN_CS::AnalyzeExecutionTrace(List<IInstruction^>^ o
     //  Time needed to dispatch a group of N waves is N+1 clocks
     // Assume that our wave load is round-robined across CUs
 
-    unsigned int nWaveIssueRate = (m_nWavesPerGroup+1)*nCUs;
+    unsigned int nGroupIssueRate = (m_nWavesPerGroup+1)*nCUs;
 
-    return AnalyzeTrace(ops,nWaveIssueRate,nWaveOccupancy,nGroupOccupancy,nCUs);
+    return AnalyzeTrace(ops,nGroupIssueRate,nWaveOccupancy,nGroupOccupancy,nCUs, m_nWavesPerGroup);
 }
 
   

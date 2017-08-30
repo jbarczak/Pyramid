@@ -37,7 +37,8 @@ protected:
                                   unsigned int nWaveIssueRate, 
                                   unsigned int nWaveOccupancy,
                                   unsigned int nGroupOccupancy,
-                                  unsigned int nCUCount );
+                                  unsigned int nCUCount,
+                                  unsigned int nWavesPerGroup );
 
     AMDAsic_Impl^ m_pmAsic;
     AMDShader_Impl^ m_pmShader;

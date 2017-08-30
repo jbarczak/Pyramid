@@ -618,26 +618,37 @@ namespace Simulator{
         //
         RingQueue<DSOp,MAX_WAVES_PER_CU*32>     LDSQueue[NUM_LDS_QUEUES];
 
+        size_t nGroupDelay= rSettings.nGroupIssueRate; // Time in cycles since a threadgroup was started
+        
 
         while(1)
         {
             // Issue new wavefront if its time
             if( nIssuedWaves < nWavesToExecute )
             {
-                if( !pIssuingThreadGroup && (nClock % rSettings.nGroupIssueRate) == 0 )
+                if( !pIssuingThreadGroup  )
                 {
-                    // start issuing a new thread group after the specified time interval has elapsed
-                    //  This is to model the effect of fixed-function units (ACE, VGT, Rasterizer, etc)
-                    //   round-robining waves across available CUs
-                    
-                    pIssuingThreadGroup = FindAvailableThreadGroup(pThreadGroups,rSettings.nMaxGroupsPerCU);
-                    if( pIssuingThreadGroup )
+                    if( nGroupDelay >= rSettings.nGroupIssueRate ) 
                     {
-                        pIssuingThreadGroup->nWaves = rSettings.nWavesPerThreadGroup;
-                        pIssuingThreadGroup->nLaunchedWaves = 0;
-                        pIssuingThreadGroup->nRetiredWaves = 0;
-                        pIssuingThreadGroup->nWaitMask = 0;
-                        nGroupsInFlight++;
+                        // start issuing a new thread group after the specified time interval has elapsed
+                        //  This is to model the effect of fixed-function units (ACE, VGT, Rasterizer, etc)
+                        //   round-robining waves across available CUs
+                    
+                        pIssuingThreadGroup = FindAvailableThreadGroup(pThreadGroups,rSettings.nMaxGroupsPerCU);
+                        if( pIssuingThreadGroup )
+                        {
+                            pIssuingThreadGroup->nWaves = rSettings.nWavesPerThreadGroup;
+                            pIssuingThreadGroup->nLaunchedWaves = 0;
+                            pIssuingThreadGroup->nRetiredWaves = 0;
+                            pIssuingThreadGroup->nWaitMask = 0;
+                            nGroupsInFlight++;
+                        }
+                        nGroupDelay=0;
+                    }
+                    else
+                    {
+                        // count cycles until next group can start
+                        nGroupDelay++;
                     }
                 }
                 
