@@ -66,7 +66,7 @@ namespace Pyramid.Scrutinizer.UI
                     if( n < m_Param.Min || n > m_Param.Max )
                     {
                         MessageBox.Show( 
-                            String.Format( "{0} must be between {1] and {2}", m_Param.Name,
+                            String.Format( "{0} must be between {1} and {2}", m_Param.Name,
                                            m_Param.Min, m_Param.Max ) );
                         m_Box.Focus();
                         return false;

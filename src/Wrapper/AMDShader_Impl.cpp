@@ -226,10 +226,12 @@ size_t AMDShader_Impl::GetGroupOccupancy()
     DWORD nUsedLDS      = m_pStats[4];
     DWORD nMaxLDS       = m_pStats[5];
     if( !nUsedLDS )
-        return GetWavesPerThreadGroup()/40;
+        return 40/GetWavesPerThreadGroup();
     
+    size_t nMaxGroupsLDS = (nMaxLDS/nUsedLDS)*2;
+    size_t nMaxGroupsWaveSlots = 40/GetWavesPerThreadGroup();
 
-    return (nMaxLDS/nUsedLDS)*2;
+    return min(nMaxGroupsLDS,nMaxGroupsWaveSlots);
 }
 
 Pyramid::Scrutinizer::IScrutinizer^ AMDShader_Impl::CreateScrutinizer()

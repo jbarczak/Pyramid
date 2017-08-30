@@ -1,0 +1,44 @@
+
+#define TILE_SIZE 32
+#define THREAD_COUNT TILE_SIZE*TILE_SIZE
+
+Texture2D<float2> tx_velocity;
+RWTexture2D<float2> tx_tile_out;
+
+groupshared float2 SCRATCH[TILE_SIZE*TILE_SIZE];
+
+
+[numthreads(THREAD_COUNT,1,1)]
+void main( uint3 tid : SV_DispatchThreadID, 
+           uint3 tid_local : SV_GroupThreadID,
+           uint3 gid : SV_GroupID )
+{
+	uint x = tid_local.x % TILE_SIZE;
+	uint y = tid_local.y / TILE_SIZE;
+	
+	uint2 fetch = gid.xy*TILE_SIZE + uint2(x,y);
+	
+	float2 v = tx_velocity.Load( uint3(fetch.xy,0) );
+	SCRATCH[tid_local.x] = v;
+	
+	uint n = THREAD_COUNT/2; 
+	do
+	{
+		GroupMemoryBarrierWithGroupSync();
+		if( tid_local.x < n )		
+		{
+			float2 v0 = SCRATCH[tid_local.x];
+			float2 v1 = SCRATCH[tid_local.x+n];
+			float m0 = dot(v0,v0);
+			float m1 = dot(v1,v1);
+			float2 big = (m0>m1) ? v0 : v1;
+			SCRATCH[tid_local.x] = big;
+		}
+
+		n = n/2;
+	} while( n > 1 );
+	
+	
+	if( tid_local.x == 0 )
+		tx_tile_out[gid.xy] = SCRATCH[0];
+}

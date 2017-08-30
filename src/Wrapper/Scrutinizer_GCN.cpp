@@ -623,8 +623,11 @@ Scrutinizer_GCN_CS::Scrutinizer_GCN_CS( AMDAsic_Impl^ asic, AMDShader_Impl^ shad
 {
     m_nWavesPerGroup             = (shader->GetThreadsPerThreadGroup()+63)/64;
     size_t nMinimumWaveOccupancy = (m_nWavesPerGroup+3)/4;
+    size_t nGroup = 40/m_nWavesPerGroup;
+    size_t nMaxGroups = shader->GetGroupOccupancy();
+
     m_pmWaveOccupancy     = gcnew SimulationParameterInt(nMinimumWaveOccupancy,10,shader->GetWaveOccupancy(),"Waves/SIMD");
-    m_pmGroupOccupancy    = gcnew SimulationParameterInt(1,(40/m_nWavesPerGroup),shader->GetGroupOccupancy(),"Groups/CU");
+    m_pmGroupOccupancy    = gcnew SimulationParameterInt(1,nMaxGroups,nMaxGroups,"Groups/CU");
     m_pmCUCount           = gcnew SimulationParameterInt(1,10000,10,"CU Count");
     m_pmParams->Add(m_pmWaveOccupancy);
     m_pmParams->Add(m_pmCUCount);
