@@ -51,6 +51,17 @@ namespace Pyramid
                     lstCodeXLAsics.SetItemChecked(index, !opts.IsCodeXLAsicDisabled(asic));
                 }
             }
+
+            if (System.IO.File.Exists(opts.RGAPath))
+            {
+                List<string> rgaAsics = RGABackend.GetAsicList(opts.RGAPath);
+                foreach (string asic in rgaAsics)
+                {
+                    int index = lstRGAAsics.Items.Add(asic);
+                    lstRGAAsics.SetItemChecked(index, !opts.IsRGAAsicDisabled(asic));
+                }
+            }
+
         }
 
         private void PopulateGUIFromOptions(Options opts)
@@ -62,6 +73,7 @@ namespace Pyramid
             txtDXX.Text = opts.DXXDriverPath;
             txtMali.Text = opts.MaliSCRoot;
             txtMystery.Text = opts.MysteryToolPath;
+            txtRGA.Text = opts.RGAPath;
         }
 
         private string BrowseFile( string initial )
@@ -115,6 +127,7 @@ namespace Pyramid
                 SelectedOptions.DXXDriverPath = txtDXX.Text;
                 SelectedOptions.MaliSCRoot = txtMali.Text ;
                 SelectedOptions.MysteryToolPath = txtMystery.Text;
+                SelectedOptions.RGAPath = txtRGA.Text;
 
                 for (int backendIndex = 0; backendIndex < lstBackends.Items.Count; backendIndex++)
                 {
@@ -137,6 +150,15 @@ namespace Pyramid
                         SelectedOptions.DisableCodeXLAsic(lstCodeXLAsics.Items[codeXLAsicIndex].ToString());
                     }
                 }
+
+                for (int i = 0; i < lstRGAAsics.Items.Count; i++)
+                {
+                    if (!lstRGAAsics.GetItemChecked(i))
+                    {
+                        SelectedOptions.DisableRGAAsic(lstRGAAsics.Items[i].ToString());
+                    }
+                }
+
             }
         }
 
@@ -167,6 +189,11 @@ namespace Pyramid
         private void btnMystery_Click(object sender, EventArgs e)
         {
             txtMystery.Text = BrowseFile(txtMystery.Text);
+        }
+
+        private void btnRGA_Click(object sender, EventArgs e)
+        {
+            txtRGA.Text = BrowseFile(txtRGA.Text);
         }
     }
 }

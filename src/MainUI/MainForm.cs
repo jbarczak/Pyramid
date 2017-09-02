@@ -49,11 +49,13 @@ namespace Pyramid
             backends.Add(new GLSLOptimizerBackend(m_Wrapper));
             backends.Add(new PowerVRBackend(opts.PowerVRCompilerPath, opts.TempPath));
             backends.Add(new MaliSCBackend(opts.MaliSCRoot, opts.TempPath));
+            backends.Add(new RGABackend(opts.RGAPath, opts.TempPath,m_Wrapper));
 
             if( File.Exists( opts.MysteryToolPath ) )
             {
                 backends.Add(new MysteryToolBackend(opts));
             }
+
 
             m_Backends = backends;
         }
@@ -164,6 +166,10 @@ namespace Pyramid
                     }
                     CodeXLBackendOptions backendOptions = new CodeXLBackendOptions(requestedAsics);
                     options = backendOptions;
+                }
+                else if( backend is RGABackend )
+                {
+                    options = new RGABackendOptions(m_Options);
                 }
 
                 IResultSet r = backend.Compile(shader, options);

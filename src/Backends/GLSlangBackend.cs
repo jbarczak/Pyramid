@@ -54,31 +54,8 @@ namespace Pyramid
             {
                 HLSLShader sh = (HLSLShader)shader;
                 IHLSLOptions hlslOpts = sh.CompileOptions;
-
-                // turn HLSL shader profile into GLSL shader type
-                GLSLShaderType eShaderType;
-                string profile = hlslOpts.Target.ToString();
-                if (profile.StartsWith("vs"))
-                    eShaderType = GLSLShaderType.VERTEX;
-                else if (profile.StartsWith("ps"))
-                    eShaderType = GLSLShaderType.FRAGMENT;
-                else if (profile.StartsWith("gs"))
-                    eShaderType = GLSLShaderType.GEOMETRY;
-                else if (profile.StartsWith("hs"))
-                    eShaderType = GLSLShaderType.TESS_CONTROL;
-                else if (profile.StartsWith("ds"))
-                    eShaderType = GLSLShaderType.TESS_EVALUATION;
-                else if (profile.StartsWith("cs"))
-                    eShaderType = GLSLShaderType.COMPUTE;
-                else
-                    throw new System.Exception("Don't know what this shader profile is");
-
-                string EntryPoint = hlslOpts.EntryPoint;
-                
-                GLSlangOptions slangOpts = new GLSlangOptions();
-                slangOpts.ShaderType = eShaderType;
-                slangOpts.Config = m_Config;
-                GLSlang.IShader result = m_Compiler.CompileHLSL(sh.Code, slangOpts, EntryPoint);
+        
+                GLSlang.IShader result = m_Compiler.CompileHLSL(sh.Code, hlslOpts, m_Config );
                 return new GLSLangResultSet(result);
             }
             else

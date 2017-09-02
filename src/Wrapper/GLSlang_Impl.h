@@ -12,7 +12,7 @@ namespace GLSlang{
         ~Compiler_Impl();
         
         virtual IShader^ Compile( System::String^ text, IOptions^ opts );
-        virtual IShader^ CompileHLSL( System::String^ text, IOptions^ opts, System::String^ EntryPoint );
+        virtual IShader^ CompileHLSL( System::String^ text, IHLSLOptions^ opts, IConfig^ cfg );
         virtual IConfig^ CreateConfig(System::String^ text);
         virtual IConfig^ CreateDefaultConfig();
     };

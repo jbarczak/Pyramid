@@ -68,11 +68,12 @@ namespace Pyramid
         public string Name { get { return "CodeXL"; } }
         public IEnumerable<string> Asics { get { return m_SupportedAsics; } }
 
-        public CodeXLBackend( string CodeXLPath, string D3DCompilerPath, string TempPath )
+        public static List<String> GetSupportedAsics( string CodeXLPath, string d3dpath  )
         {
             // try to run CodeXLAnalyzer to get the asic list
             // -s "HLSL" --DXLocation s -l"
-            string CommandLine = string.Format("-s \"HLSL\" --DXLocation \"{0}\" -l", D3DCompilerPath);
+            string CommandLine = string.Format("-s \"HLSL\" --DXLocation {0} -l", d3dpath);
+            List<String> asics = new List<string>();
 
             ProcessStartInfo pi = new ProcessStartInfo();
             pi.RedirectStandardOutput = true;
@@ -91,20 +92,26 @@ namespace Pyramid
                 while (!p.StandardOutput.EndOfStream)
                 {
                     string s = p.StandardOutput.ReadLine();
-                    m_SupportedAsics.Add(s.TrimEnd().TrimStart());
+                    asics.Add(s.TrimEnd().TrimStart());
                 }
 
                 // skip whatever text they're emitting, up to 'Devices:'
-                while (!m_SupportedAsics[0].Equals("Devices:"))
-                    m_SupportedAsics.RemoveAt(0);
-                m_SupportedAsics.RemoveAt(0); // remove 'Devices'
+                while (!asics[0].Equals("Devices:"))
+                    asics.RemoveAt(0);
+                asics.RemoveAt(0); // remove 'Devices'
 
                 p.Close();
             }
             catch (Exception e)
             {
-                MessageBox.Show(e.Message, "uh-oh, couldn't get CodeXL asic list", MessageBoxButtons.OK, MessageBoxIcon.Error);            
+                MessageBox.Show(e.Message, "uh-oh, couldn't get CodeXL asic list", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+            return asics;
+        }
+
+        public CodeXLBackend( string CodeXLPath, string D3DCompilerPath, string TempPath )
+        {
+            m_SupportedAsics = GetSupportedAsics(CodeXLPath, D3DCompilerPath);
 
             m_CodeXL        = CodeXLPath;
             m_D3DCompiler   = D3DCompilerPath;

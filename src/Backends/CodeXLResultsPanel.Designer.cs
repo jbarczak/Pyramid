@@ -31,13 +31,19 @@
             this.cmbAsic = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
-            this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.txtIL = new System.Windows.Forms.TextBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.txtISA = new System.Windows.Forms.TextBox();
+            this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.txtIL = new System.Windows.Forms.TextBox();
+            this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.txtLiveReg = new System.Windows.Forms.TextBox();
+            this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.txtToolOutput = new System.Windows.Forms.TextBox();
             this.tabControl1.SuspendLayout();
-            this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
+            this.tabPage1.SuspendLayout();
+            this.tabPage3.SuspendLayout();
+            this.tabPage4.SuspendLayout();
             this.SuspendLayout();
             // 
             // cmbAsic
@@ -69,34 +75,13 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Controls.Add(this.tabPage1);
+            this.tabControl1.Controls.Add(this.tabPage3);
+            this.tabControl1.Controls.Add(this.tabPage4);
             this.tabControl1.Location = new System.Drawing.Point(3, 35);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(232, 186);
             this.tabControl1.TabIndex = 2;
-            // 
-            // tabPage1
-            // 
-            this.tabPage1.Controls.Add(this.txtIL);
-            this.tabPage1.Location = new System.Drawing.Point(4, 4);
-            this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(224, 160);
-            this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "IL";
-            this.tabPage1.UseVisualStyleBackColor = true;
-            // 
-            // txtIL
-            // 
-            this.txtIL.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtIL.Font = new System.Drawing.Font("Lucida Console", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtIL.Location = new System.Drawing.Point(3, 3);
-            this.txtIL.Multiline = true;
-            this.txtIL.Name = "txtIL";
-            this.txtIL.ReadOnly = true;
-            this.txtIL.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtIL.Size = new System.Drawing.Size(218, 154);
-            this.txtIL.TabIndex = 0;
             // 
             // tabPage2
             // 
@@ -121,6 +106,75 @@
             this.txtISA.Size = new System.Drawing.Size(218, 154);
             this.txtISA.TabIndex = 0;
             // 
+            // tabPage1
+            // 
+            this.tabPage1.Controls.Add(this.txtIL);
+            this.tabPage1.Location = new System.Drawing.Point(4, 4);
+            this.tabPage1.Name = "tabPage1";
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage1.Size = new System.Drawing.Size(224, 160);
+            this.tabPage1.TabIndex = 0;
+            this.tabPage1.Text = "IL";
+            this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // txtIL
+            // 
+            this.txtIL.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtIL.Font = new System.Drawing.Font("Lucida Console", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtIL.Location = new System.Drawing.Point(3, 3);
+            this.txtIL.Multiline = true;
+            this.txtIL.Name = "txtIL";
+            this.txtIL.ReadOnly = true;
+            this.txtIL.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.txtIL.Size = new System.Drawing.Size(218, 154);
+            this.txtIL.TabIndex = 0;
+            // 
+            // tabPage3
+            // 
+            this.tabPage3.Controls.Add(this.txtLiveReg);
+            this.tabPage3.Location = new System.Drawing.Point(4, 4);
+            this.tabPage3.Name = "tabPage3";
+            this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage3.Size = new System.Drawing.Size(224, 160);
+            this.tabPage3.TabIndex = 2;
+            this.tabPage3.Text = "LiveReg";
+            this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // txtLiveReg
+            // 
+            this.txtLiveReg.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtLiveReg.Font = new System.Drawing.Font("Lucida Console", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtLiveReg.Location = new System.Drawing.Point(3, 3);
+            this.txtLiveReg.Multiline = true;
+            this.txtLiveReg.Name = "txtLiveReg";
+            this.txtLiveReg.ReadOnly = true;
+            this.txtLiveReg.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.txtLiveReg.Size = new System.Drawing.Size(218, 154);
+            this.txtLiveReg.TabIndex = 1;
+            // 
+            // tabPage4
+            // 
+            this.tabPage4.Controls.Add(this.txtToolOutput);
+            this.tabPage4.Location = new System.Drawing.Point(4, 4);
+            this.tabPage4.Name = "tabPage4";
+            this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage4.Size = new System.Drawing.Size(224, 160);
+            this.tabPage4.TabIndex = 3;
+            this.tabPage4.Text = "Output";
+            this.tabPage4.UseVisualStyleBackColor = true;
+            // 
+            // txtToolOutput
+            // 
+            this.txtToolOutput.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtToolOutput.Font = new System.Drawing.Font("Lucida Console", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtToolOutput.Location = new System.Drawing.Point(3, 3);
+            this.txtToolOutput.Multiline = true;
+            this.txtToolOutput.Name = "txtToolOutput";
+            this.txtToolOutput.ReadOnly = true;
+            this.txtToolOutput.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.txtToolOutput.Size = new System.Drawing.Size(218, 154);
+            this.txtToolOutput.TabIndex = 2;
+            // 
             // AMDResultsPanel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -131,10 +185,14 @@
             this.Name = "AMDResultsPanel";
             this.Size = new System.Drawing.Size(238, 236);
             this.tabControl1.ResumeLayout(false);
-            this.tabPage1.ResumeLayout(false);
-            this.tabPage1.PerformLayout();
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
+            this.tabPage1.ResumeLayout(false);
+            this.tabPage1.PerformLayout();
+            this.tabPage3.ResumeLayout(false);
+            this.tabPage3.PerformLayout();
+            this.tabPage4.ResumeLayout(false);
+            this.tabPage4.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -149,5 +207,9 @@
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.TextBox txtIL;
         private System.Windows.Forms.TextBox txtISA;
+        private System.Windows.Forms.TabPage tabPage3;
+        private System.Windows.Forms.TextBox txtLiveReg;
+        private System.Windows.Forms.TabPage tabPage4;
+        private System.Windows.Forms.TextBox txtToolOutput;
     }
 }

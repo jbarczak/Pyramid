@@ -112,7 +112,6 @@ float PCFBilin3x3(float3 vPosSM, Texture2D<float> t, SamplerComparisonState s, i
 {  
     float2 uv = vPosSM.xy;
     float z = saturate(vPosSM.z);
-    float v=0;
 
     float t0 = t.SampleCmp( s,uv,z,int2(-2,-2) );
     float t1 = t.SampleCmp( s,uv,z,int2(-2,-1) );

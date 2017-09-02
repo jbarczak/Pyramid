@@ -397,11 +397,11 @@ namespace GLSlang{
     ref class ShaderImpl : IShader
     {
     public:
-        ShaderImpl( StubShader* pShader, System::String^ Info, System::String^ InfoDebug )
+        ShaderImpl( StubShader* pShader, System::String^ Info, System::String^ InfoDebug, GLSLShaderType eType)
             : m_pShader(pShader),
               m_InfoLog( Info ),
-              m_InfoDebugLog( InfoDebug )
-
+              m_InfoDebugLog( InfoDebug ),
+              m_eType(eType)
         {
         }
         ~ShaderImpl()
@@ -410,8 +410,8 @@ namespace GLSlang{
                 delete m_pShader;
             m_pShader=nullptr;
         }
-
-        virtual property bool HasErrors { bool get() { return m_pShader != nullptr; } };
+        virtual property GLSLShaderType ShaderType { GLSLShaderType get() { return m_eType; } }
+        virtual property bool HasErrors { bool get() { return m_pShader == nullptr; } };
         virtual property System::String^ InfoLog { System::String^ get() { return m_InfoLog; } }
         virtual property System::String^ InfoDebugLog { System::String^ get() { return m_InfoDebugLog; } }
 
@@ -430,6 +430,7 @@ namespace GLSlang{
         System::String^ m_InfoLog;
         System::String^ m_InfoDebugLog;
         StubShader* m_pShader;
+        GLSLShaderType m_eType;
     };
 
 
@@ -502,13 +503,32 @@ namespace GLSlang{
             shader = nullptr;
         }
 
-        return gcnew ShaderImpl(shader, rInfoLog, rInfoDebugLog );
+        return gcnew ShaderImpl(shader, rInfoLog, rInfoDebugLog, opts->ShaderType );
     }
 
-    IShader^ Compiler_Impl::CompileHLSL( System::String^ text, IOptions^ opts, System::String^ entrypoint )
+    IShader^ Compiler_Impl::CompileHLSL( System::String^ text, IHLSLOptions^ opts, IConfig^ config )
     {
+        System::String^ entrypoint = opts->EntryPoint;
+
+        System::String^ profile = opts->Target.ToString();
+        GLSLShaderType eManagedType; 
+        if (profile->StartsWith("vs"))
+            eManagedType = GLSLShaderType::VERTEX;
+        else if (profile->StartsWith("ps"))
+            eManagedType = GLSLShaderType::FRAGMENT;
+        else if (profile->StartsWith("gs"))
+            eManagedType = GLSLShaderType::GEOMETRY;
+        else if (profile->StartsWith("hs"))
+            eManagedType = GLSLShaderType::TESS_CONTROL;
+        else if (profile->StartsWith("ds"))
+            eManagedType = GLSLShaderType::TESS_EVALUATION;
+        else if (profile->StartsWith("cs"))
+            eManagedType = GLSLShaderType::COMPUTE;
+        else
+            return nullptr;
+
         EShLanguage eShaderType; 
-        switch( opts->ShaderType )
+        switch( eManagedType )
         {
         case GLSLShaderType::VERTEX:            eShaderType = EShLangVertex; break;
         case GLSLShaderType::FRAGMENT:          eShaderType = EShLangFragment; break;
@@ -519,7 +539,7 @@ namespace GLSlang{
         default: return nullptr;
         }
 
-        ConfigImpl^ cfg = (ConfigImpl^)opts->Config;
+        ConfigImpl^ cfg = (ConfigImpl^)config;
 
         MarshalledString marshalledText(text);
         MarshalledString marshalledEntryPoint(entrypoint);
@@ -528,6 +548,8 @@ namespace GLSlang{
         StubShader* shader = new StubShader(eShaderType);
         shader->setStrings( &p, 1 );
         shader->setEntryPoint( marshalledEntryPoint.GetString() );
+        shader->setHlslIoMapping(true);
+        shader->setAutoMapBindings(true);
 
         bool bResult = shader->parse( cfg->m_Config, 100, false, (EShMessages)(EShMsgDefault|EShMsgReadHlsl|EShMsgVulkanRules|EShMsgSpvRules) );
 
@@ -539,7 +561,7 @@ namespace GLSlang{
             shader = nullptr;
         }
 
-        return gcnew ShaderImpl(shader, rInfoLog, rInfoDebugLog );
+        return gcnew ShaderImpl(shader, rInfoLog, rInfoDebugLog, eManagedType );
        
     }
 

@@ -10,7 +10,9 @@ namespace Pyramid
         private List<string> m_DisabledBackends = new List<string>();
         private List<string> m_DisabledAMDAsics = new List<string>();
         private List<string> m_DisabledCodeXLAsics = new List<string>();
+        private List<string> m_DisabledRGAAsics = new List<string>();
 
+        public string RGAPath { get; set; }
         public string MysteryToolPath { get; set; }
         public string D3DCompilerPath { get; set; }
         public string CodeXLPath { get; set; }
@@ -21,6 +23,7 @@ namespace Pyramid
         public IEnumerable<string> DisabledBackends { get { return m_DisabledBackends; } }
         public IEnumerable<string> DisabledAMDAsics { get { return m_DisabledAMDAsics; } }
         public IEnumerable<string> DisabledCodeXLAsics { get { return m_DisabledCodeXLAsics; } }
+        public IEnumerable<string> DisabledRGAAsics { get { return m_DisabledRGAAsics; } }
 
         public void DisableBackend(string name)
         {
@@ -30,6 +33,16 @@ namespace Pyramid
         {
             return m_DisabledBackends.Contains(name);
         }
+
+        public void DisableRGAAsic(string name)
+        {
+            m_DisabledRGAAsics.Add(name);
+        }
+        public bool IsRGAAsicDisabled(string name)
+        {
+            return m_DisabledRGAAsics.Contains(name);
+        }
+
 
         public void DisableAMDAsic(string name)
         {
@@ -58,6 +71,7 @@ namespace Pyramid
             opts.DXXDriverPath = "atidxx32.dll";
             opts.MaliSCRoot = "MaliSC";
             opts.MysteryToolPath = "";
+            opts.RGAPath = "rga\\rga.exe";
             opts.TempPath = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "Pyramid" );
@@ -128,7 +142,17 @@ namespace Pyramid
                 string disabledCodeXLAsics;
                 if (map.TryGetValue("DisabledCodeXLAsics", out disabledCodeXLAsics))
                     opts.m_DisabledCodeXLAsics.AddRange(disabledCodeXLAsics.Split(','));
-                
+
+                string disabledRGAAsics;
+                if (map.TryGetValue("DisabledRGAAsics", out disabledRGAAsics))
+                    opts.m_DisabledRGAAsics.AddRange(disabledRGAAsics.Split(','));
+
+
+                string rga;
+                if (!map.TryGetValue("RGAPath", out rga))
+                    rga = defaults.RGAPath;
+
+
                 opts.D3DCompilerPath = d3dCompiler;
                 opts.CodeXLPath = codeXL;
                 opts.TempPath = temp;
@@ -136,6 +160,7 @@ namespace Pyramid
                 opts.DXXDriverPath = dxx;
                 opts.MaliSCRoot = mali;
                 opts.MysteryToolPath = mystery;
+                opts.RGAPath = rga;
                 return opts;
             }
             catch (Exception e)
@@ -157,9 +182,10 @@ namespace Pyramid
                 string DisabledBackends = String.Join(",",m_DisabledBackends.ToArray());
                 string DisabledAMDAsics = String.Join(",",m_DisabledAMDAsics.ToArray());
                 string DisabledCodeXLAsics = String.Join(",", m_DisabledCodeXLAsics.ToArray());
+                string DisabledRGAAsics = String.Join(",", m_DisabledRGAAsics.ToArray());
 
                 File.WriteAllText(OptionsFile,
-                                   String.Format("D3DCompiler={0}\nCodeXL={1}\ntemp={2}\nPowerVR={3}\nMali={4}\nDisabledBackends={5}\nDisabledAMDAsics={6}\nDisabledCodeXLAsics={7}\nMysteryTool={8}\n",
+                                   String.Format("D3DCompiler={0}\nCodeXL={1}\ntemp={2}\nPowerVR={3}\nMali={4}\nDisabledBackends={5}\nDisabledAMDAsics={6}\nDisabledCodeXLAsics={7}\nMysteryTool={8}\nRGAPath={9}\nDisabledRGAAsics={10}\n",
                                                              D3DCompilerPath,
                                                              CodeXLPath,
                                                              TempPath,
@@ -168,7 +194,9 @@ namespace Pyramid
                                                              DisabledBackends,
                                                              DisabledAMDAsics,
                                                              DisabledCodeXLAsics,
-                                                             MysteryToolPath));
+                                                             MysteryToolPath,
+                                                             RGAPath,
+                                                             DisabledRGAAsics));
             }
             catch(Exception e)
             {
