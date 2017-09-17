@@ -87,6 +87,7 @@
       <DependentUpon>MysteryToolResultsPanel.cs</DependentUpon>
     </Compile>
     <Compile Include="Backends\RGABackend.cs" />
+    <Compile Include="IncludeHandler.cs" />
     <Compile Include="Languages\ILanguage.cs" />
     <Compile Include="MainUI\AboutBox.cs">
       <SubType>Form</SubType>

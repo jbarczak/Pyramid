@@ -12,7 +12,7 @@ namespace Pyramid
         /// </summary>
         /// <param name="DLLPath"></param>
         /// <returns></returns>
-        ID3DCompiler CreateD3DCompiler(string DLLPath);
+        ID3DCompiler CreateD3DCompiler(string DLLPath, IIncludeHandler handler );
 
         /// <summary>
         ///  Construct an instance of the GLSL Optimizer
@@ -20,7 +20,7 @@ namespace Pyramid
         /// <returns></returns>
         GLSLOptimizer.IOptimizer CreateGLSLOptimizer( GLSLOptimizer.Target eTarget );
 
-        GLSlang.ICompiler CreateGLSlangCompiler();
+        GLSlang.ICompiler CreateGLSlangCompiler( IIncludeHandler handler );
 
         IAMDDriver CreateAMDDriver( string DLLPath );
 

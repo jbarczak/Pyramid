@@ -79,11 +79,12 @@ namespace Pyramid
 
     public class HLSLShader : IShader
     {
-        public HLSLShader(string code, IHLSLOptions opts)
+        public HLSLShader(string code, IHLSLOptions opts ,string path)
         {
             CompileOptions = opts;
             Code = code;
             WasCompiled = false;
+            SourceFilePath = path;
         }
 
         public Languages Language { get { return Languages.HLSL; } }
@@ -91,12 +92,13 @@ namespace Pyramid
         public string Code { get; private set; }
         public IDXShaderBlob CompiledBlob { get; private set; }
         public string Messages { get; private set; }
+        public string SourceFilePath { get; private set; }
 
         public bool Compile( ID3DCompiler compiler )
         {
             IDXShaderBlob blob;
             string msg;
-            HasError = !compiler.Compile(this.Code, this.CompileOptions, out blob, out msg);
+            HasError = !compiler.Compile(this.Code, this.CompileOptions, this.SourceFilePath, out blob, out msg);
             WasCompiled = true;
             Messages = msg;
             CompiledBlob = blob;
@@ -112,6 +114,7 @@ namespace Pyramid
     {
         bool Compile(string text,
                      IHLSLOptions opts,
+                     string fileName,
                      out IDXShaderBlob blob,
                      out string Messages);
     };

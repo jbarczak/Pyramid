@@ -191,13 +191,13 @@ namespace Pyramid
             return asics;
         }
 
-        public RGABackend(string RGAPath, string TempPath, IWrapper wrapper )
+        public RGABackend(string RGAPath, string TempPath, IWrapper wrapper, IIncludeHandler handler )
         {
             m_SupportedAsics = GetAsicList(RGAPath);
             m_RGAPath = RGAPath;
             m_TempPath = TempPath;
 
-            m_GLSLang = wrapper.CreateGLSlangCompiler();
+            m_GLSLang = wrapper.CreateGLSlangCompiler(handler);
             m_GLSLangConfig = m_GLSLang.CreateDefaultConfig();
         }
 
@@ -254,7 +254,7 @@ namespace Pyramid
             {
                 // pass the shader through GLSLang's hlsl front end
                 HLSLShader hlsl = shader as HLSLShader;
-                GLSlang.IShader glShader = m_GLSLang.CompileHLSL(shader.Code, hlsl.CompileOptions, m_GLSLangConfig); 
+                GLSlang.IShader glShader = m_GLSLang.CompileHLSL(shader.Code, hlsl.CompileOptions, m_GLSLangConfig, shader.SourceFilePath); 
                 if( glShader.HasErrors )
                     return new GenericTextResultSet(this.Name, glShader.InfoLog);
 

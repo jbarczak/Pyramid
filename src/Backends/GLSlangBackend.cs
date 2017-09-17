@@ -9,11 +9,7 @@ namespace Pyramid
         private GLSlang.ICompiler m_Compiler;
         private GLSlang.IConfig m_Config;
 
-        private class GLSlangOptions : GLSlang.IOptions
-        {
-            public GLSLShaderType ShaderType { get; set; }
-            public GLSlang.IConfig Config { get; set; }
-        }
+      
 
         private class GLSLangResultSet : IResultSet
         {
@@ -31,9 +27,9 @@ namespace Pyramid
         
         public string Name { get { return "GLSlang"; } }
 
-        public GLSlangBackend( IWrapper wrapper )
+        public GLSlangBackend( IWrapper wrapper, IIncludeHandler handler )
         {
-            m_Compiler = wrapper.CreateGLSlangCompiler();
+            m_Compiler = wrapper.CreateGLSlangCompiler(handler);
             m_Config = m_Compiler.CreateDefaultConfig();
         }
 
@@ -44,18 +40,15 @@ namespace Pyramid
                 GLSLShader sh = (GLSLShader)shader;
                 IGLSLOptions glOpts = sh.CompileOptions;
 
-                GLSlangOptions slangOpts = new GLSlangOptions();
-                slangOpts.ShaderType = glOpts.ShaderType;
-                slangOpts.Config = m_Config;
-                GLSlang.IShader result = m_Compiler.Compile(sh.Code, slangOpts);
+                GLSlang.IShader result = m_Compiler.Compile(sh.Code, glOpts.ShaderType, m_Config, shader.SourceFilePath );
                 return new GLSLangResultSet(result);
             }
             else if( shader is HLSLShader )
             {
                 HLSLShader sh = (HLSLShader)shader;
                 IHLSLOptions hlslOpts = sh.CompileOptions;
-        
-                GLSlang.IShader result = m_Compiler.CompileHLSL(sh.Code, hlslOpts, m_Config );
+
+                GLSlang.IShader result = m_Compiler.CompileHLSL(sh.Code, hlslOpts, m_Config, shader.SourceFilePath  );
                 return new GLSLangResultSet(result);
             }
             else

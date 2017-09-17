@@ -17,9 +17,9 @@ namespace Pyramid
     {
     public:
         Wrapper() {};
-        virtual Pyramid::ID3DCompiler^ CreateD3DCompiler( System::String^ DLLPath )
+        virtual Pyramid::ID3DCompiler^ CreateD3DCompiler( System::String^ DLLPath, IIncludeHandler^ handler )
         {
-            return gcnew D3DCompiler_Impl(DLLPath);
+            return gcnew D3DCompiler_Impl(DLLPath,handler);
         }
        
         virtual Pyramid::GLSLOptimizer::IOptimizer^ CreateGLSLOptimizer( GLSLOptimizer::Target eTarget )
@@ -27,12 +27,12 @@ namespace Pyramid
             return gcnew GLSLOptimizer::Optimizer_Impl(eTarget);
         }
 
-        virtual Pyramid::GLSlang::ICompiler^ CreateGLSlangCompiler( )
+        virtual Pyramid::GLSlang::ICompiler^ CreateGLSlangCompiler( IIncludeHandler^ handler )
         {
-            return gcnew GLSlang::Compiler_Impl();
+            return gcnew GLSlang::Compiler_Impl(handler);
         }
 
-        virtual Pyramid::IAMDDriver^ CreateAMDDriver( System::String^ DLLPath )
+        virtual Pyramid::IAMDDriver^ CreateAMDDriver( System::String^ DLLPath)
         {
             return gcnew AMDDriver_Impl(DLLPath);
         }

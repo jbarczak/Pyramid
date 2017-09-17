@@ -40,6 +40,7 @@
     <Compile Include="GLSLTypes.cs" />
     <Compile Include="HLSLTypes.cs" />
     <Compile Include="IAMDDriver.cs" />
+    <Compile Include="IIncludeHandler.cs" />
     <Compile Include="IWrapper.cs" />
     <Compile Include="LanguageTypes.cs" />
     <Compile Include="ScrutinizerTypes.cs" />

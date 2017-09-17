@@ -25,14 +25,16 @@ namespace Pyramid
 
     public class GLSLShader : IShader
     {
-        public GLSLShader(string code, IGLSLOptions opts)
+        public GLSLShader(string code, IGLSLOptions opts, string path )
         {
             CompileOptions = opts;
             Code = code;
+            SourceFilePath = path;
         }
 
         public Languages Language { get { return Languages.GLSL; } }
         public IGLSLOptions CompileOptions { get; private set; }
         public string Code { get; private set; }
+        public string SourceFilePath { get; private set; }
     };
 }

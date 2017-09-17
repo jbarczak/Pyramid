@@ -310,6 +310,86 @@ void ProcessConfigFile( TBuiltInResource& Resources,  char* config )
 }
 
 
+class PyramidIncluder : public glslang::TShader::Includer
+{
+public:
+
+    PyramidIncluder( Pyramid::IIncludeHandler^ pmIncluder )
+        : m_pmInclude(pmIncluder)
+    {
+    }
+
+    glslang::TShader::Includer::IncludeResult* Do( Pyramid::IncludeType eType, const char* headerName, const char* includerPath )
+    {
+        Pyramid::IIncludeHandler^ pmInclude = m_pmInclude;
+        if( pmInclude == nullptr )
+            return nullptr;
+
+        Pyramid::IIncludeResult^ pmResult = m_pmInclude->OpenInclude( eType, MakeString(headerName), MakeString(includerPath) );
+        if( pmResult == nullptr )
+            return nullptr;
+
+        array<unsigned char>^ bytes = pmResult->Contents;
+        MarshalledString str( pmResult->FullPath );
+
+        size_t nLength = bytes->Length;
+        void* pData = malloc( nLength );
+        Marshal::Copy( bytes,0,  System::IntPtr(pData), bytes->Length );
+        return new glslang::TShader::Includer::IncludeResult( std::string((const char*)str), (const char*)pData, nLength, nullptr);
+    }
+
+    glslang::TShader::Includer::IncludeResult* DepthLimit()
+    {
+        static const char* DEPTH_LIMIT = "Include depth limit reached";
+        size_t len = strlen(DEPTH_LIMIT);
+        char* pAlloc = (char*)malloc(len+1);
+        strcpy(pAlloc,DEPTH_LIMIT);
+        glslang::TShader::Includer::IncludeResult* pResult;
+        return new glslang::TShader::Includer::IncludeResult( "", pAlloc, len, nullptr);
+    }
+
+
+
+
+    // For the "system" or <>-style includes; search the "system" paths.
+    virtual IncludeResult* includeSystem(const char* headerName,
+                                            const char* includerName,
+                                            size_t inclusionDepth) 
+    { 
+        if( inclusionDepth > 1024 )
+            return DepthLimit();
+        return Do( Pyramid::IncludeType::System, headerName, includerName );
+    }
+
+    // For the "local"-only aspect of a "" include. Should not search in the
+    // "system" paths, because on returning a failure, the parser will
+    // call includeSystem() to look in the "system" locations.
+    virtual IncludeResult* includeLocal(const char* headerName,
+                                        const char* includerName,
+                                        size_t inclusionDepth) 
+    { 
+        if( inclusionDepth > 1024 )
+            return DepthLimit();
+        return Do( Pyramid::IncludeType::System, headerName, includerName );
+    }
+
+    // Signals that the parser will no longer use the contents of the
+    // specified IncludeResult.
+    virtual void releaseInclude(IncludeResult* result) 
+    {
+        if( !result )
+            return;
+
+        if( result->headerData )
+            free((void*) result->headerData);
+        delete result;
+    }
+
+private:
+
+    gcroot<Pyramid::IIncludeHandler^> m_pmInclude;
+};
+
 
 namespace Pyramid{
 namespace GLSlang{
@@ -437,7 +517,7 @@ namespace GLSlang{
     static volatile long m_nLock=0;
     static long m_nInstanceCount=0;
 
-    Compiler_Impl::Compiler_Impl()
+    Compiler_Impl::Compiler_Impl( Pyramid::IIncludeHandler^ pmIncluder )
     {
         while( _InterlockedExchange( &m_nLock, 1 ) != 0 )
             ;
@@ -447,6 +527,7 @@ namespace GLSlang{
             glslang::InitializeProcess();
 
         m_nLock = 0;
+        m_pmIncluder = pmIncluder;
     }
     Compiler_Impl::~Compiler_Impl()
     {
@@ -472,10 +553,10 @@ namespace GLSlang{
         return gcnew ConfigImpl(DefaultConfig);
     }
 
-    IShader^ Compiler_Impl::Compile( System::String^ text, IOptions^ opts )
+    IShader^ Compiler_Impl::Compile( System::String^ text, GLSLShaderType eManagedShaderType, IConfig^ config, System::String^ path )
     {
         EShLanguage eShaderType; 
-        switch( opts->ShaderType )
+        switch( eManagedShaderType )
         {
         case GLSLShaderType::VERTEX:            eShaderType = EShLangVertex; break;
         case GLSLShaderType::FRAGMENT:          eShaderType = EShLangFragment; break;
@@ -486,14 +567,22 @@ namespace GLSlang{
         default: return nullptr;
         }
 
-        ConfigImpl^ cfg = (ConfigImpl^)opts->Config;
+        ConfigImpl^ cfg = (ConfigImpl^)config;
 
         MarshalledString marshalledText(text);
         const char* p = marshalledText.GetString();
+        int len = strlen(p);
+        
+        MarshalledString marshalledPath(path);
+        const char* pnames = marshalledPath.GetString();
 
         StubShader* shader = new StubShader(eShaderType);
-        shader->setStrings( &p, 1 );
-        bool bResult = shader->parse( cfg->m_Config, 100, false, EShMsgDefault );
+        shader->setStringsWithLengthsAndNames( &p, &len, &pnames, 1 );
+
+
+        PyramidIncluder includer(m_pmIncluder);
+
+        bool bResult = shader->parse( cfg->m_Config, 100, false, EShMsgDefault, includer );
 
         System::String^ rInfoLog = MakeString( shader->getInfoLog() );
         System::String^ rInfoDebugLog = MakeString( shader->getInfoDebugLog() );
@@ -503,15 +592,16 @@ namespace GLSlang{
             shader = nullptr;
         }
 
-        return gcnew ShaderImpl(shader, rInfoLog, rInfoDebugLog, opts->ShaderType );
+        return gcnew ShaderImpl(shader, rInfoLog, rInfoDebugLog, eManagedShaderType );
     }
 
-    IShader^ Compiler_Impl::CompileHLSL( System::String^ text, IHLSLOptions^ opts, IConfig^ config )
+    IShader^ Compiler_Impl::CompileHLSL( System::String^ text, IHLSLOptions^ opts, IConfig^ config, System::String^ path )
     {
         System::String^ entrypoint = opts->EntryPoint;
 
+        GLSLShaderType eManagedType;
+        
         System::String^ profile = opts->Target.ToString();
-        GLSLShaderType eManagedType; 
         if (profile->StartsWith("vs"))
             eManagedType = GLSLShaderType::VERTEX;
         else if (profile->StartsWith("ps"))
@@ -526,6 +616,7 @@ namespace GLSlang{
             eManagedType = GLSLShaderType::COMPUTE;
         else
             return nullptr;
+            
 
         EShLanguage eShaderType; 
         switch( eManagedType )
@@ -544,14 +635,20 @@ namespace GLSlang{
         MarshalledString marshalledText(text);
         MarshalledString marshalledEntryPoint(entrypoint);
         const char* p = marshalledText.GetString();
+        int len = strlen(p);
 
+        MarshalledString marshalledPath(path);
+        const char* pPath = marshalledPath.GetString();
+       
         StubShader* shader = new StubShader(eShaderType);
-        shader->setStrings( &p, 1 );
+        shader->setStringsWithLengthsAndNames( &p, &len, &pPath, 1 );
         shader->setEntryPoint( marshalledEntryPoint.GetString() );
         shader->setHlslIoMapping(true);
         shader->setAutoMapBindings(true);
 
-        bool bResult = shader->parse( cfg->m_Config, 100, false, (EShMessages)(EShMsgDefault|EShMsgReadHlsl|EShMsgVulkanRules|EShMsgSpvRules) );
+        PyramidIncluder includer(m_pmIncluder);
+
+        bool bResult = shader->parse( cfg->m_Config, 100, false, (EShMessages)(EShMsgDefault|EShMsgReadHlsl|EShMsgVulkanRules|EShMsgSpvRules), includer );
 
         System::String^ rInfoLog = MakeString( shader->getInfoLog() );
         System::String^ rInfoDebugLog = MakeString( shader->getInfoDebugLog() );

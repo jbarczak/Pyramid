@@ -7,7 +7,7 @@
 #include "GLSlang/glslang/Include/ShHandle.h"
 #include "GLSlang/glslang/MachineIndependent/Versions.h"
 
-
+#if 0
 //
 // Here is where real machine specific high-level data would be defined.
 //
@@ -98,3 +98,4 @@ void DeleteBindingList(TShHandleBase* bindingList)
 {
     delete bindingList;
 }
+#endif

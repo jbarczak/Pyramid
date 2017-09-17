@@ -97,10 +97,11 @@ private ref class D3DCompiler_Impl : Pyramid::ID3DCompiler
 {
 public:
 
-    D3DCompiler_Impl( System::String^ DLLPath );
+    D3DCompiler_Impl( System::String^ DLLPath, Pyramid::IIncludeHandler^ pmIncludes );
     
     virtual bool Compile( System::String^ Shader, 
-                          Pyramid::IHLSLOptions^ opts, 
+                          Pyramid::IHLSLOptions^ opts,
+                          System::String^ Path,
                           Pyramid::IDXShaderBlob^% blob,  
                           System::String^% Errors  );
 
@@ -113,6 +114,7 @@ internal:
     D3DGETBLOBPART_FUNC m_pGetBlob;
     D3DCREATEBLOB_FUNC m_pCreateBlob;
     D3DREFLECT_FUNC m_pReflect;
+    Pyramid::IIncludeHandler^ m_pmInclude;
 };
 
 

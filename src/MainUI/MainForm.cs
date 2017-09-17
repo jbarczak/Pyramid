@@ -24,10 +24,11 @@ namespace Pyramid
         private void CreateBackends( Options opts )
         {
             List<IBackend> backends = new List<IBackend>();
-            
+            IIncludeHandler handler = new IncludeHandler();
+
             try
             {
-                ID3DCompiler fxc = m_Wrapper.CreateD3DCompiler(opts.D3DCompilerPath);
+                ID3DCompiler fxc = m_Wrapper.CreateD3DCompiler(opts.D3DCompilerPath,handler);
                 backends.Add(new D3DCompilerBackend(fxc));
                 try
                 {
@@ -45,11 +46,11 @@ namespace Pyramid
             }
             
             backends.Add(new CodeXLBackend(opts.CodeXLPath, opts.D3DCompilerPath, opts.TempPath));
-            backends.Add(new GLSlangBackend(m_Wrapper));
+            backends.Add(new GLSlangBackend(m_Wrapper,handler));
             backends.Add(new GLSLOptimizerBackend(m_Wrapper));
             backends.Add(new PowerVRBackend(opts.PowerVRCompilerPath, opts.TempPath));
             backends.Add(new MaliSCBackend(opts.MaliSCRoot, opts.TempPath));
-            backends.Add(new RGABackend(opts.RGAPath, opts.TempPath,m_Wrapper));
+            backends.Add(new RGABackend(opts.RGAPath, opts.TempPath,m_Wrapper,handler));
 
             if( File.Exists( opts.MysteryToolPath ) )
             {
@@ -125,9 +126,9 @@ namespace Pyramid
             switch (opts.Language)
             {
                 case Languages.GLSL: 
-                    shader = new GLSLShader(txtCode.Text, opts as IGLSLOptions); break;
+                    shader = new GLSLShader(txtCode.Text, opts as IGLSLOptions, m_FileName ); break;
                 case Languages.HLSL: 
-                    shader = new HLSLShader(txtCode.Text, opts as IHLSLOptions); break;
+                    shader = new HLSLShader(txtCode.Text, opts as IHLSLOptions, m_FileName ); break;
                 default:
                     throw new System.Exception("Unsupported language");
             }

@@ -2,7 +2,72 @@
 #include "Utilities.h"
 
 #include <Windows.h>
+#include <vector>
 
+class PyramidD3DIncludeHandler : public ID3DInclude
+{
+public:
+    PyramidD3DIncludeHandler( Pyramid::IIncludeHandler^ pmInclude, System::String^ root )
+        : m_pmInclude(pmInclude)
+    {
+        // D3D compiler doesn't pass the source file path to you
+        //  They expect you to track it yourself.
+        m_Stack.push_back(root);
+    }
+
+    virtual  HRESULT __stdcall Open(
+         D3D_INCLUDE_TYPE IncludeType,
+         LPCSTR           pFileName,
+         LPCVOID          pParentData,
+          LPCVOID          *ppData,
+         UINT             *pBytes) override
+    {
+        *ppData=0;
+        *pBytes=0;
+
+        Pyramid::IIncludeHandler^ pmInclude = static_cast<Pyramid::IIncludeHandler^>(m_pmInclude);
+        if( pmInclude == nullptr )
+            return E_FAIL;
+        
+        Pyramid::IncludeType eType;
+        switch( IncludeType )
+        {
+        case D3D_INCLUDE_SYSTEM: eType = Pyramid::IncludeType::System; break;
+        case D3D_INCLUDE_LOCAL:  eType = Pyramid::IncludeType::User; break;
+        default: return E_FAIL;
+        }
+
+        
+        Pyramid::IIncludeResult^ result = pmInclude->OpenInclude(eType,MakeString(pFileName),m_Stack.back() );
+        if( result == nullptr )
+            return E_FAIL;
+        
+        array<unsigned char>^ pFileContents =  result->Contents;
+        void* pNative = malloc(pFileContents->Length);
+
+        Marshal::Copy( pFileContents, 0, System::IntPtr(pNative), pFileContents->Length);
+        
+        *ppData = pNative;
+        *pBytes = pFileContents->Length;
+        m_Stack.push_back( result->FullPath );
+        return S_OK;
+    }
+
+    virtual HRESULT __stdcall Close(LPCVOID pData) override
+    {
+        if( !pData )
+            return S_OK;
+
+        free((void*)pData);
+        m_Stack.pop_back();
+        return S_OK;
+    }
+
+private:
+    gcroot<Pyramid::IIncludeHandler^> m_pmInclude;
+    std::vector< gcroot<System::String^> > m_Stack;
+
+};
 
 
 
@@ -118,7 +183,7 @@ Pyramid::IDXShaderReflection^ DXShaderBlob_Impl::Reflect()
 }
 
 
-D3DCompiler_Impl::D3DCompiler_Impl( System::String^ DLLPath )
+D3DCompiler_Impl::D3DCompiler_Impl( System::String^ DLLPath, Pyramid::IIncludeHandler^ pmInclude )
 {
     MarshalledString DLL(DLLPath);
     
@@ -160,16 +225,20 @@ D3DCompiler_Impl::D3DCompiler_Impl( System::String^ DLLPath )
     m_pGetBlob     = (D3DGETBLOBPART_FUNC)pGetBlobPartFunc;
     m_pCreateBlob  = (D3DCREATEBLOB_FUNC) pCreateBlobFunc;
     m_pReflect     = (D3DREFLECT_FUNC) pReflectFunc;
+    m_pmInclude    = pmInclude;
 }
 
 bool D3DCompiler_Impl::Compile( System::String^ Shader, 
                                 Pyramid::IHLSLOptions^ opts, 
+                                System::String^ fileName,
                                 Pyramid::IDXShaderBlob^% IR,  
                                 System::String^% Messages  )
 {
     MarshalledString hlsl( Shader );
     MarshalledString entry( opts->EntryPoint );
     MarshalledString profile( opts->Target.ToString() );
+
+    PyramidD3DIncludeHandler include(m_pmInclude,fileName);
 
     ID3DBlob* pCode=0;
     ID3DBlob* pMessages=0;
@@ -181,7 +250,7 @@ bool D3DCompiler_Impl::Compile( System::String^ Shader,
                     hlsl.Length()+1, 
                     "", 
                     0,
-                    0,
+                    &include,
                     entry, profile, opts->GetD3DCompileFlagBits(), 0, 
                     0,0,0,
                     &pCode, &pMessages );
@@ -192,7 +261,7 @@ bool D3DCompiler_Impl::Compile( System::String^ Shader,
                     hlsl.Length()+1, 
                     "", 
                     0,
-                    0,
+                    &include,
                     entry, profile, opts->GetD3DCompileFlagBits(), 0, &pCode, &pMessages );
     }
 
