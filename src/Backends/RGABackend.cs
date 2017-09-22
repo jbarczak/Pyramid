@@ -218,68 +218,61 @@ namespace Pyramid
             return sType;
         }
 
+        GLSlang.IShader CompileShader( IShader shader )
+        {
+            if (shader is HLSLShader)
+            {
+                // pass the shader through GLSLang's hlsl front end
+                HLSLShader hlsl = shader as HLSLShader;
+                return m_GLSLang.CompileHLSL(shader.Code, hlsl.CompileOptions, m_GLSLangConfig, shader.SourceFilePath);
+            }
+            else if( shader is GLSLShader )
+            {
+                GLSLShader glsl = shader as GLSLShader;
+                return m_GLSLang.Compile(shader.Code, glsl.CompileOptions.ShaderType, m_GLSLangConfig, glsl.SourceFilePath);
+            }
+            else
+            {
+                throw new System.Exception("Bad shader type?!?");
+            }
+        }
+
         public IResultSet Compile(IShader shader, IBackendOptions options)
         {
             if( !(options is RGABackendOptions))
                 return null;
+            if (!(shader is HLSLShader || shader is GLSLShader))
+                return null;
 
             RGABackendOptions backendOptions = options as RGABackendOptions;
                 
-            string CommandLine = "";
             string tmpFile = Path.Combine(m_TempPath, "PYRAMID_amdrga");
-            string sType = "";
-            if (shader is GLSLShader)
-            {
-                GLSLShader shaderHLSL = shader as GLSLShader;
-                IGLSLOptions glslOpts = shaderHLSL.CompileOptions;
-                string text = shader.Code;
-
-                try
-                {
-                    StreamWriter stream = File.CreateText(tmpFile);
-                    stream.Write(text);
-                    stream.Close();
-                }
-                catch (Exception e)
-                {
-                    MessageBox.Show(e.Message, "uh-oh, couldn't create temp file", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return null;
-                }
-
-                sType = GetRGAShaderType(glslOpts.ShaderType);
-                CommandLine = String.Format(" -s vulkan --{0} {1} ", sType, tmpFile);
-                
-            }
-            else if( shader is HLSLShader)
-            {
-                // pass the shader through GLSLang's hlsl front end
-                HLSLShader hlsl = shader as HLSLShader;
-                GLSlang.IShader glShader = m_GLSLang.CompileHLSL(shader.Code, hlsl.CompileOptions, m_GLSLangConfig, shader.SourceFilePath); 
-                if( glShader.HasErrors )
-                    return new GenericTextResultSet(this.Name, glShader.InfoLog);
-
-                sType = GetRGAShaderType(glShader.ShaderType);
             
-                // get the SPIR-V
-                SPIRV.IProgram spirv = glShader.CompileSPIRV();
-                if( spirv == null )
-                    return new GenericTextResultSet(this.Name, "Error generating SPIR-V");
-                
-                // dump the SPIR-V to disk
-                try
-                {
-                    File.WriteAllBytes(tmpFile,spirv.GetBytes());
-                }
-                catch (Exception e)
-                {
-                    MessageBox.Show(e.Message, "uh-oh, couldn't create temp file", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return null;
-                }
+            // pass the shader through GLSLang's hlsl front end
+            GLSlang.IShader glShader = CompileShader(shader);
+            if (glShader.HasErrors)
+                return new GenericTextResultSet(this.Name, glShader.InfoLog);
 
-                // send the SPIR-V to RGA
-                CommandLine = String.Format(" -s vulkan-spv {0}", tmpFile);
+            string sType = GetRGAShaderType(glShader.ShaderType);
+
+            // get the SPIR-V
+            SPIRV.IProgram spirv = glShader.CompileSPIRV();
+            if (spirv == null)
+                return new GenericTextResultSet(this.Name, "Error generating SPIR-V");
+
+            // dump the SPIR-V to disk
+            try
+            {
+                File.WriteAllBytes(tmpFile, spirv.GetBytes());
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message, "uh-oh, couldn't create temp file", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
             }
 
+            // send the SPIR-V to RGA
+            string CommandLine = String.Format(" -s vulkan-spv {0}", tmpFile);
             
 
             string isaPath = Path.Combine(m_TempPath, "pyramid.isa");
