@@ -1,1 +1,1 @@
-const float B = 42;
+static const float B = 42;

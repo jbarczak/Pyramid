@@ -1,0 +1,1 @@
+static const float E = 16;

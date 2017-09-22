@@ -11,6 +11,7 @@ namespace Pyramid
     public partial class OptionsScreen : Form
     {
         private Options m_InitialOpts;
+        private string m_IncludeBrowseStart = "";
 
         public Options SelectedOptions { get; private set; }
 
@@ -74,6 +75,13 @@ namespace Pyramid
             txtMali.Text = opts.MaliSCRoot;
             txtMystery.Text = opts.MysteryToolPath;
             txtRGA.Text = opts.RGAPath;
+
+            foreach (string s in opts.IncludePaths)
+                lstIncludes.Items.Add(s);
+
+            // start include browsing at last include directory
+            if (lstIncludes.Items.Count > 0)
+                m_IncludeBrowseStart = (string) lstIncludes.Items[lstIncludes.Items.Count - 1];
         }
 
         private string BrowseFile( string initial )
@@ -89,7 +97,9 @@ namespace Pyramid
         private string BrowseFolder(string initial)
         {
             FolderBrowserDialog fd = new FolderBrowserDialog();
-            fd.SelectedPath = initial;
+            if( !string.IsNullOrEmpty(initial) && System.IO.Directory.Exists(initial))
+                fd.SelectedPath = initial;
+
             if (fd.ShowDialog() != DialogResult.Cancel)
                 return fd.SelectedPath;
             else
@@ -159,6 +169,8 @@ namespace Pyramid
                     }
                 }
 
+                foreach( string s in lstIncludes.Items )
+                    SelectedOptions.AddInclude(s);
             }
         }
 
@@ -194,6 +206,66 @@ namespace Pyramid
         private void btnRGA_Click(object sender, EventArgs e)
         {
             txtRGA.Text = BrowseFile(txtRGA.Text);
+        }
+
+        private void btnAddInclude_Click(object sender, EventArgs e)
+        {
+            FolderBrowserDialog fd = new FolderBrowserDialog();
+            if( System.IO.Directory.Exists(m_IncludeBrowseStart) )
+                fd.SelectedPath = m_IncludeBrowseStart;
+
+            if (fd.ShowDialog() != DialogResult.Cancel)
+            {
+                string path = fd.SelectedPath;
+                if (!lstIncludes.Items.Contains(path))
+                {
+                    lstIncludes.Items.Add(path);
+                    m_IncludeBrowseStart = path; // remember last place user browsed to
+                }
+            }
+        }
+
+        private void btnDeleteInclude_Click(object sender, EventArgs e)
+        {
+            if( lstIncludes.SelectedItem != null )
+            {
+                lstIncludes.Items.Remove(lstIncludes.SelectedItem);
+            }
+        }
+
+        private void numericUpDown1_ValueChanged(object sender, EventArgs e)
+        {
+            if (lstIncludes.SelectedItem != null)
+            {
+                // figure out which direction user wamts it moved in
+                int direction = (int)numericUpDown1.Value;
+                int oldPlace = lstIncludes.SelectedIndex;
+                int newPlace = lstIncludes.SelectedIndex;
+                if (direction == 1)
+                {
+                    // user clicked the up arrow, move it up
+                    if( lstIncludes.SelectedIndex > 0 )
+                        newPlace = oldPlace - 1;
+                }
+                else if (direction == -1)
+                {
+                    // user clicked the down arrow, move it down
+                    if (lstIncludes.SelectedIndex < lstIncludes.Items.Count - 1)
+                        newPlace = oldPlace + 1;                    
+                }
+
+                if( oldPlace != newPlace )
+                {
+                    string a = (string) lstIncludes.Items[oldPlace];
+                    string b = (string) lstIncludes.Items[newPlace];
+                    lstIncludes.Items[oldPlace] = b;
+                    lstIncludes.Items[newPlace] = a;
+                    lstIncludes.SelectedIndex = newPlace;
+                }
+            }
+
+            // clear the updown for next time
+            numericUpDown1.Value = 0;
         }
     }
 }

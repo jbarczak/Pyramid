@@ -1,9 +1,8 @@
 //#extension GL_GOOGLE_include_directive : require
 #include "include_a.txt"
-#include "include_b.txt"
-#include "include_a.txt"
+#include "include_d.txt"
 
 float main() : SV_Target
 {
-   return Function();
+   return Function() + E;
 }

@@ -20,8 +20,13 @@ namespace Pyramid
 
     class IncludeHandler : IIncludeHandler
     {
-        private string m_SourcePath = "";
         private List<string> m_SearchDirs = new List<string>();
+
+        public IncludeHandler( IEnumerable<string> IncludePaths )
+        {
+            if (IncludePaths != null)
+                m_SearchDirs.AddRange(IncludePaths);
+        }
 
         IIncludeResult DoPath(string searchPath, string includePath )
         {
@@ -38,7 +43,9 @@ namespace Pyramid
             if (!String.IsNullOrEmpty(includerPath))
             {
                 string fileDir = Path.GetDirectoryName(includerPath);
-                return DoPath(fileDir, path);
+                IIncludeResult r = DoPath(fileDir, path);
+                if (r != null)
+                    return r;
             }
 
             foreach( string s in m_SearchDirs )

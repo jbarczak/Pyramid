@@ -11,6 +11,7 @@ namespace Pyramid
         private List<string> m_DisabledAMDAsics = new List<string>();
         private List<string> m_DisabledCodeXLAsics = new List<string>();
         private List<string> m_DisabledRGAAsics = new List<string>();
+        private List<string> m_IncludePaths = new List<string>();
 
         public string RGAPath { get; set; }
         public string MysteryToolPath { get; set; }
@@ -24,6 +25,7 @@ namespace Pyramid
         public IEnumerable<string> DisabledAMDAsics { get { return m_DisabledAMDAsics; } }
         public IEnumerable<string> DisabledCodeXLAsics { get { return m_DisabledCodeXLAsics; } }
         public IEnumerable<string> DisabledRGAAsics { get { return m_DisabledRGAAsics; } }
+        public IEnumerable<string> IncludePaths { get { return m_IncludePaths; } }
 
         public void DisableBackend(string name)
         {
@@ -43,7 +45,7 @@ namespace Pyramid
             return m_DisabledRGAAsics.Contains(name);
         }
 
-
+       
         public void DisableAMDAsic(string name)
         {
             m_DisabledAMDAsics.Add(name);
@@ -60,6 +62,16 @@ namespace Pyramid
         public bool IsCodeXLAsicDisabled(string name)
         {
             return m_DisabledCodeXLAsics.Contains(name);
+        }
+
+        public void AddInclude(string include)
+        {
+            if( !m_IncludePaths.Contains(include))
+                m_IncludePaths.Add(include);
+        }
+        public void RemoveInclude( string include )
+        {
+            m_IncludePaths.Remove(include);
         }
 
         public static Options GetDefaults()
@@ -96,9 +108,9 @@ namespace Pyramid
                 Dictionary<string,string> map = new Dictionary<string,string>();
                 foreach( string s in lines )
                 {
-                    string[] keyval = s.Split('=');
-                    string key = keyval[0];
-                    string value = keyval[1];
+                    int idx = s.IndexOf('=');
+                    string key   = s.Substring(0, idx);
+                    string value = s.Substring(idx+1);
                     map.Add(key, value);
                 }
                 
@@ -147,11 +159,13 @@ namespace Pyramid
                 if (map.TryGetValue("DisabledRGAAsics", out disabledRGAAsics))
                     opts.m_DisabledRGAAsics.AddRange(disabledRGAAsics.Split(','));
 
-
                 string rga;
-                if (!map.TryGetValue("RGAPath", out rga))
+                if (map.TryGetValue("RGAPath", out rga))
                     rga = defaults.RGAPath;
 
+                string includePaths;
+                if (map.TryGetValue("IncludePaths", out includePaths))
+                    opts.m_IncludePaths.AddRange(includePaths.Split('?'));
 
                 opts.D3DCompilerPath = d3dCompiler;
                 opts.CodeXLPath = codeXL;
@@ -161,6 +175,7 @@ namespace Pyramid
                 opts.MaliSCRoot = mali;
                 opts.MysteryToolPath = mystery;
                 opts.RGAPath = rga;
+
                 return opts;
             }
             catch (Exception e)
@@ -183,9 +198,12 @@ namespace Pyramid
                 string DisabledAMDAsics = String.Join(",",m_DisabledAMDAsics.ToArray());
                 string DisabledCodeXLAsics = String.Join(",", m_DisabledCodeXLAsics.ToArray());
                 string DisabledRGAAsics = String.Join(",", m_DisabledRGAAsics.ToArray());
+                
+                // NOTE: remember, must join include paths with a non-path character
+                string IncludePaths = String.Join("?", m_IncludePaths);
 
                 File.WriteAllText(OptionsFile,
-                                   String.Format("D3DCompiler={0}\nCodeXL={1}\ntemp={2}\nPowerVR={3}\nMali={4}\nDisabledBackends={5}\nDisabledAMDAsics={6}\nDisabledCodeXLAsics={7}\nMysteryTool={8}\nRGAPath={9}\nDisabledRGAAsics={10}\n",
+                                   String.Format("D3DCompiler={0}\nCodeXL={1}\ntemp={2}\nPowerVR={3}\nMali={4}\nDisabledBackends={5}\nDisabledAMDAsics={6}\nDisabledCodeXLAsics={7}\nMysteryTool={8}\nRGAPath={9}\nDisabledRGAAsics={10}\nIncludePaths={11}\n",
                                                              D3DCompilerPath,
                                                              CodeXLPath,
                                                              TempPath,
@@ -196,7 +214,8 @@ namespace Pyramid
                                                              DisabledCodeXLAsics,
                                                              MysteryToolPath,
                                                              RGAPath,
-                                                             DisabledRGAAsics));
+                                                             DisabledRGAAsics,
+                                                             IncludePaths));
             }
             catch(Exception e)
             {

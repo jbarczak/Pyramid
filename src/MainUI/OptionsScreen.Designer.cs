@@ -48,6 +48,10 @@
             this.label5 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
+            this.label12 = new System.Windows.Forms.Label();
+            this.btnAddInclude = new System.Windows.Forms.Button();
+            this.btnDeleteInclude = new System.Windows.Forms.Button();
+            this.label13 = new System.Windows.Forms.Label();
             this.txtDXX = new System.Windows.Forms.TextBox();
             this.btnDXX = new System.Windows.Forms.Button();
             this.lstBackends = new System.Windows.Forms.CheckedListBox();
@@ -64,6 +68,9 @@
             this.btnRGA = new System.Windows.Forms.Button();
             this.lstRGAAsics = new System.Windows.Forms.CheckedListBox();
             this.label11 = new System.Windows.Forms.Label();
+            this.lstIncludes = new System.Windows.Forms.ListBox();
+            this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             this.SuspendLayout();
             // 
             // txtCodeXL
@@ -259,6 +266,50 @@
             this.toolTip1.SetToolTip(this.label10, "Directory where the mali shader compiler can be found.  Default will be relative " +
         "to working directory.");
             // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(50, 435);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(30, 13);
+            this.label12.TabIndex = 38;
+            this.label12.Text = "RGA";
+            this.toolTip1.SetToolTip(this.label12, "Directory where the mali shader compiler can be found.  Default will be relative " +
+        "to working directory.");
+            // 
+            // btnAddInclude
+            // 
+            this.btnAddInclude.Location = new System.Drawing.Point(576, 179);
+            this.btnAddInclude.Name = "btnAddInclude";
+            this.btnAddInclude.Size = new System.Drawing.Size(17, 20);
+            this.btnAddInclude.TabIndex = 44;
+            this.btnAddInclude.Text = "+";
+            this.toolTip1.SetToolTip(this.btnAddInclude, "Add include path");
+            this.btnAddInclude.UseVisualStyleBackColor = true;
+            this.btnAddInclude.Click += new System.EventHandler(this.btnAddInclude_Click);
+            // 
+            // btnDeleteInclude
+            // 
+            this.btnDeleteInclude.Location = new System.Drawing.Point(599, 179);
+            this.btnDeleteInclude.Name = "btnDeleteInclude";
+            this.btnDeleteInclude.Size = new System.Drawing.Size(17, 20);
+            this.btnDeleteInclude.TabIndex = 45;
+            this.btnDeleteInclude.Text = "X";
+            this.toolTip1.SetToolTip(this.btnDeleteInclude, "Delete include path");
+            this.btnDeleteInclude.UseVisualStyleBackColor = true;
+            this.btnDeleteInclude.Click += new System.EventHandler(this.btnDeleteInclude_Click);
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(33, 179);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(47, 13);
+            this.label13.TabIndex = 46;
+            this.label13.Text = "Includes";
+            this.toolTip1.SetToolTip(this.label13, "Path to a directory that will be polluted with temporary nonsense when the compil" +
+        "e button is pressed.");
+            // 
             // txtDXX
             // 
             this.txtDXX.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -415,11 +466,40 @@
             this.label11.TabIndex = 37;
             this.label11.Text = "RGA Asics";
             // 
+            // lstIncludes
+            // 
+            this.lstIncludes.FormattingEnabled = true;
+            this.lstIncludes.Location = new System.Drawing.Point(86, 179);
+            this.lstIncludes.Name = "lstIncludes";
+            this.lstIncludes.Size = new System.Drawing.Size(483, 56);
+            this.lstIncludes.TabIndex = 39;
+            // 
+            // numericUpDown1
+            // 
+            this.numericUpDown1.InterceptArrowKeys = false;
+            this.numericUpDown1.Location = new System.Drawing.Point(576, 215);
+            this.numericUpDown1.Minimum = new decimal(new int[] {
+            100,
+            0,
+            0,
+            -2147483648});
+            this.numericUpDown1.Name = "numericUpDown1";
+            this.numericUpDown1.Size = new System.Drawing.Size(17, 20);
+            this.numericUpDown1.TabIndex = 47;
+            this.toolTip1.SetToolTip(this.numericUpDown1, "Adjust include order");
+            this.numericUpDown1.ValueChanged += new System.EventHandler(this.numericUpDown1_ValueChanged);
+            // 
             // OptionsScreen
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(673, 514);
+            this.Controls.Add(this.numericUpDown1);
+            this.Controls.Add(this.label13);
+            this.Controls.Add(this.btnDeleteInclude);
+            this.Controls.Add(this.btnAddInclude);
+            this.Controls.Add(this.lstIncludes);
+            this.Controls.Add(this.label12);
             this.Controls.Add(this.label11);
             this.Controls.Add(this.lstRGAAsics);
             this.Controls.Add(this.btnRGA);
@@ -457,6 +537,7 @@
             this.Name = "OptionsScreen";
             this.Text = "OptionsScreen";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OptionsScreen_FormClosing);
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -499,5 +580,11 @@
         private System.Windows.Forms.Button btnRGA;
         private System.Windows.Forms.CheckedListBox lstRGAAsics;
         private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.ListBox lstIncludes;
+        private System.Windows.Forms.Button btnAddInclude;
+        private System.Windows.Forms.Button btnDeleteInclude;
+        private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.NumericUpDown numericUpDown1;
     }
 }

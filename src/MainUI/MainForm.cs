@@ -24,7 +24,7 @@ namespace Pyramid
         private void CreateBackends( Options opts )
         {
             List<IBackend> backends = new List<IBackend>();
-            IIncludeHandler handler = new IncludeHandler();
+            IIncludeHandler handler = new IncludeHandler(opts.IncludePaths);
 
             try
             {
