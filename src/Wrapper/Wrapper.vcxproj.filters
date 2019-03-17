@@ -157,8 +157,5 @@
     <ClInclude Include="DXILCompiler_Impl.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="GenHLSLExtensionIntrinsics.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>

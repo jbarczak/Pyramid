@@ -8,7 +8,6 @@
 struct IDxcLibrary;
 struct IDxcCompiler;
 struct IDxcBlob;
-class GenIntrinsicTable;
 #pragma managed
 
 typedef unsigned char byte;
@@ -69,7 +68,6 @@ internal:
     Pyramid::IIncludeHandler^ m_pmInclude;
     IDxcLibrary* m_pDXCLibrary = nullptr;
     IDxcCompiler* m_pDXCCompiler = nullptr;
-    GenIntrinsicTable* m_pGenIntrinsics = nullptr;
     DxcCreateInstanceProc m_pfnCreateInstance = nullptr;
 };
 

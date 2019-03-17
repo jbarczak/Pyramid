@@ -73,7 +73,6 @@ namespace Pyramid
             txtPowerVR.Text = opts.PowerVRCompilerPath;
             txtDXX.Text = opts.DXXDriverPath;
             txtMali.Text = opts.MaliSCRoot;
-            txtIGC.Text = opts.IGCPath;
             txtRGA.Text = opts.RGAPath;
             txtDXIL.Text = opts.DXILCompilerPath;
             txtIntelShaderAnalyzer.Text = opts.IntelShaderAnalyzerPath;
@@ -138,7 +137,6 @@ namespace Pyramid
                 SelectedOptions.PowerVRCompilerPath = txtPowerVR.Text;
                 SelectedOptions.DXXDriverPath = txtDXX.Text;
                 SelectedOptions.MaliSCRoot = txtMali.Text ;
-                SelectedOptions.IGCPath = txtIGC.Text;
                 SelectedOptions.RGAPath = txtRGA.Text;
                 SelectedOptions.DXILCompilerPath = txtDXIL.Text;
                 SelectedOptions.IntelShaderAnalyzerPath = txtIntelShaderAnalyzer.Text;
@@ -201,11 +199,7 @@ namespace Pyramid
         {
             txtMali.Text = BrowseFolder(txtMali.Text);
         }
-
-        private void btnMystery_Click(object sender, EventArgs e)
-        {
-            txtIGC.Text = BrowseFile(txtIGC.Text);
-        }
+        
 
         private void btnRGA_Click(object sender, EventArgs e)
         {
@@ -280,6 +274,11 @@ namespace Pyramid
         private void btnIntelShaderAnalyzer_Click(object sender, EventArgs e)
         {
             txtIntelShaderAnalyzer.Text = BrowseFile(txtIntelShaderAnalyzer.Text);
+        }
+
+        private void label15_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

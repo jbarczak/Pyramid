@@ -131,7 +131,6 @@
     <ClInclude Include="GCNEnums.h" />
     <ClInclude Include="GCNIsa.h" />
     <ClInclude Include="GCNSimulator.h" />
-    <ClInclude Include="GenHLSLExtensionIntrinsics.h" />
     <ClInclude Include="GLSlang_Impl.h" />
     <ClInclude Include="GLSLOpt_Impl.h" />
     <ClInclude Include="Scrutinizer_GCN.h" />

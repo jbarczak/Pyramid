@@ -12,10 +12,8 @@ namespace Pyramid
         private List<string> m_DisabledCodeXLAsics = new List<string>();
         private List<string> m_DisabledRGAAsics = new List<string>();
         private List<string> m_IncludePaths = new List<string>();
-
-        public string IGCPath { get; set; }
+        
         public string RGAPath { get; set; }
-        public string MysteryToolPath { get; set; }
         public string D3DCompilerPath { get; set; }
         public string DXILCompilerPath { get; set; }
         public string CodeXLPath { get; set; }
@@ -86,9 +84,7 @@ namespace Pyramid
             opts.PowerVRCompilerPath = "PowerVR";
             opts.DXXDriverPath = "atidxx32.dll";
             opts.MaliSCRoot = "MaliSC";
-            opts.MysteryToolPath = "";
             opts.RGAPath = "rga\\rga.exe";
-            opts.IGCPath = "IGC_Standalone\\IGCStandalone.exe";
             opts.IntelShaderAnalyzerPath = "IntelShaderAnalyzer\\IntelShaderAnalyzer.exe";
             opts.TempPath = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -148,12 +144,7 @@ namespace Pyramid
                 string mali;
                 if (!map.TryGetValue("Mali", out mali))
                     mali = defaults.MaliSCRoot;
-
-                string mystery;
-                if (!map.TryGetValue("MysteryTool", out mystery))
-                    mystery = defaults.MysteryToolPath;
-
-
+                
                 string disabledBackends;
                 if( map.TryGetValue("DisabledBackends", out disabledBackends))
                     opts.m_DisabledBackends.AddRange(disabledBackends.Split(','));
@@ -173,11 +164,7 @@ namespace Pyramid
                 string rga;
                 if (!map.TryGetValue("RGAPath", out rga))
                     rga = defaults.RGAPath;
-
-                string igc;
-                if (!map.TryGetValue("IGCPath", out igc))
-                    igc = defaults.IGCPath;
-
+                
                 string intelAnalyzer;
                 if (!map.TryGetValue("IntelShaderAnalyzerPath", out intelAnalyzer))
                     intelAnalyzer = defaults.IntelShaderAnalyzerPath;
@@ -194,9 +181,7 @@ namespace Pyramid
                 opts.PowerVRCompilerPath = pvr;
                 opts.DXXDriverPath = dxx;
                 opts.MaliSCRoot = mali;
-                opts.MysteryToolPath = mystery;
                 opts.RGAPath = rga;
-                opts.IGCPath = igc;
                 opts.IntelShaderAnalyzerPath = intelAnalyzer;
 
                 return opts;
@@ -226,7 +211,7 @@ namespace Pyramid
                 string IncludePaths = String.Join("?", m_IncludePaths);
 
                 File.WriteAllText(OptionsFile,
-                                   String.Format("D3DCompiler={0}\nCodeXL={1}\ntemp={2}\nPowerVR={3}\nMali={4}\nDisabledBackends={5}\nDisabledAMDAsics={6}\nDisabledCodeXLAsics={7}\nMysteryTool={8}\nRGAPath={9}\nDisabledRGAAsics={10}\nIncludePaths={11}\nIGCPath={12}\nDXILCompiler={13}\nIntelShaderAnalyzerPath={14}\n",
+                                   String.Format("D3DCompiler={0}\nCodeXL={1}\ntemp={2}\nPowerVR={3}\nMali={4}\nDisabledBackends={5}\nDisabledAMDAsics={6}\nDisabledCodeXLAsics={7}\nRGAPath={8}\nDisabledRGAAsics={9}\nIncludePaths={10}\nDXILCompiler={11}\nIntelShaderAnalyzerPath={12}\n",
                                                              D3DCompilerPath,
                                                              CodeXLPath,
                                                              TempPath,
@@ -235,11 +220,9 @@ namespace Pyramid
                                                              DisabledBackends,
                                                              DisabledAMDAsics,
                                                              DisabledCodeXLAsics,
-                                                             MysteryToolPath,
                                                              RGAPath,
                                                              DisabledRGAAsics,
                                                              IncludePaths,
-                                                             IGCPath,
                                                              DXILCompilerPath,
                                                              IntelShaderAnalyzerPath ));
             }

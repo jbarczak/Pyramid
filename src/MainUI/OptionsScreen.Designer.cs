@@ -47,13 +47,13 @@
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.label5 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
-            this.label10 = new System.Windows.Forms.Label();
             this.label12 = new System.Windows.Forms.Label();
             this.btnAddInclude = new System.Windows.Forms.Button();
             this.btnDeleteInclude = new System.Windows.Forms.Button();
             this.label13 = new System.Windows.Forms.Label();
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
             this.label14 = new System.Windows.Forms.Label();
+            this.label15 = new System.Windows.Forms.Label();
             this.txtDXX = new System.Windows.Forms.TextBox();
             this.btnDXX = new System.Windows.Forms.Button();
             this.lstBackends = new System.Windows.Forms.CheckedListBox();
@@ -64,8 +64,6 @@
             this.label8 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.lstCodeXLAsics = new System.Windows.Forms.CheckedListBox();
-            this.txtIGC = new System.Windows.Forms.TextBox();
-            this.btnMystery = new System.Windows.Forms.Button();
             this.txtRGA = new System.Windows.Forms.TextBox();
             this.btnRGA = new System.Windows.Forms.Button();
             this.lstRGAAsics = new System.Windows.Forms.CheckedListBox();
@@ -75,7 +73,6 @@
             this.txtDXIL = new System.Windows.Forms.TextBox();
             this.btnIntelShaderAnalyzer = new System.Windows.Forms.Button();
             this.txtIntelShaderAnalyzer = new System.Windows.Forms.TextBox();
-            this.label15 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -85,7 +82,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtCodeXL.Enabled = false;
             this.txtCodeXL.Location = new System.Drawing.Point(115, 314);
-            this.txtCodeXL.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtCodeXL.Margin = new System.Windows.Forms.Padding(4);
             this.txtCodeXL.Name = "txtCodeXL";
             this.txtCodeXL.Size = new System.Drawing.Size(705, 22);
             this.txtCodeXL.TabIndex = 1;
@@ -96,7 +93,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtD3DCompiler.Enabled = false;
             this.txtD3DCompiler.Location = new System.Drawing.Point(115, 346);
-            this.txtD3DCompiler.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtD3DCompiler.Margin = new System.Windows.Forms.Padding(4);
             this.txtD3DCompiler.Name = "txtD3DCompiler";
             this.txtD3DCompiler.Size = new System.Drawing.Size(705, 22);
             this.txtD3DCompiler.TabIndex = 2;
@@ -107,7 +104,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtTemp.Enabled = false;
             this.txtTemp.Location = new System.Drawing.Point(115, 282);
-            this.txtTemp.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtTemp.Margin = new System.Windows.Forms.Padding(4);
             this.txtTemp.Name = "txtTemp";
             this.txtTemp.Size = new System.Drawing.Size(705, 22);
             this.txtTemp.TabIndex = 3;
@@ -150,7 +147,7 @@
             // 
             this.btnTemp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnTemp.Location = new System.Drawing.Point(829, 282);
-            this.btnTemp.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnTemp.Margin = new System.Windows.Forms.Padding(4);
             this.btnTemp.Name = "btnTemp";
             this.btnTemp.Size = new System.Drawing.Size(43, 25);
             this.btnTemp.TabIndex = 8;
@@ -162,7 +159,7 @@
             // 
             this.btnCodeXL.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnCodeXL.Location = new System.Drawing.Point(829, 312);
-            this.btnCodeXL.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnCodeXL.Margin = new System.Windows.Forms.Padding(4);
             this.btnCodeXL.Name = "btnCodeXL";
             this.btnCodeXL.Size = new System.Drawing.Size(43, 25);
             this.btnCodeXL.TabIndex = 10;
@@ -174,7 +171,7 @@
             // 
             this.btnD3DCompiler.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnD3DCompiler.Location = new System.Drawing.Point(829, 344);
-            this.btnD3DCompiler.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnD3DCompiler.Margin = new System.Windows.Forms.Padding(4);
             this.btnD3DCompiler.Name = "btnD3DCompiler";
             this.btnD3DCompiler.Size = new System.Drawing.Size(43, 25);
             this.btnD3DCompiler.TabIndex = 11;
@@ -186,7 +183,7 @@
             // 
             this.btnOk.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.btnOk.Location = new System.Drawing.Point(505, 609);
-            this.btnOk.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnOk.Margin = new System.Windows.Forms.Padding(4);
             this.btnOk.Name = "btnOk";
             this.btnOk.Size = new System.Drawing.Size(92, 31);
             this.btnOk.TabIndex = 12;
@@ -197,7 +194,7 @@
             // 
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.btnCancel.Location = new System.Drawing.Point(617, 608);
-            this.btnCancel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnCancel.Margin = new System.Windows.Forms.Padding(4);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(92, 31);
             this.btnCancel.TabIndex = 13;
@@ -222,7 +219,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtPowerVR.Enabled = false;
             this.txtPowerVR.Location = new System.Drawing.Point(115, 376);
-            this.txtPowerVR.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtPowerVR.Margin = new System.Windows.Forms.Padding(4);
             this.txtPowerVR.Name = "txtPowerVR";
             this.txtPowerVR.Size = new System.Drawing.Size(705, 22);
             this.txtPowerVR.TabIndex = 15;
@@ -231,7 +228,7 @@
             // 
             this.btnPowerVR.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnPowerVR.Location = new System.Drawing.Point(829, 375);
-            this.btnPowerVR.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnPowerVR.Margin = new System.Windows.Forms.Padding(4);
             this.btnPowerVR.Name = "btnPowerVR";
             this.btnPowerVR.Size = new System.Drawing.Size(43, 23);
             this.btnPowerVR.TabIndex = 16;
@@ -242,7 +239,7 @@
             // btnDefaults
             // 
             this.btnDefaults.Location = new System.Drawing.Point(48, 609);
-            this.btnDefaults.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnDefaults.Margin = new System.Windows.Forms.Padding(4);
             this.btnDefaults.Name = "btnDefaults";
             this.btnDefaults.Size = new System.Drawing.Size(87, 30);
             this.btnDefaults.TabIndex = 17;
@@ -278,22 +275,10 @@
             this.toolTip1.SetToolTip(this.label7, "Directory where the mali shader compiler can be found.  Default will be relative " +
         "to working directory.");
             // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(73, 476);
-            this.label10.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(31, 17);
-            this.label10.TabIndex = 33;
-            this.label10.Text = "IGC";
-            this.toolTip1.SetToolTip(this.label10, "Directory where the mali shader compiler can be found.  Default will be relative " +
-        "to working directory.");
-            // 
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(67, 509);
+            this.label12.Location = new System.Drawing.Point(67, 479);
             this.label12.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(38, 17);
@@ -305,7 +290,7 @@
             // btnAddInclude
             // 
             this.btnAddInclude.Location = new System.Drawing.Point(768, 201);
-            this.btnAddInclude.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnAddInclude.Margin = new System.Windows.Forms.Padding(4);
             this.btnAddInclude.Name = "btnAddInclude";
             this.btnAddInclude.Size = new System.Drawing.Size(23, 25);
             this.btnAddInclude.TabIndex = 44;
@@ -317,7 +302,7 @@
             // btnDeleteInclude
             // 
             this.btnDeleteInclude.Location = new System.Drawing.Point(799, 201);
-            this.btnDeleteInclude.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnDeleteInclude.Margin = new System.Windows.Forms.Padding(4);
             this.btnDeleteInclude.Name = "btnDeleteInclude";
             this.btnDeleteInclude.Size = new System.Drawing.Size(23, 25);
             this.btnDeleteInclude.TabIndex = 45;
@@ -342,7 +327,7 @@
             // 
             this.numericUpDown1.InterceptArrowKeys = false;
             this.numericUpDown1.Location = new System.Drawing.Point(768, 246);
-            this.numericUpDown1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.numericUpDown1.Margin = new System.Windows.Forms.Padding(4);
             this.numericUpDown1.Minimum = new decimal(new int[] {
             100,
             0,
@@ -357,7 +342,7 @@
             // label14
             // 
             this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(19, 539);
+            this.label14.Location = new System.Drawing.Point(19, 509);
             this.label14.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(97, 17);
@@ -365,13 +350,25 @@
             this.label14.Text = "DXIL Compiler";
             this.toolTip1.SetToolTip(this.label14, "Path to the D3DCompiler DLL to use");
             // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(21, 539);
+            this.label15.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(56, 17);
+            this.label15.TabIndex = 51;
+            this.label15.Text = "Intel SA";
+            this.toolTip1.SetToolTip(this.label15, "Path to the D3DCompiler DLL to use");
+            this.label15.Click += new System.EventHandler(this.label15_Click);
+            // 
             // txtDXX
             // 
             this.txtDXX.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtDXX.Enabled = false;
             this.txtDXX.Location = new System.Drawing.Point(115, 408);
-            this.txtDXX.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtDXX.Margin = new System.Windows.Forms.Padding(4);
             this.txtDXX.Name = "txtDXX";
             this.txtDXX.Size = new System.Drawing.Size(705, 22);
             this.txtDXX.TabIndex = 18;
@@ -380,7 +377,7 @@
             // 
             this.btnDXX.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnDXX.Location = new System.Drawing.Point(829, 410);
-            this.btnDXX.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnDXX.Margin = new System.Windows.Forms.Padding(4);
             this.btnDXX.Name = "btnDXX";
             this.btnDXX.Size = new System.Drawing.Size(43, 23);
             this.btnDXX.TabIndex = 19;
@@ -392,7 +389,7 @@
             // 
             this.lstBackends.FormattingEnabled = true;
             this.lstBackends.Location = new System.Drawing.Point(44, 57);
-            this.lstBackends.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.lstBackends.Margin = new System.Windows.Forms.Padding(4);
             this.lstBackends.Name = "lstBackends";
             this.lstBackends.ScrollAlwaysVisible = true;
             this.lstBackends.Size = new System.Drawing.Size(203, 123);
@@ -412,7 +409,7 @@
             // 
             this.btnMali.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnMali.Location = new System.Drawing.Point(829, 442);
-            this.btnMali.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnMali.Margin = new System.Windows.Forms.Padding(4);
             this.btnMali.Name = "btnMali";
             this.btnMali.Size = new System.Drawing.Size(43, 23);
             this.btnMali.TabIndex = 25;
@@ -426,7 +423,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtMali.Enabled = false;
             this.txtMali.Location = new System.Drawing.Point(115, 440);
-            this.txtMali.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtMali.Margin = new System.Windows.Forms.Padding(4);
             this.txtMali.Name = "txtMali";
             this.txtMali.Size = new System.Drawing.Size(705, 22);
             this.txtMali.TabIndex = 24;
@@ -435,7 +432,7 @@
             // 
             this.lstAMDAsics.FormattingEnabled = true;
             this.lstAMDAsics.Location = new System.Drawing.Point(273, 57);
-            this.lstAMDAsics.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.lstAMDAsics.Margin = new System.Windows.Forms.Padding(4);
             this.lstAMDAsics.Name = "lstAMDAsics";
             this.lstAMDAsics.ScrollAlwaysVisible = true;
             this.lstAMDAsics.Size = new System.Drawing.Size(203, 123);
@@ -465,42 +462,19 @@
             // 
             this.lstCodeXLAsics.FormattingEnabled = true;
             this.lstCodeXLAsics.Location = new System.Drawing.Point(501, 57);
-            this.lstCodeXLAsics.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.lstCodeXLAsics.Margin = new System.Windows.Forms.Padding(4);
             this.lstCodeXLAsics.Name = "lstCodeXLAsics";
             this.lstCodeXLAsics.ScrollAlwaysVisible = true;
             this.lstCodeXLAsics.Size = new System.Drawing.Size(171, 123);
             this.lstCodeXLAsics.TabIndex = 29;
-            // 
-            // txtIGC
-            // 
-            this.txtIGC.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtIGC.Enabled = false;
-            this.txtIGC.Location = new System.Drawing.Point(115, 472);
-            this.txtIGC.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.txtIGC.Name = "txtIGC";
-            this.txtIGC.Size = new System.Drawing.Size(705, 22);
-            this.txtIGC.TabIndex = 31;
-            // 
-            // btnMystery
-            // 
-            this.btnMystery.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnMystery.Location = new System.Drawing.Point(828, 472);
-            this.btnMystery.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.btnMystery.Name = "btnMystery";
-            this.btnMystery.Size = new System.Drawing.Size(43, 23);
-            this.btnMystery.TabIndex = 32;
-            this.btnMystery.Text = "...";
-            this.btnMystery.UseVisualStyleBackColor = true;
-            this.btnMystery.Click += new System.EventHandler(this.btnMystery_Click);
             // 
             // txtRGA
             // 
             this.txtRGA.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtRGA.Enabled = false;
-            this.txtRGA.Location = new System.Drawing.Point(115, 504);
-            this.txtRGA.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtRGA.Location = new System.Drawing.Point(115, 474);
+            this.txtRGA.Margin = new System.Windows.Forms.Padding(4);
             this.txtRGA.Name = "txtRGA";
             this.txtRGA.Size = new System.Drawing.Size(705, 22);
             this.txtRGA.TabIndex = 34;
@@ -508,8 +482,8 @@
             // btnRGA
             // 
             this.btnRGA.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnRGA.Location = new System.Drawing.Point(828, 506);
-            this.btnRGA.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnRGA.Location = new System.Drawing.Point(828, 476);
+            this.btnRGA.Margin = new System.Windows.Forms.Padding(4);
             this.btnRGA.Name = "btnRGA";
             this.btnRGA.Size = new System.Drawing.Size(43, 23);
             this.btnRGA.TabIndex = 35;
@@ -521,7 +495,7 @@
             // 
             this.lstRGAAsics.FormattingEnabled = true;
             this.lstRGAAsics.Location = new System.Drawing.Point(700, 57);
-            this.lstRGAAsics.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.lstRGAAsics.Margin = new System.Windows.Forms.Padding(4);
             this.lstRGAAsics.Name = "lstRGAAsics";
             this.lstRGAAsics.ScrollAlwaysVisible = true;
             this.lstRGAAsics.Size = new System.Drawing.Size(171, 123);
@@ -542,7 +516,7 @@
             this.lstIncludes.FormattingEnabled = true;
             this.lstIncludes.ItemHeight = 16;
             this.lstIncludes.Location = new System.Drawing.Point(115, 201);
-            this.lstIncludes.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.lstIncludes.Margin = new System.Windows.Forms.Padding(4);
             this.lstIncludes.Name = "lstIncludes";
             this.lstIncludes.Size = new System.Drawing.Size(643, 68);
             this.lstIncludes.TabIndex = 39;
@@ -550,8 +524,8 @@
             // btnDXIL
             // 
             this.btnDXIL.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnDXIL.Location = new System.Drawing.Point(828, 535);
-            this.btnDXIL.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnDXIL.Location = new System.Drawing.Point(828, 505);
+            this.btnDXIL.Margin = new System.Windows.Forms.Padding(4);
             this.btnDXIL.Name = "btnDXIL";
             this.btnDXIL.Size = new System.Drawing.Size(43, 25);
             this.btnDXIL.TabIndex = 50;
@@ -564,8 +538,8 @@
             this.txtDXIL.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtDXIL.Enabled = false;
-            this.txtDXIL.Location = new System.Drawing.Point(115, 536);
-            this.txtDXIL.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtDXIL.Location = new System.Drawing.Point(115, 506);
+            this.txtDXIL.Margin = new System.Windows.Forms.Padding(4);
             this.txtDXIL.Name = "txtDXIL";
             this.txtDXIL.Size = new System.Drawing.Size(705, 22);
             this.txtDXIL.TabIndex = 49;
@@ -573,7 +547,7 @@
             // btnIntelShaderAnalyzer
             // 
             this.btnIntelShaderAnalyzer.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnIntelShaderAnalyzer.Location = new System.Drawing.Point(830, 565);
+            this.btnIntelShaderAnalyzer.Location = new System.Drawing.Point(830, 535);
             this.btnIntelShaderAnalyzer.Margin = new System.Windows.Forms.Padding(4);
             this.btnIntelShaderAnalyzer.Name = "btnIntelShaderAnalyzer";
             this.btnIntelShaderAnalyzer.Size = new System.Drawing.Size(43, 25);
@@ -587,22 +561,11 @@
             this.txtIntelShaderAnalyzer.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtIntelShaderAnalyzer.Enabled = false;
-            this.txtIntelShaderAnalyzer.Location = new System.Drawing.Point(117, 566);
+            this.txtIntelShaderAnalyzer.Location = new System.Drawing.Point(117, 536);
             this.txtIntelShaderAnalyzer.Margin = new System.Windows.Forms.Padding(4);
             this.txtIntelShaderAnalyzer.Name = "txtIntelShaderAnalyzer";
             this.txtIntelShaderAnalyzer.Size = new System.Drawing.Size(705, 22);
             this.txtIntelShaderAnalyzer.TabIndex = 52;
-            // 
-            // label15
-            // 
-            this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(21, 569);
-            this.label15.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(97, 17);
-            this.label15.TabIndex = 51;
-            this.label15.Text = "DXIL Compiler";
-            this.toolTip1.SetToolTip(this.label15, "Path to the D3DCompiler DLL to use");
             // 
             // OptionsScreen
             // 
@@ -625,9 +588,6 @@
             this.Controls.Add(this.lstRGAAsics);
             this.Controls.Add(this.btnRGA);
             this.Controls.Add(this.txtRGA);
-            this.Controls.Add(this.label10);
-            this.Controls.Add(this.btnMystery);
-            this.Controls.Add(this.txtIGC);
             this.Controls.Add(this.label9);
             this.Controls.Add(this.lstCodeXLAsics);
             this.Controls.Add(this.label8);
@@ -655,7 +615,7 @@
             this.Controls.Add(this.txtTemp);
             this.Controls.Add(this.txtD3DCompiler);
             this.Controls.Add(this.txtCodeXL);
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "OptionsScreen";
             this.Text = "OptionsScreen";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OptionsScreen_FormClosing);
@@ -695,9 +655,6 @@
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.CheckedListBox lstCodeXLAsics;
-        private System.Windows.Forms.TextBox txtIGC;
-        private System.Windows.Forms.Button btnMystery;
-        private System.Windows.Forms.Label label10;
         private System.Windows.Forms.TextBox txtRGA;
         private System.Windows.Forms.Button btnRGA;
         private System.Windows.Forms.CheckedListBox lstRGAAsics;

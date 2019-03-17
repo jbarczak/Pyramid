@@ -11,7 +11,7 @@ namespace Pyramid
 {
     class IntelShaderAnalyzerResultSet : IResultSet
     {
-        public string Name { get { return "IGC"; } }
+        public string Name { get { return "IntelShaderAnalyzer"; } }
         public Control AnalysisPanel { get { return m_Analysis; } }
         public Control ResultsPanel { get { return m_Results; } }
         private TextBox m_Analysis = new TextBox();

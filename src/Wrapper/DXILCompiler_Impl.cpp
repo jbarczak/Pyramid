@@ -6,7 +6,6 @@
 #include <vector>
 #include <atlbase.h>
 #include <d3dcompiler.h>
-#include "GenHLSLExtensionIntrinsics.h"
 #include "dxc/hlsl/DxilContainer.h"
 #pragma managed
 
@@ -278,17 +277,6 @@ DXILCompiler_Impl::DXILCompiler_Impl( System::String^ DLLPath, Pyramid::IInclude
         throw gcnew System::Exception( System::String::Format( "DXCCompiler create failed in {0} ",DLLPath ) );
     }
 
-    CComPtr<IDxcLangExtensions> pILangExtensions;
-
-    if ( SUCCEEDED( pCompiler->QueryInterface<IDxcLangExtensions>( &pILangExtensions ) ) )
-    {
-        GenIntrinsicTable* pGenIntrinsicTable = new GenIntrinsicTable( IntelIntrinsics );
-        if ( FAILED( pILangExtensions->RegisterIntrinsicTable( pGenIntrinsicTable ) ) )
-            delete pGenIntrinsicTable;
-
-        m_pGenIntrinsics = pGenIntrinsicTable;
-    }
-
     m_pDXCCompiler = pCompiler;
     m_pDXCLibrary = pLibrary;
     m_pmInclude    = pmInclude;
@@ -302,8 +290,6 @@ DXILCompiler_Impl::~DXILCompiler_Impl()
         m_pDXCCompiler->Release();
     if ( m_pDXCLibrary )
         m_pDXCLibrary->Release();
-
-    m_pGenIntrinsics->Release();
 }
 
 

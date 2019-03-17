@@ -53,15 +53,7 @@ namespace Pyramid
             backends.Add(new PowerVRBackend(opts.PowerVRCompilerPath, opts.TempPath));
             backends.Add(new MaliSCBackend(opts.MaliSCRoot, opts.TempPath));
             backends.Add(new RGABackend(opts.RGAPath, opts.TempPath,m_Wrapper,handler));
-
-            if( File.Exists( opts.MysteryToolPath ) )
-            {
-                backends.Add(new MysteryToolBackend(opts));
-            }
-            if( File.Exists( opts.IGCPath) )
-            {
-                backends.Add(new IGCStandaloneBackend(opts));
-            }
+            
             if (File.Exists(opts.IntelShaderAnalyzerPath))
             {
                 backends.Add(new IntelShaderAnalyzerBackend(opts));
