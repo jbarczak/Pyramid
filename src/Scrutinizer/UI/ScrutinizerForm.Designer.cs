@@ -33,8 +33,8 @@
             this.txtLoopCount = new System.Windows.Forms.TextBox();
             this.btnSimulate = new System.Windows.Forms.Button();
             this.chkTaken = new System.Windows.Forms.CheckBox();
-            this.parameterWidget1 = new Pyramid.Scrutinizer.UI.ParameterWidget();
-            this.cfgWidget1 = new Pyramid.Scrutinizer.UI.CFGWidget();
+            this.parameterWidget1 = new Scrutinizer.UI.ParameterWidget();
+            this.cfgWidget1 = new Scrutinizer.UI.CFGWidget();
             this.SuspendLayout();
             // 
             // panel1
@@ -112,11 +112,11 @@
             this.cfgWidget1.Name = "cfgWidget1";
             this.cfgWidget1.Size = new System.Drawing.Size(248, 247);
             this.cfgWidget1.TabIndex = 1;
-            this.cfgWidget1.BlockSelected += new Pyramid.Scrutinizer.UI.CFGWidget.BlockSelectedHandler(this.cfgWidget1_BlockSelected);
-            this.cfgWidget1.LoopSelected += new Pyramid.Scrutinizer.UI.CFGWidget.LoopSelectionHandler(this.cfgWidget1_LoopSelected);
-            this.cfgWidget1.BranchSelected += new Pyramid.Scrutinizer.UI.CFGWidget.BranchSelectedHandler(this.cfgWidget1_BranchSelected);
-            this.cfgWidget1.BranchTargetSelected += new Pyramid.Scrutinizer.UI.CFGWidget.BranchTargetSelectedHandler(this.cfgWidget1_BranchTargetSelected);
-            this.cfgWidget1.SelectionCleared += new Pyramid.Scrutinizer.UI.CFGWidget.SelectionClearedHandler(this.cfgWidget1_SelectionCleared);
+            this.cfgWidget1.BlockSelected += new Scrutinizer.UI.CFGWidget.BlockSelectedHandler(this.cfgWidget1_BlockSelected);
+            this.cfgWidget1.LoopSelected += new Scrutinizer.UI.CFGWidget.LoopSelectionHandler(this.cfgWidget1_LoopSelected);
+            this.cfgWidget1.BranchSelected += new Scrutinizer.UI.CFGWidget.BranchSelectedHandler(this.cfgWidget1_BranchSelected);
+            this.cfgWidget1.BranchTargetSelected += new Scrutinizer.UI.CFGWidget.BranchTargetSelectedHandler(this.cfgWidget1_BranchTargetSelected);
+            this.cfgWidget1.SelectionCleared += new Scrutinizer.UI.CFGWidget.SelectionClearedHandler(this.cfgWidget1_SelectionCleared);
             // 
             // ScrutinizerForm
             // 

@@ -2,7 +2,14 @@
 #include "Utilities.h"
 
 #include <Windows.h>
+
+#pragma unmanaged
 #include <vector>
+#include <atlbase.h>
+#include "dxc/dxcapi.h"
+#pragma managed
+
+///////////////////////////////////////////////////////////////////////////////////////
 
 class PyramidD3DIncludeHandler : public ID3DInclude
 {
@@ -69,18 +76,55 @@ private:
 
 };
 
-
-
-DXShaderBlob_Impl::DXShaderBlob_Impl( ID3DBlob* pBlob, D3DCompiler_Impl^ pCompiler ) : m_pBlob(pBlob), m_pmCompiler(pCompiler)
+///////////////////////////////////////////////////////////////////////////////////////
+DXBCRootSignatureBlob_Impl::DXBCRootSignatureBlob_Impl( ID3DBlob* pBlob,D3DCompiler_Impl^ pCompiler ) : m_pBlob( pBlob ),m_pmCompiler( pCompiler )
 {
 }
-DXShaderBlob_Impl::~DXShaderBlob_Impl()
+
+DXBCRootSignatureBlob_Impl::~DXBCRootSignatureBlob_Impl()
+{
+    if ( m_pBlob )
+        m_pBlob->Release();
+}
+array<byte>^ DXBCRootSignatureBlob_Impl::ReadBytes()
+{
+    if ( !m_pBlob )
+        return nullptr;
+
+    size_t size  = m_pBlob->GetBufferSize();
+    byte* pBytes = (byte*)m_pBlob->GetBufferPointer();
+    array<byte>^ pmBytes = gcnew array<byte>( m_pBlob->GetBufferSize() );
+    for ( size_t i=0; i<size; i++ )
+        pmBytes[i] = pBytes[i];
+
+    return pmBytes;
+}
+///////////////////////////////////////////////////////////////////////////////////////
+
+DXBCShaderBlob_Impl::DXBCShaderBlob_Impl( ID3DBlob* pBlob, D3DCompiler_Impl^ pCompiler ) : m_pBlob(pBlob), m_pmCompiler(pCompiler)
+{
+}
+DXBCShaderBlob_Impl::~DXBCShaderBlob_Impl()
 {
     if( m_pBlob )
         m_pBlob->Release();
 }
 
-System::String^ DXShaderBlob_Impl::Disassemble()
+Pyramid::IDXBlob^ DXBCShaderBlob_Impl::ExtractRootSignature()
+{
+    if ( m_pBlob )
+    {
+        ID3DBlob* pRSBlob;
+        HRESULT hr = m_pmCompiler->m_pGetBlob( m_pBlob->GetBufferPointer(),m_pBlob->GetBufferSize(),D3D_BLOB_ROOT_SIGNATURE,0,&pRSBlob );
+        if ( SUCCEEDED( hr ) && pRSBlob != nullptr )
+        {
+            return gcnew DXBCRootSignatureBlob_Impl( pRSBlob,m_pmCompiler );
+        }
+    }
+    return nullptr;
+}
+
+System::String^ DXBCShaderBlob_Impl::Disassemble()
 {
     if( m_pBlob )
     {
@@ -96,7 +140,7 @@ System::String^ DXShaderBlob_Impl::Disassemble()
     }
     return gcnew System::String("");
 }
-array<byte>^ DXShaderBlob_Impl::ReadBytes()
+array<byte>^ DXBCShaderBlob_Impl::ReadBytes()
 {
     if( !m_pBlob )
         return nullptr;
@@ -110,7 +154,7 @@ array<byte>^ DXShaderBlob_Impl::ReadBytes()
     return pmBytes;
 }
 
-Pyramid::IDXShaderBlob^ DXShaderBlob_Impl::Strip()
+Pyramid::IDXBCShaderBlob^ DXBCShaderBlob_Impl::Strip()
 {
     if( !m_pBlob )
         return nullptr;
@@ -125,11 +169,11 @@ Pyramid::IDXShaderBlob^ DXShaderBlob_Impl::Strip()
     if( !SUCCEEDED(hr))
         throw gcnew System::Exception("D3DStripShader failed");
 
-    return gcnew DXShaderBlob_Impl(pStripped,m_pmCompiler);
+    return gcnew DXBCShaderBlob_Impl(pStripped,m_pmCompiler);
 }
 
 
-Pyramid::IDXShaderBlob^ DXShaderBlob_Impl::GetSignatureBlob()
+Pyramid::IDXBCShaderBlob^ DXBCShaderBlob_Impl::GetSignatureBlob()
 {
     if( !m_pBlob )
         return nullptr;
@@ -140,10 +184,10 @@ Pyramid::IDXShaderBlob^ DXShaderBlob_Impl::GetSignatureBlob()
     if( !SUCCEEDED(hr))
         throw gcnew System::Exception("D3DGetBlobPart failed");
 
-    return gcnew DXShaderBlob_Impl(pSignature,m_pmCompiler);
+    return gcnew DXBCShaderBlob_Impl(pSignature,m_pmCompiler);
 }
 
-Pyramid::IDXShaderBlob^ DXShaderBlob_Impl::GetExecutableBlob()
+Pyramid::IDXBCShaderBlob^ DXBCShaderBlob_Impl::GetExecutableBlob()
 {
     if( !m_pBlob )
         return nullptr;
@@ -165,14 +209,14 @@ Pyramid::IDXShaderBlob^ DXShaderBlob_Impl::GetExecutableBlob()
                 throw gcnew System::Exception("D3DCreateBlob failed");
 
             memcpy( pResultBlob->GetBufferPointer(), pBlob + (i/4)+2, nCodeSizeInBytes );
-            return gcnew DXShaderBlob_Impl( pResultBlob, m_pmCompiler );
+            return gcnew DXBCShaderBlob_Impl( pResultBlob, m_pmCompiler );
         }
     }
     
     return nullptr; // no code in this blob
 }
 
-Pyramid::IDXShaderReflection^ DXShaderBlob_Impl::Reflect()
+Pyramid::IDXShaderReflection^ DXBCShaderBlob_Impl::Reflect()
 {
     ID3D11ShaderReflection* pReflect=0;
     HRESULT hr = m_pmCompiler->m_pReflect( m_pBlob->GetBufferPointer(), m_pBlob->GetBufferSize(), __uuidof(ID3D11ShaderReflection), (void**) &pReflect );
@@ -183,7 +227,9 @@ Pyramid::IDXShaderReflection^ DXShaderBlob_Impl::Reflect()
 }
 
 
-D3DCompiler_Impl::D3DCompiler_Impl( System::String^ DLLPath, Pyramid::IIncludeHandler^ pmInclude )
+///////////////////////////////////////////////////////////////////////////////////////
+
+D3DCompiler_Impl::D3DCompiler_Impl( System::String^ DLLPath,  Pyramid::IIncludeHandler^ pmInclude )
 {
     MarshalledString DLL(DLLPath);
     
@@ -228,52 +274,100 @@ D3DCompiler_Impl::D3DCompiler_Impl( System::String^ DLLPath, Pyramid::IIncludeHa
     m_pmInclude    = pmInclude;
 }
 
-bool D3DCompiler_Impl::Compile( System::String^ Shader, 
-                                Pyramid::IHLSLOptions^ opts, 
-                                System::String^ fileName,
-                                Pyramid::IDXShaderBlob^% IR,  
-                                System::String^% Messages  )
+
+
+bool D3DCompiler_Impl::Compile( System::String^ Shader,
+    Pyramid::IHLSLOptions^ opts,
+    System::String^ fileName,
+    Pyramid::IDXBCShaderBlob^% IR,
+    System::String^% Messages )
 {
+   
+     
+    ID3DBlob* pCode=0;
+    ID3DBlob* pMessages=0;
+    HRESULT hr;
     MarshalledString hlsl( Shader );
     MarshalledString entry( opts->EntryPoint );
     MarshalledString profile( opts->Target.ToString() );
 
-    PyramidD3DIncludeHandler include(m_pmInclude,fileName);
+    PyramidD3DIncludeHandler include( m_pmInclude,fileName );
 
-    ID3DBlob* pCode=0;
-    ID3DBlob* pMessages=0;
-    ID3DBlob* pAsm=0;
-    HRESULT hr;
-    if( m_pCompile2 )
+
+    if ( m_pCompile2 )
     {
-        hr = m_pCompile2( hlsl.GetString(), 
-                    hlsl.Length()+1, 
-                    "", 
-                    0,
-                    &include,
-                    entry, profile, opts->GetD3DCompileFlagBits(), 0, 
-                    0,0,0,
-                    &pCode, &pMessages );
+        hr = m_pCompile2( hlsl.GetString(),
+            hlsl.Length()+1,
+            "",
+            0,
+            &include,
+            entry,profile,opts->GetD3DCompileFlagBits(),0,
+            0,0,0,
+            &pCode,&pMessages );
     }
     else
     {
-        hr = m_pCompile( hlsl.GetString(), 
-                    hlsl.Length()+1, 
-                    "", 
-                    0,
-                    &include,
-                    entry, profile, opts->GetD3DCompileFlagBits(), 0, &pCode, &pMessages );
+        hr = m_pCompile( hlsl.GetString(),
+            hlsl.Length()+1,
+            "",
+            0,
+            &include,
+            entry,profile,opts->GetD3DCompileFlagBits(),0,&pCode,&pMessages );
     }
+   
+    if ( SUCCEEDED( hr ) )
+        IR = gcnew DXBCShaderBlob_Impl( pCode,this );
 
     Messages = nullptr;
-    if( pMessages )
+    if ( pMessages )
     {
-        Messages = Marshal::PtrToStringAnsi( System::IntPtr(pMessages->GetBufferPointer()) );
-        Messages = Messages->Replace( gcnew System::String("\n"), System::Environment::NewLine );   
+        Messages = Marshal::PtrToStringAnsi( System::IntPtr( pMessages->GetBufferPointer() ) );
+        Messages = Messages->Replace( gcnew System::String( "\n" ),System::Environment::NewLine );
+        pMessages->Release();
     }
 
-    if( SUCCEEDED(hr) )
-        IR = gcnew DXShaderBlob_Impl( pCode, this );
-    
-    return SUCCEEDED(hr);
+    return SUCCEEDED( hr );
+}
+
+bool D3DCompiler_Impl::CompileRootSignature(
+        System::String^ Shader,
+        Pyramid::IHLSLOptions^ opts,
+        System::String^ Path,
+        Pyramid::IDXBlob^% blob,
+        System::String^% Messages )
+{
+
+
+    ID3DBlob* pCode=0;
+    ID3DBlob* pMessages=0;
+    HRESULT hr;
+    MarshalledString hlsl( Shader );
+    MarshalledString entry( opts->RootSigMacro );
+    MarshalledString profile( opts->RootSigTarget.ToString() );
+
+    PyramidD3DIncludeHandler include( m_pmInclude,Path );
+
+
+    {
+        hr = m_pCompile( hlsl.GetString(),
+            hlsl.Length()+1,
+            "",
+            0,
+            &include,
+            entry,profile,opts->GetD3DCompileFlagBits(),0,&pCode,&pMessages );
+    }
+
+    if ( SUCCEEDED( hr ) )
+        blob = gcnew DXBCRootSignatureBlob_Impl( pCode,this );
+
+    Messages = nullptr;
+    if ( pMessages )
+    {
+        Messages = Marshal::PtrToStringAnsi( System::IntPtr( pMessages->GetBufferPointer() ) );
+        Messages = Messages->Replace( gcnew System::String( "\n" ),System::Environment::NewLine );
+        pMessages->Release();
+    }
+
+    return SUCCEEDED( hr );
+
 }

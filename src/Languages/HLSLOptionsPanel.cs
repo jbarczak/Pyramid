@@ -14,9 +14,68 @@ namespace Pyramid
         {
             public Languages Language { get { return Languages.HLSL; } }
             public HLSLTarget Target { get; set; }
+            public RootSignatureTarget RootSigTarget { get; set; }
             public HLSLOptimizationLevel OptimizationLevel { get; set; }
             public string EntryPoint { get; set; }
+            public string RootSigMacro { get; set; }
             public bool Compatibility { get; set; }
+
+            public HLSLShaderType ShaderType
+            {
+                get
+                {
+                    switch (this.Target)
+                    {
+                        case HLSLTarget.vs_3_0:
+                        case HLSLTarget.vs_4_0:
+                        case HLSLTarget.vs_4_1:
+                        case HLSLTarget.vs_5_0:
+                        case HLSLTarget.vs_5_1:
+                        case HLSLTarget.vs_6_0:
+                        case HLSLTarget.vs_6_1:
+                        case HLSLTarget.vs_6_2:
+                            return HLSLShaderType.VERTEX;                       
+                        case HLSLTarget.ps_3_0:
+                        case HLSLTarget.ps_4_0:
+                        case HLSLTarget.ps_4_1:
+                        case HLSLTarget.ps_5_0:
+                        case HLSLTarget.ps_5_1:
+                        case HLSLTarget.ps_6_0:
+                        case HLSLTarget.ps_6_1:
+                        case HLSLTarget.ps_6_2:
+                            return HLSLShaderType.PIXEL;
+                        case HLSLTarget.gs_4_0:
+                        case HLSLTarget.gs_4_1:
+                        case HLSLTarget.gs_5_0:
+                        case HLSLTarget.gs_5_1:
+                        case HLSLTarget.gs_6_0:
+                        case HLSLTarget.gs_6_1:
+                        case HLSLTarget.gs_6_2:
+                            return HLSLShaderType.GEOMETRY;
+                        case HLSLTarget.hs_5_0:
+                        case HLSLTarget.hs_5_1:
+                        case HLSLTarget.hs_6_0:
+                        case HLSLTarget.hs_6_1:
+                        case HLSLTarget.hs_6_2:
+                            return HLSLShaderType.HULL;
+                        case HLSLTarget.ds_5_0:
+                        case HLSLTarget.ds_5_1:
+                        case HLSLTarget.ds_6_0:
+                        case HLSLTarget.ds_6_1:
+                        case HLSLTarget.ds_6_2:
+                            return HLSLShaderType.DOMAIN;
+                        case HLSLTarget.cs_4_0:
+                        case HLSLTarget.cs_4_1:
+                        case HLSLTarget.cs_5_0:
+                        case HLSLTarget.cs_5_1:
+                        case HLSLTarget.cs_6_0:
+                        case HLSLTarget.cs_6_1:
+                        case HLSLTarget.cs_6_2:
+                            return HLSLShaderType.COMPUTE;
+                    }
+                    throw new System.Exception("What is this?");
+                }
+            }
 
             public uint GetD3DCompileFlagBits()
             {
@@ -83,10 +142,16 @@ namespace Pyramid
                 string n = Enum.GetName(typeof(HLSLOptimizationLevel), e);
                 cmbOpt.Items.Add(n);
             }
+            foreach( object e in Enum.GetValues(typeof(RootSignatureTarget) ) )
+            {
+                string n = Enum.GetName(typeof(RootSignatureTarget), e);
+                cmbRootSignature.Items.Add(n);
+            }
             cmbTarget.SelectedIndex = cmbTarget.Items.IndexOf("ps_5_0");
             cmbOpt.SelectedIndex = cmbOpt.Items.IndexOf("LEVEL3");
+            cmbRootSignature.SelectedIndex = cmbRootSignature.Items.IndexOf("rootsig_1_0");
         }
-
+        
         public Control Panel { get { return this; } }
 
         public ICompileOptions ReadOptions()
@@ -94,10 +159,17 @@ namespace Pyramid
             HLSLOptions opts = new HLSLOptions();
             opts.Compatibility = chkCompat.Checked;
             opts.EntryPoint = txtEntryPoint.Text;
+            opts.RootSigMacro = txtRootSig.Text;
+            opts.RootSigTarget = (RootSignatureTarget)Enum.Parse(typeof(RootSignatureTarget), (string) cmbRootSignature.Items[cmbRootSignature.SelectedIndex]);
             opts.Target = (HLSLTarget) Enum.Parse(typeof(HLSLTarget), (string) cmbTarget.Items[cmbTarget.SelectedIndex]);
             opts.OptimizationLevel = (HLSLOptimizationLevel)Enum.Parse(typeof(HLSLOptimizationLevel), (string)
                                                                cmbOpt.Items[cmbOpt.SelectedIndex]);
             return opts;
+        }
+
+        private void HLSLOptionsPanel_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

@@ -10,9 +10,9 @@ namespace Pyramid
     {
         private FXCResultsPanel m_Panel = null;
 
-        public FXCResultSet(string error, IDXShaderBlob blob)
+        public FXCResultSet(HLSLShader shader)
         {
-            m_Panel = new FXCResultsPanel(error, blob);
+            m_Panel = new FXCResultsPanel(shader);
         }
 
         public string Name { get { return "D3DCompiler"; } }
@@ -23,12 +23,14 @@ namespace Pyramid
     class D3DCompilerBackend : IBackend
     {
         private ID3DCompiler m_Compiler;
+        private IDXILCompiler m_DXIL;
 
         public string Name { get { return "D3DCompiler"; } }
 
-        public D3DCompilerBackend( ID3DCompiler comp )
+        public D3DCompilerBackend( ID3DCompiler comp, IDXILCompiler dxil )
         {
             m_Compiler = comp;
+            m_DXIL = dxil;
         }
 
         public IResultSet Compile(IShader shader, IBackendOptions options)
@@ -41,9 +43,12 @@ namespace Pyramid
             string text = hlsl.Code;
 
             if (!hlsl.WasCompiled)
-                hlsl.Compile(m_Compiler);
-            
-            return new FXCResultSet(hlsl.Messages, hlsl.CompiledBlob);
+                hlsl.Compile(m_Compiler, m_DXIL);
+
+            if (!hlsl.RootSigWasCompiled)
+                hlsl.CompileRootSignature(m_DXIL);
+
+            return new FXCResultSet(hlsl);
         }
     }
 

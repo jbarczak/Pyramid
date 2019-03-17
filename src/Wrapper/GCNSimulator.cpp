@@ -5,6 +5,7 @@
 #include <string.h>
 #include <algorithm>
 #include <assert.h>
+#include <intrin.h>
 
 namespace GCN{
 namespace Simulator{

@@ -62,6 +62,9 @@
     <ClCompile Include="amd-codexl-analyzer\Common\Src\DeviceInfo\DeviceInfoUtils.cpp">
       <Filter>Source Files\CodeXL</Filter>
     </ClCompile>
+    <ClCompile Include="DXILCompiler_Impl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Utilities.h">
@@ -150,6 +153,12 @@
     </ClInclude>
     <ClInclude Include="amd-codexl-analyzer\CommonProjects\AMDTBackend\Include\Common\asic_reg\vi_id.h">
       <Filter>Source Files\CodeXL</Filter>
+    </ClInclude>
+    <ClInclude Include="DXILCompiler_Impl.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GenHLSLExtensionIntrinsics.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -74,17 +74,33 @@ typedef HRESULT (WINAPI *D3DREFLECT_FUNC)(
 
 ref class D3DCompiler_Impl;
 
-private ref class DXShaderBlob_Impl : Pyramid::IDXShaderBlob
+private ref class DXBCRootSignatureBlob_Impl : Pyramid::IDXBlob
 {
 public:
-    DXShaderBlob_Impl( ID3DBlob* pBlob, D3DCompiler_Impl^ pCompiler );
-    ~DXShaderBlob_Impl( );
+    DXBCRootSignatureBlob_Impl( ID3DBlob* pBlob,D3DCompiler_Impl^ pCompiler );
+    ~DXBCRootSignatureBlob_Impl();
 
+    virtual array<byte>^ ReadBytes();
+
+
+private:
+    ID3DBlob* m_pBlob;
+    D3DCompiler_Impl^ m_pmCompiler;
+};
+
+
+private ref class DXBCShaderBlob_Impl : Pyramid::IDXBCShaderBlob
+{
+public:
+    DXBCShaderBlob_Impl( ID3DBlob* pBlob, D3DCompiler_Impl^ pCompiler );
+    ~DXBCShaderBlob_Impl( );
+
+    virtual Pyramid::IDXBlob^ ExtractRootSignature();
     virtual System::String^ Disassemble();
     virtual array<byte>^ ReadBytes();
-    virtual Pyramid::IDXShaderBlob^ Strip();
-    virtual Pyramid::IDXShaderBlob^ GetSignatureBlob();
-    virtual Pyramid::IDXShaderBlob^ GetExecutableBlob();
+    virtual Pyramid::IDXBCShaderBlob^ Strip();
+    virtual Pyramid::IDXBCShaderBlob^ GetSignatureBlob();
+    virtual Pyramid::IDXBCShaderBlob^ GetExecutableBlob();
     virtual Pyramid::IDXShaderReflection^ Reflect();
 
 private:
@@ -99,10 +115,16 @@ public:
 
     D3DCompiler_Impl( System::String^ DLLPath, Pyramid::IIncludeHandler^ pmIncludes );
     
+    virtual bool CompileRootSignature( System::String^ Shader,
+                                        Pyramid::IHLSLOptions^ opts,
+                                        System::String^ Path,
+                                        Pyramid::IDXBlob^% blob,
+                                        System::String^% Errors );
+
     virtual bool Compile( System::String^ Shader, 
                           Pyramid::IHLSLOptions^ opts,
                           System::String^ Path,
-                          Pyramid::IDXShaderBlob^% blob,  
+                          Pyramid::IDXBCShaderBlob^% blob,  
                           System::String^% Errors  );
 
 internal:
@@ -116,6 +138,7 @@ internal:
     D3DREFLECT_FUNC m_pReflect;
     Pyramid::IIncludeHandler^ m_pmInclude;
 };
+
 
 
 private ref class DXShaderReflection_Impl : public Pyramid::IDXShaderReflection

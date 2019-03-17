@@ -73,8 +73,10 @@ namespace Pyramid
             txtPowerVR.Text = opts.PowerVRCompilerPath;
             txtDXX.Text = opts.DXXDriverPath;
             txtMali.Text = opts.MaliSCRoot;
-            txtMystery.Text = opts.MysteryToolPath;
+            txtIGC.Text = opts.IGCPath;
             txtRGA.Text = opts.RGAPath;
+            txtDXIL.Text = opts.DXILCompilerPath;
+            txtIntelShaderAnalyzer.Text = opts.IntelShaderAnalyzerPath;
 
             foreach (string s in opts.IncludePaths)
                 lstIncludes.Items.Add(s);
@@ -136,8 +138,10 @@ namespace Pyramid
                 SelectedOptions.PowerVRCompilerPath = txtPowerVR.Text;
                 SelectedOptions.DXXDriverPath = txtDXX.Text;
                 SelectedOptions.MaliSCRoot = txtMali.Text ;
-                SelectedOptions.MysteryToolPath = txtMystery.Text;
+                SelectedOptions.IGCPath = txtIGC.Text;
                 SelectedOptions.RGAPath = txtRGA.Text;
+                SelectedOptions.DXILCompilerPath = txtDXIL.Text;
+                SelectedOptions.IntelShaderAnalyzerPath = txtIntelShaderAnalyzer.Text;
 
                 for (int backendIndex = 0; backendIndex < lstBackends.Items.Count; backendIndex++)
                 {
@@ -200,7 +204,7 @@ namespace Pyramid
 
         private void btnMystery_Click(object sender, EventArgs e)
         {
-            txtMystery.Text = BrowseFile(txtMystery.Text);
+            txtIGC.Text = BrowseFile(txtIGC.Text);
         }
 
         private void btnRGA_Click(object sender, EventArgs e)
@@ -266,6 +270,16 @@ namespace Pyramid
 
             // clear the updown for next time
             numericUpDown1.Value = 0;
+        }
+
+        private void btnDXIL_Click(object sender, EventArgs e)
+        {
+            txtDXIL.Text = BrowseFile(txtDXIL.Text);
+        }
+
+        private void btnIntelShaderAnalyzer_Click(object sender, EventArgs e)
+        {
+            txtIntelShaderAnalyzer.Text = BrowseFile(txtIntelShaderAnalyzer.Text);
         }
     }
 }

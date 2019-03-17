@@ -98,14 +98,18 @@ namespace Pyramid
                 IDXShaderBlob blob = shaderHLSL.CompiledBlob;
                 if ( blob == null )
                 {
-                    if (!shaderHLSL.Compile(m_FXC))
+                    if (!shaderHLSL.Compile(m_FXC, null))
                         return null;
                     blob = shaderHLSL.CompiledBlob;
                 }
+                if (!(blob is IDXBCShaderBlob))
+                    return null;
 
-                IDXShaderReflection reflect = blob.Reflect();
+                IDXBCShaderBlob dxcBlob = blob as IDXBCShaderBlob;
 
-                IDXShaderBlob exe = blob.GetExecutableBlob();
+                IDXShaderReflection reflect = dxcBlob.Reflect();
+
+                IDXShaderBlob exe = dxcBlob.GetExecutableBlob();
                 if (exe == null)
                     return null;
 

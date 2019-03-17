@@ -1,4 +1,5 @@
-﻿namespace Pyramid
+﻿
+namespace Pyramid
 {
     partial class MainForm
     {
@@ -223,8 +224,8 @@
             // 
             // CompilePanel
             // 
-            this.CompilePanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.CompilePanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.CompilePanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.CompilePanel.Location = new System.Drawing.Point(4, 68);
@@ -234,7 +235,7 @@
             // 
             // cmbLanguage
             // 
-            this.cmbLanguage.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.cmbLanguage.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.cmbLanguage.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbLanguage.FormattingEnabled = true;
@@ -246,7 +247,7 @@
             // 
             // btnCompile
             // 
-            this.btnCompile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.btnCompile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.btnCompile.Location = new System.Drawing.Point(2, 3);
             this.btnCompile.Name = "btnCompile";
@@ -267,8 +268,8 @@
             // 
             // BackendPanel
             // 
-            this.BackendPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.BackendPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.BackendPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.BackendPanel.Location = new System.Drawing.Point(2, 30);
@@ -278,7 +279,7 @@
             // 
             // cmbBackend
             // 
-            this.cmbBackend.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.cmbBackend.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.cmbBackend.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbBackend.FormattingEnabled = true;
@@ -358,4 +359,3 @@
 
     }
 }
-

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -15,19 +15,20 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <Keyword>ManagedCProj</Keyword>
     <RootNamespace>Wrapper</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CLRSupport>true</CLRSupport>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CLRSupport>true</CLRSupport>
     <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
@@ -87,6 +88,7 @@
     <ClCompile Include="AMDDriver_Impl.cpp" />
     <ClCompile Include="AMDShader_Impl.cpp" />
     <ClCompile Include="D3DCompiler_Impl.cpp" />
+    <ClCompile Include="DXILCompiler_Impl.cpp" />
     <ClCompile Include="GCN1Decoder.cpp" />
     <ClCompile Include="GCNDecoder.cpp" />
     <ClCompile Include="GCNDisassembler.cpp">
@@ -120,6 +122,7 @@
     <ClInclude Include="AMDDriver_Impl.h" />
     <ClInclude Include="AMDShader_Impl.h" />
     <ClInclude Include="D3DCompiler_Impl.h" />
+    <ClInclude Include="DXILCompiler_Impl.h" />
     <ClInclude Include="GCN1Decoder.h" />
     <ClInclude Include="GCN3Decoder.h" />
     <ClInclude Include="GCNBufferedPrinter.h" />
@@ -128,6 +131,7 @@
     <ClInclude Include="GCNEnums.h" />
     <ClInclude Include="GCNIsa.h" />
     <ClInclude Include="GCNSimulator.h" />
+    <ClInclude Include="GenHLSLExtensionIntrinsics.h" />
     <ClInclude Include="GLSlang_Impl.h" />
     <ClInclude Include="GLSLOpt_Impl.h" />
     <ClInclude Include="Scrutinizer_GCN.h" />

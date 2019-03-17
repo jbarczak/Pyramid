@@ -21,7 +21,7 @@ namespace Pyramid
             System.IO.Directory.CreateDirectory(opts.TempPath);
 
 
-            IWrapper wrapper = new Pyramid.Wrapper();
+            IWrapper wrapper = new Wrapper();
             MainForm main = new MainForm( opts, wrapper );
             Application.Run(main);
 

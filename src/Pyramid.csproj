@@ -72,6 +72,20 @@
     <Compile Include="Backends\GLSlangResultsPanel.Designer.cs">
       <DependentUpon>GLSlangResultsPanel.cs</DependentUpon>
     </Compile>
+    <Compile Include="Backends\IGCStandaloneBackend.cs" />
+    <Compile Include="Backends\IGCResultsPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Backends\IGCResultsPanel.Designer.cs">
+      <DependentUpon>IGCResultsPanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Backends\IntelShaderAnalyzerBackend.cs" />
+    <Compile Include="Backends\IntelShaderAnalyzerResultsPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Backends\IntelShaderAnalyzerResultsPanel.Designer.cs">
+      <DependentUpon>IntelShaderAnalyzerResultsPanel.cs</DependentUpon>
+    </Compile>
     <Compile Include="Backends\MaliSCBackend.cs" />
     <Compile Include="Backends\MaliSCResultsPanel.cs">
       <SubType>UserControl</SubType>
@@ -185,6 +199,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Backends\GLSlangResultsPanel.resx">
       <DependentUpon>GLSlangResultsPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Backends\IGCResultsPanel.resx">
+      <DependentUpon>IGCResultsPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Backends\IntelShaderAnalyzerResultsPanel.resx">
+      <DependentUpon>IntelShaderAnalyzerResultsPanel.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Backends\MaliSCResultsPanel.resx">
       <DependentUpon>MaliSCResultsPanel.cs</DependentUpon>

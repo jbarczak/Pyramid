@@ -28,8 +28,10 @@ namespace Pyramid
 
             try
             {
-                ID3DCompiler fxc = m_Wrapper.CreateD3DCompiler(opts.D3DCompilerPath,handler);
-                backends.Add(new D3DCompilerBackend(fxc));
+                ID3DCompiler fxc = m_Wrapper.CreateD3DCompiler(opts.D3DCompilerPath, handler);
+                IDXILCompiler dxil = m_Wrapper.CreateDXILCompiler(opts.DXILCompilerPath, handler);
+
+                backends.Add(new D3DCompilerBackend(fxc,dxil));
                 try
                 {
                     IAMDDriver driver = m_Wrapper.CreateAMDDriver(opts.DXXDriverPath);
@@ -56,7 +58,14 @@ namespace Pyramid
             {
                 backends.Add(new MysteryToolBackend(opts));
             }
-
+            if( File.Exists( opts.IGCPath) )
+            {
+                backends.Add(new IGCStandaloneBackend(opts));
+            }
+            if (File.Exists(opts.IntelShaderAnalyzerPath))
+            {
+                backends.Add(new IntelShaderAnalyzerBackend(opts));
+            }
 
             m_Backends = backends;
         }
@@ -336,6 +345,58 @@ namespace Pyramid
             AboutBox a = new AboutBox();
             a.ShowDialog();
         }
-      
+
+
+        // Hackery to make .NET split containers behave themselves at arbitrary dpi  Courtesty of:
+        //   https://www.codeproject.com/Tips/786170/Proper-Resizing-of-SplitterContainer-Controls-at-a
+
+        // Save the current scale value
+        // ScaleControl() is called during the Form's constructor
+        private SizeF scale = new SizeF(1.0f, 1.0f);
+        protected override void ScaleControl(SizeF factor, BoundsSpecified specified)
+        {
+            scale = new SizeF(scale.Width * factor.Width, scale.Height * factor.Height);
+            base.ScaleControl(factor, specified);
+        }
+
+        // Recursively search for SplitContainer controls
+        private void FixSplitter(Control c)
+        {
+            foreach (Control child in c.Controls)
+            {
+                if (child is SplitContainer)
+                {
+                    SplitContainer sp = (SplitContainer)child;
+                    FixSplitter(sp);
+                    FixSplitter(sp.Panel1);
+                    FixSplitter(sp.Panel2);
+                }
+                else
+                {
+                    FixSplitter(child);
+                }
+            }
+        }
+
+        private void FixSplitter(SplitContainer sp)
+        {
+            // Scale factor depends on orientation
+            float sc = (sp.Orientation == Orientation.Vertical) ? scale.Width : scale.Height;
+            if (sp.FixedPanel == FixedPanel.Panel1)
+            {
+                sp.SplitterDistance = (int)Math.Round((float)sp.SplitterDistance * sc);
+            }
+            else if (sp.FixedPanel == FixedPanel.Panel2)
+            {
+                int cs = (sp.Orientation == Orientation.Vertical) ? sp.Panel2.ClientSize.Width : sp.Panel2.ClientSize.Height;
+                int newcs = (int)((float)cs * sc);
+                sp.SplitterDistance -= (newcs - cs);
+            }
+        }
+
+        private void MainForm_Shown(object sender, EventArgs e)
+        {
+            FixSplitter(this);
+        }
     }
 }

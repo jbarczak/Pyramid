@@ -5,6 +5,7 @@
 #pragma managed
 
 #include "D3DCompiler_Impl.h"
+#include "DXILCompiler_Impl.h"
 #include "GLSLOpt_Impl.h"
 #include "GLSlang_Impl.h"
 #include "AMDDriver_Impl.h"
@@ -20,6 +21,11 @@ namespace Pyramid
         virtual Pyramid::ID3DCompiler^ CreateD3DCompiler( System::String^ DLLPath, IIncludeHandler^ handler )
         {
             return gcnew D3DCompiler_Impl(DLLPath,handler);
+        }
+
+        virtual Pyramid::IDXILCompiler^ CreateDXILCompiler( System::String^ DLLPath,IIncludeHandler^ handler )
+        {
+            return gcnew DXILCompiler_Impl( DLLPath,handler );
         }
        
         virtual Pyramid::GLSLOptimizer::IOptimizer^ CreateGLSLOptimizer( GLSLOptimizer::Target eTarget )

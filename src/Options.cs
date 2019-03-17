@@ -13,14 +13,17 @@ namespace Pyramid
         private List<string> m_DisabledRGAAsics = new List<string>();
         private List<string> m_IncludePaths = new List<string>();
 
+        public string IGCPath { get; set; }
         public string RGAPath { get; set; }
         public string MysteryToolPath { get; set; }
         public string D3DCompilerPath { get; set; }
+        public string DXILCompilerPath { get; set; }
         public string CodeXLPath { get; set; }
         public string TempPath { get; set; }
         public string PowerVRCompilerPath { get; set; }
         public string DXXDriverPath { get; set; }
         public string MaliSCRoot { get; set; }
+        public string IntelShaderAnalyzerPath { get; set; }
         public IEnumerable<string> DisabledBackends { get { return m_DisabledBackends; } }
         public IEnumerable<string> DisabledAMDAsics { get { return m_DisabledAMDAsics; } }
         public IEnumerable<string> DisabledCodeXLAsics { get { return m_DisabledCodeXLAsics; } }
@@ -78,12 +81,15 @@ namespace Pyramid
         {
             Options opts = new Options();
             opts.D3DCompilerPath     = "d3dcompiler_47.dll";
+            opts.DXILCompilerPath    = "dxcompiler.dll";
             opts.CodeXLPath          = "CodeXLAnalyzer.exe";
             opts.PowerVRCompilerPath = "PowerVR";
             opts.DXXDriverPath = "atidxx32.dll";
             opts.MaliSCRoot = "MaliSC";
             opts.MysteryToolPath = "";
             opts.RGAPath = "rga\\rga.exe";
+            opts.IGCPath = "IGC_Standalone\\IGCStandalone.exe";
+            opts.IntelShaderAnalyzerPath = "IntelShaderAnalyzer\\IntelShaderAnalyzer.exe";
             opts.TempPath = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "Pyramid" );
@@ -117,6 +123,11 @@ namespace Pyramid
                 string d3dCompiler;
                 if (!map.TryGetValue("D3DCompiler", out d3dCompiler))
                     d3dCompiler = defaults.D3DCompilerPath;
+
+                string dxilCompiler;
+                if (!map.TryGetValue("DXILCompiler", out dxilCompiler))
+                    dxilCompiler = defaults.DXILCompilerPath;
+
 
                 string codeXL;
                 if (!map.TryGetValue("CodeXL", out codeXL))
@@ -160,14 +171,24 @@ namespace Pyramid
                     opts.m_DisabledRGAAsics.AddRange(disabledRGAAsics.Split(','));
 
                 string rga;
-                if (map.TryGetValue("RGAPath", out rga))
+                if (!map.TryGetValue("RGAPath", out rga))
                     rga = defaults.RGAPath;
+
+                string igc;
+                if (!map.TryGetValue("IGCPath", out igc))
+                    igc = defaults.IGCPath;
+
+                string intelAnalyzer;
+                if (!map.TryGetValue("IntelShaderAnalyzerPath", out intelAnalyzer))
+                    intelAnalyzer = defaults.IntelShaderAnalyzerPath;
+
 
                 string includePaths;
                 if (map.TryGetValue("IncludePaths", out includePaths))
                     opts.m_IncludePaths.AddRange(includePaths.Split('?'));
 
                 opts.D3DCompilerPath = d3dCompiler;
+                opts.DXILCompilerPath = dxilCompiler;
                 opts.CodeXLPath = codeXL;
                 opts.TempPath = temp;
                 opts.PowerVRCompilerPath = pvr;
@@ -175,6 +196,8 @@ namespace Pyramid
                 opts.MaliSCRoot = mali;
                 opts.MysteryToolPath = mystery;
                 opts.RGAPath = rga;
+                opts.IGCPath = igc;
+                opts.IntelShaderAnalyzerPath = intelAnalyzer;
 
                 return opts;
             }
@@ -203,7 +226,7 @@ namespace Pyramid
                 string IncludePaths = String.Join("?", m_IncludePaths);
 
                 File.WriteAllText(OptionsFile,
-                                   String.Format("D3DCompiler={0}\nCodeXL={1}\ntemp={2}\nPowerVR={3}\nMali={4}\nDisabledBackends={5}\nDisabledAMDAsics={6}\nDisabledCodeXLAsics={7}\nMysteryTool={8}\nRGAPath={9}\nDisabledRGAAsics={10}\nIncludePaths={11}\n",
+                                   String.Format("D3DCompiler={0}\nCodeXL={1}\ntemp={2}\nPowerVR={3}\nMali={4}\nDisabledBackends={5}\nDisabledAMDAsics={6}\nDisabledCodeXLAsics={7}\nMysteryTool={8}\nRGAPath={9}\nDisabledRGAAsics={10}\nIncludePaths={11}\nIGCPath={12}\nDXILCompiler={13}\nIntelShaderAnalyzerPath={14}\n",
                                                              D3DCompilerPath,
                                                              CodeXLPath,
                                                              TempPath,
@@ -215,7 +238,10 @@ namespace Pyramid
                                                              MysteryToolPath,
                                                              RGAPath,
                                                              DisabledRGAAsics,
-                                                             IncludePaths));
+                                                             IncludePaths,
+                                                             IGCPath,
+                                                             DXILCompilerPath,
+                                                             IntelShaderAnalyzerPath ));
             }
             catch(Exception e)
             {

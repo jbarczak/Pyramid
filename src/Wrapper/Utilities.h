@@ -34,6 +34,28 @@ private:
     System::IntPtr m_Ptr;
 };
 
+private ref class MarshalledStringW
+{
+public:
+    MarshalledStringW( System::String^ str )
+        : m_Ptr( Marshal::StringToHGlobalUni( str ) )
+    {
+    }
+
+    ~MarshalledStringW()
+    {
+        Marshal::FreeHGlobal( m_Ptr );
+    }
+
+    operator wchar_t* () { return GetString(); }
+
+    wchar_t* GetString() { return (wchar_t*)m_Ptr.ToPointer(); }
+    size_t Length() { return wcslen( GetString() ); }
+private:
+    System::IntPtr m_Ptr;
+};
+
+
 private ref class MarshalledBlob
 {
 public: 
@@ -64,5 +86,6 @@ private:
 };
 
 inline System::String^ MakeString( const char* p ) { return Marshal::PtrToStringAnsi(System::IntPtr((char*)p));}
+inline System::String^ MakeString( const wchar_t* p ) { return Marshal::PtrToStringUni( System::IntPtr( (wchar_t*)p ) ); }
 
 #endif

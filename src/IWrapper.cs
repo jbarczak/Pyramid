@@ -14,6 +14,8 @@ namespace Pyramid
         /// <returns></returns>
         ID3DCompiler CreateD3DCompiler(string DLLPath, IIncludeHandler handler );
 
+        IDXILCompiler CreateDXILCompiler(string DLLPath, IIncludeHandler handler);
+
         /// <summary>
         ///  Construct an instance of the GLSL Optimizer
         /// </summary>
