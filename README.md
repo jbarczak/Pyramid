@@ -15,6 +15,8 @@ Currently, Pyramid supports these tools:
 	* AMD DXX driver *(Catalyst 14.9)*, used for GCN disassembly and [shader execution simulation](http://www.joshbarczak.com/blog/?p=823).
 	* AMD [CodeXL analyzer](http://developer.amd.com/tools-and-sdks/opencl-zone/codexl/) *(version 1.5)*.
     * glslang HLSL front end (2017 January build)
+    * [DXC] (https://github.com/microsoft/DirectXShadercompiler)
+    * [Intel Shader Analyzer](http://github.com/GameTechDev/IntelShaderAnalyzer)
 * GLSL:
 	* Khronos reference [glslang](https://github.com/KhronosGroup/glslang) validator *(2017 January build)*.
 	* Imagination [PowerVR Rogue compiler](https://community.imgtec.com/developers/powervr/tools/pvrshadereditor/) *(version 3.4)*.
